@@ -8,7 +8,7 @@ function StudioDocenteInit(runtime, element) {
         var prompt_texto = $('#prompt-input', element).val().trim();
         
         if (prompt_texto === '') {
-            $('#mensaje-error .error-texto', element).text('El prompt no puede estar vacío. Dale instrucciones a Afrodita.');
+            $('#mensaje-error .error-texto', element).text('El prompt no puede estar vacío');
             $('#mensaje-estado', element).hide();
             $('#mensaje-error', element).slideDown(200);
             return;

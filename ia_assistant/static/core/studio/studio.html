@@ -1,0 +1,62 @@
+<div class="ia-assistant-studio">
+    <div class="studio-header">
+        <div class="brand-badge">🤖 IA - Modo Docente</div>
+        <h2>Generador de Unidad Interactiva</h2>
+        <p class="subtitle">Diseña el contenido de tu clase. La IA generará el material basándose exactamente en tus
+            instrucciones.</p>
+    </div>
+
+    <div class="prompt-container">
+        <label for="prompt-input" class="prompt-label">Instrucciones para la IA:</label>
+        <textarea id="prompt-input" rows="6"
+            placeholder="Ej: Genera una unidad sobre 'Estructuras de Datos: Pilas y Colas' en Java. Incluye teoría con ejemplos, un quiz de 3 preguntas y 1 reto de código nivel intermedio.">{prompt_docente}</textarea>
+
+        <div class="prompt-guide">
+            <h4 class="guide-title">💡 Guía para generar el mejor contenido</h4>
+
+            <div class="guide-grid">
+                <div class="guide-card">
+                    <span class="guide-icon">🧩</span>
+                    <div class="guide-text">
+                        <strong>Elige tus componentes</strong>
+                        Pide explícitamente lo que necesitas: Teoría, Quizzes, Preguntas de Análisis o Retos de Código.
+                        Si no lo pides, no se genera.
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <span class="guide-icon">🎯</span>
+                    <div class="guide-text">
+                        <strong>Sé específico en cantidades</strong>
+                        En lugar de "pon un examen", usa "Genera un quiz de 3 preguntas" o "Añade 2 preguntas de
+                        análisis crítico".
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <span class="guide-icon">💻</span>
+                    <div class="guide-text">
+                        <strong>Contexto técnico</strong>
+                        Para los retos de código, no olvides especificar el lenguaje de programación (Java, Python, C++,
+                        etc.) y la dificultad.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button id="btn-generar" class="btn-primary">
+            <span class="btn-text">Generar y Guardar Unidad</span>
+        </button>
+    </div>
+
+    <div class="mensajes-area">
+        <div id="mensaje-estado" class="alert alert-success" style="display: none;">
+            <strong>✅ ¡Éxito!</strong> La unidad interactiva se ha generado y guardado en la base de datos.
+        </div>
+        <div id="mensaje-error" class="alert alert-error" style="display: none;">
+            <strong>❌ Error:</strong> <span class="error-texto">Ocurrió un problema.</span>
+        </div>
+    </div>
+</div>

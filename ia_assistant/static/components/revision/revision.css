@@ -1,0 +1,84 @@
+.ia-revision-container {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.revision-header {
+    margin-bottom: 25px;
+    border-bottom: 2px solid #eef2f7;
+    padding-bottom: 15px;
+}
+
+.revision-header h3 {
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+}
+
+.revision-header p {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Tarjetas dinámicas que generará el JS */
+.rev-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-left: 4px solid #0056D2;
+    /* Azul UAGRM/Afrodita */
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 15px;
+}
+
+.rev-tipo {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #0056D2;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: inline-block;
+    background: #e6f0ff;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.rev-enunciado {
+    font-weight: 600;
+    color: #343a40;
+    font-size: 15px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+/* Estilo para las respuestas llenas */
+.rev-respuesta {
+    background: #ffffff;
+    border: 1px dashed #ced4da;
+    border-radius: 6px;
+    padding: 12px;
+    color: #495057;
+    font-size: 14px;
+    white-space: pre-wrap;
+    /* Respeta los saltos de línea del textarea */
+    word-break: break-word;
+}
+
+/* Estilo específico si es código */
+.rev-respuesta.es-codigo {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border: 1px solid #444;
+}
+
+/* Estilo de alerta cuando dejaron algo en blanco */
+.rev-respuesta.es-vacio {
+    background: #fff5f5;
+    border-color: #ffcdd2;
+    color: #e53935;
+    font-style: italic;
+    font-weight: 500;
+}

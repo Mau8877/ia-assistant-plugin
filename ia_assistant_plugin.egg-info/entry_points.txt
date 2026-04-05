@@ -1,0 +1,2 @@
+[xblock.v1]
+ia_assistant = ia_assistant.ia_assistant:IAAssistantXBlock

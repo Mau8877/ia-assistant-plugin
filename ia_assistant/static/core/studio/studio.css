@@ -1,0 +1,214 @@
+:root {
+    --uagrm-blue: #0056D2;
+    --uagrm-dark: #003e99;
+    --text-dark: #2c3e50;
+    --text-muted: #6c757d;
+    --bg-light: #f8f9fa;
+    --border-color: #e2e8f0;
+}
+
+.ia-assistant-studio {
+    padding: 25px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.studio-header {
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--bg-light);
+    padding-bottom: 15px;
+}
+
+.brand-badge {
+    display: inline-block;
+    background: #e6f0ff;
+    color: var(--uagrm-blue);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.ia-assistant-studio h2 {
+    color: var(--text-dark);
+    margin: 0 0 8px 0;
+    font-size: 22px;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0;
+}
+
+.prompt-container {
+    background: var(--bg-light);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 20px;
+}
+
+.prompt-label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.ia-assistant-studio textarea {
+    width: 100%;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 15px;
+    line-height: 1.5;
+    border: 1px solid #cbd5e1;
+    box-sizing: border-box;
+    resize: vertical;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    font-family: inherit;
+}
+
+.ia-assistant-studio textarea:focus {
+    outline: none;
+    border-color: var(--uagrm-blue);
+    box-shadow: 0 0 0 3px rgba(0, 86, 210, 0.1);
+}
+
+/* ===================================================
+   GUÍA DE PROMPTING (Reemplaza a los antiguos tips)
+   =================================================== */
+.prompt-guide {
+    margin-top: 20px;
+    background: #f8fbff;
+    border: 1px solid #cce0ff;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.guide-title {
+    margin: 0 0 15px 0;
+    color: var(--uagrm-blue);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: bold;
+}
+
+.guide-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+.guide-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.guide-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.guide-text {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.4;
+}
+
+.guide-text strong {
+    display: block;
+    color: #1e293b;
+    margin-bottom: 4px;
+    font-size: 13px;
+}
+
+/* ===================================================
+   BOTONES Y ACCIONES
+   =================================================== */
+.actions {
+    text-align: right;
+}
+
+.btn-primary {
+    background-color: var(--uagrm-blue);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--uagrm-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 86, 210, 0.2);
+}
+
+.btn-primary:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* Animación de carga */
+.btn-loading {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* ===================================================
+   MENSAJES DE ESTADO (Alertas)
+   =================================================== */
+.alert {
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.alert-success {
+    background-color: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.alert-error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}

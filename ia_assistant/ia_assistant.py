@@ -2,7 +2,7 @@ import json
 import logging
 from xblock.core import XBlock
 from xblock.fields import Scope, String, Dict, Integer
-from xblock.fragment import Fragment
+from web_fragments.fragment import Fragment
 
 # --- Importaciones de Capas Refactorizadas ---
 from .utils.load_resource import load_resource
@@ -97,8 +97,6 @@ class IAAssistantXBlock(XBlock):
     def student_view(self, context=None):
         """ Ensambla dinámicamente los componentes de la unidad. """
         
-        #return self.studio_view(context)
-
         json_crudo = self.unidad_json if self.unidad_json else "{}"
         
         # El component_manager se encarga de convertir JSON -> HTML y listar recursos
@@ -127,8 +125,6 @@ class IAAssistantXBlock(XBlock):
         frag.add_javascript(load_resource("static/core/student/student.js"))
         frag.add_javascript(load_resource("static/components/revision/revision.js"))
         frag.initialize_js('StudentMasterInit')
-        
-        print(f"DEBUG: El JSON en la base de datos es: {self.unidad_json}")
 
         return frag
 

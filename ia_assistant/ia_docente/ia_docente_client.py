@@ -4,14 +4,15 @@ import time
 import logging
 import re  
 from openai import OpenAI
-from dotenv import load_dotenv
-from django.conf import settings
+#from dotenv import load_dotenv
+#from django.conf import settings
 from .prompt_docente_builder import generar_system_prompt
 
 logger = logging.getLogger(__name__)
-load_dotenv()
+#load_dotenv()
 
-OPENROUTER_KEY = getattr(settings, 'OPENROUTER_API_KEY', os.getenv('OPENROUTER_API_KEY'))
+
+OPENROUTER_KEY = "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"
 
 # Lista de modelos IA
 MODELOS_FALLBACK = [

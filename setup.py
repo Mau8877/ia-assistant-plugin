@@ -30,7 +30,10 @@ setup(
     entry_points={
         'xblock.v1': [
             'ia_assistant = ia_assistant.ia_assistant:IAAssistantXBlock',
-        ]
+        ],
+        'tutor.v1.plugins': [
+        'ia_assistant = ia_assistant.tutor_plugin',
+        ],
     },
 
     package_data=package_data("ia_assistant", ["static"]),

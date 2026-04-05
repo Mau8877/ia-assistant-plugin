@@ -5,11 +5,13 @@ import logging
 import re
 from openai import OpenAI
 from dotenv import load_dotenv
+from django.conf import settings
 
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_KEY = getattr(settings, 'OPENROUTER_API_KEY', os.getenv('OPENROUTER_API_KEY'))
+
 
 # Mantenemos la lista para failover - Priorizando estabilidad
 MODELOS_FALLBACK = [

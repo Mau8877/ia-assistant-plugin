@@ -5,12 +5,13 @@ import logging
 import re  
 from openai import OpenAI
 from dotenv import load_dotenv
+from django.conf import settings
 from .prompt_docente_builder import generar_system_prompt
 
 logger = logging.getLogger(__name__)
 load_dotenv()
 
-OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_KEY = getattr(settings, 'OPENROUTER_API_KEY', os.getenv('OPENROUTER_API_KEY'))
 
 # Lista de modelos IA
 MODELOS_FALLBACK = [

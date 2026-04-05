@@ -6,6 +6,6 @@ hooks.Filters.ENV_PATCHES.add_item((
 ))
 
 hooks.Filters.ENV_PATCHES.add_item((
-    "openedx-cms-common-settings", 
+    "openedx-cms-common-settings",
     'OPENROUTER_API_KEY = "{{ OPENROUTER_API_KEY }}"'
 ))

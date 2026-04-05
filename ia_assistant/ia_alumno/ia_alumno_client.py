@@ -1,16 +1,14 @@
-import json
 import os
+import json
 import time
 import logging
 import re
 from openai import OpenAI
-#from dotenv import load_dotenv
-#from django.conf import settings
+from django.conf import settings
 
-#load_dotenv()
 logger = logging.getLogger(__name__)
 
-OPENROUTER_KEY = "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"
+OPENROUTER_KEY = getattr(settings, 'OPENROUTER_API_KEY', None)
 
 # Mantenemos la lista para failover - Priorizando estabilidad
 MODELOS_FALLBACK = [

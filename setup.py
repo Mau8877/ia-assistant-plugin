@@ -32,7 +32,7 @@ setup(
             'ia_assistant = ia_assistant.ia_assistant:IAAssistantXBlock',
         ],
         'tutor.v1.plugins': [
-        'ia_assistant = ia_assistant.tutor_plugin',
+            'ia_assistant = ia_assistant.tutor_plugin',
         ],
     },
 

@@ -5,7 +5,7 @@ import logging
 import re  
 from openai import OpenAI
 from django.conf import settings
-from .prompt_docente_builder import generar_system_prompt
+from .prompt_docente_builder import GENERAR_SYSTEM_PROMPT
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ def generar_contenido_unidad(prompt_usuario):
         }
     )
 
-    system_prompt = generar_system_prompt()
+    system_prompt = GENERAR_SYSTEM_PROMPT()
 
     # Unimos el modelo de paga con los gratuitos para el bucle
     cola_modelos = [MODELO_PRINCIPAL] + MODELOS_FALLBACK

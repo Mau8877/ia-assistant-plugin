@@ -2,7 +2,7 @@ import json
 import logging
 from xblock.core import XBlock
 from xblock.fields import Scope, String, Dict, Integer
-from web_fragments.fragment import Fragment
+from xblock.fragment import Fragment
 
 # --- Importaciones de Capas Refactorizadas ---
 from .utils.load_resource import load_resource
@@ -62,41 +62,93 @@ class IAAssistantXBlock(XBlock):
     # -----------------------------------------------------------------------
     def studio_view(self, context=None):
         """ Renderiza la interfaz donde el profesor escribe el prompt. """
-        html_str = load_resource("static/core/studio/studio.html")
-        html_formateado = html_str.format(prompt_docente=self.prompt_docente)
         
-        frag = Fragment(html_formateado)
+        # 1. Cargar las piezas HTML individuales
+        html_generador_raw = load_resource("static/core/studio/components/generador_unidad/generador_unidad.html")
+        html_editor_raw = load_resource("static/core/studio/components/editor_unidad/editor_unidad.html")
+        html_maestro_raw = load_resource("static/core/studio/studio.html")
+        
+        # 2. Inyectar los datos en el Generador (el prompt del docente)
+        html_generador_formateado = html_generador_raw.format(prompt_docente=self.prompt_docente)
+        json_guardado = self.unidad_json if self.unidad_json else "{}"
+        html_editor_formateado = html_editor_raw.format(unidad_json_guardada=json_guardado)
+
+        # 3. Ensamblar todo dentro del Maestro
+        html_final = html_maestro_raw.format(
+            html_generador=html_generador_formateado,
+            html_editor=html_editor_formateado
+        )
+        
+        # 4. Crear el Fragmento y añadir Recursos Estáticos
+        frag = Fragment(html_final)
+        
+        # CSS (El maestro + hijos si tuvieran)
         frag.add_css(load_resource("static/core/studio/studio.css"))
+        frag.add_css(load_resource("static/core/studio/components/generador_unidad/generador_unidad.css"))
+        frag.add_css(load_resource("static/core/studio/components/editor_unidad/editor_unidad.css"))
+        
+        # JS (Arquitectura Modular Inyectada)
+        frag.add_javascript(load_resource("static/core/studio/components/editor_unidad/editor_unidad.js"))
+        frag.add_javascript(load_resource("static/core/studio/components/generador_unidad/generador_unidad.js"))
         frag.add_javascript(load_resource("static/core/studio/studio.js"))
-        frag.initialize_js('StudioDocenteInit')
+        
+        frag.initialize_js('STUDIO_DOCENTE_INIT')
         return frag
 
+    # -----------------------------------------------------------------------
+    # HANDLERS DE STUDIO (Nuevo Flujo de 2 Pasos)
+    # -----------------------------------------------------------------------
+    
     @XBlock.json_handler
-    def guardar_prompt(self, data, suffix=''):
+    def generar_borrador_ia(self, data, suffix=''):
         """ 
-        Handler Ajax que delega la generación a ia_docente_client. 
+        Paso 1: Solo genera el contenido y lo devuelve a la pantalla.
+        NO lo guarda en la base de datos de los alumnos todavía.
         """
         nuevo_prompt = data.get('prompt', '')
-        self.prompt_docente = nuevo_prompt 
+        self.prompt_docente = nuevo_prompt # Guardamos el borrador del prompt
 
-        logger.info(f"IA Assistant: Iniciando generación para docente...")
-        
+        logger.info(f"IA Assistant: Iniciando generación de borrador para docente...")
+
+
+
         # Delegación a la lógica de negocio en ia_docente
         resultado = generar_contenido_unidad(nuevo_prompt)
 
         if resultado['resultado'] == 'ok':
-            self.unidad_json = resultado['json_unidad']
-            logger.info("IA Assistant: Unidad generada y persistida exitosamente.")
-            return {"resultado": "ok", "mensaje": "Unidad generada correctamente."}
+            logger.info("IA Assistant: Borrador generado, enviando a vista previa.")
+            return {
+                "resultado": "ok", 
+                "contenido_crudo": resultado['json_unidad'] # Se va directo al textarea derecho
+            }
         else:
             return resultado
 
+    @XBlock.json_handler
+    def guardar_unidad_editada(self, data, suffix=''):
+        """ 
+        Paso 2: Recibe el contenido que el profesor ya editó manualmente
+        en la vista previa, y ahora sí lo guarda como la unidad final.
+        """
+        contenido_final = data.get('contenido_final', '').strip()
+        
+        if not contenido_final:
+            return {"resultado": "error", "mensaje": "El contenido editado está vacío."}
+            
+        # Guardamos definitivamente el contenido en el bloque del curso
+        self.unidad_json = contenido_final
+        logger.info("IA Assistant: Unidad editada manualmente y persistida exitosamente.")
+        
+        return {"resultado": "ok", "mensaje": "Unidad publicada."}
+    
     # -----------------------------------------------------------------------
     # VISTA STUDENT (Interfaz del Alumno)
     # -----------------------------------------------------------------------
     def student_view(self, context=None):
         """ Ensambla dinámicamente los componentes de la unidad. """
         
+        #return self.studio_view(context)
+
         json_crudo = self.unidad_json if self.unidad_json else "{}"
         
         # El component_manager se encarga de convertir JSON -> HTML y listar recursos
@@ -125,6 +177,8 @@ class IAAssistantXBlock(XBlock):
         frag.add_javascript(load_resource("static/core/student/student.js"))
         frag.add_javascript(load_resource("static/components/revision/revision.js"))
         frag.initialize_js('StudentMasterInit')
+        
+        print(f"DEBUG: El JSON en la base de datos es: {self.unidad_json}")
 
         return frag
 

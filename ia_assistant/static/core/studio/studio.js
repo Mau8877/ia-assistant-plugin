@@ -1,58 +1,30 @@
-function StudioDocenteInit(runtime, element) {
-    var handlerUrl = runtime.handlerUrl(element, 'guardar_prompt');
+function STUDIO_DOCENTE_INIT(runtime, element) {
+    // 1. Definición de Rutas
+    var HANDLER_LLAMAR_IA = runtime.handlerUrl(element, 'generar_borrador_ia');
+    var HANDLER_GUARDAR_UNIDAD = runtime.handlerUrl(element, 'guardar_unidad_editada');
     
-    $('#btn-generar', element).click(function(eventObject) {
-        eventObject.preventDefault();
-        
-        var $btn = $(this);
-        var prompt_texto = $('#prompt-input', element).val().trim();
-        
-        if (prompt_texto === '') {
-            $('#mensaje-error .error-texto', element).text('El prompt no puede estar vacío');
-            $('#mensaje-estado', element).hide();
-            $('#mensaje-error', element).slideDown(200);
-            return;
+    // 2. Instanciación del Módulo Editor
+    var EDITOR = new EDITOR_UNIDAD(element, HANDLER_GUARDAR_UNIDAD);
+
+    // 3. Instanciación del Módulo Generador (Inyectando los Callbacks del Editor)
+    var GENERADOR = new GENERADOR_UNIDAD(element, HANDLER_LLAMAR_IA, {
+        onStart: function() {
+            EDITOR.OCULTAR_MENSAJES();
+            $('#btn-guardar-final', element).prop('disabled', true);
+        },
+        onSuccess: function(jsonCrudo) {
+            // Cuando la IA termina, le pasamos el JSON directamente al Editor
+            EDITOR.PROCESAR_NUEVO_JSON(jsonCrudo);
+        },
+        onError: function(mensaje) {
+            // Si la IA falla, usamos el sistema de alertas del Editor
+            EDITOR.MOSTRAR_ERROR(mensaje);
         }
-
-        // Estado de carga
-        var originalText = $btn.find('.btn-text').text();
-        $btn.prop('disabled', true).addClass('btn-loading');
-        $btn.find('.btn-icon').text('⏳');
-        $btn.find('.btn-text').text('Generando con IA...');
-        
-        $('#mensaje-error', element).slideUp(200);
-        $('#mensaje-estado', element).slideUp(200);
-        
-        $.ajax({
-            type: "POST",
-            url: handlerUrl,
-            data: JSON.stringify({"prompt": prompt_texto}),
-            success: function(data) {
-                // Restaurar botón
-                $btn.prop('disabled', false).removeClass('btn-loading');
-                $btn.find('.btn-icon').text('✨');
-                $btn.find('.btn-text').text(originalText);
-
-                if (data.resultado === 'ok') {
-                    $('#mensaje-estado', element).slideDown(300);
-                    // Opcional: Ocultar el éxito después de unos segundos
-                    setTimeout(function() {
-                        $('#mensaje-estado', element).slideUp(300);
-                    }, 6000);
-                } else {
-                    $('#mensaje-error .error-texto', element).text(data.mensaje);
-                    $('#mensaje-error', element).slideDown(300);
-                }
-            },
-            error: function() {
-                // Restaurar botón
-                $btn.prop('disabled', false).removeClass('btn-loading');
-                $btn.find('.btn-icon').text('✨');
-                $btn.find('.btn-text').text(originalText);
-                
-                $('#mensaje-error .error-texto', element).text('Error de conexión con el servidor. Por favor, intenta de nuevo.');
-                $('#mensaje-error', element).slideDown(300);
-            }
-        });
     });
+
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+    
+    console.log("[SISTEMA] Módulos de Studio inicializados y conectados correctamente.");
 }

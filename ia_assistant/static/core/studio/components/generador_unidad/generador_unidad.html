@@ -1,0 +1,49 @@
+<div class="ia-generador-module">
+    <div class="studio-header">
+        <div class="brand-badge" style="display: inline-flex; align-items: center; gap: 6px;">
+            <i data-lucide="bot" style="width: 18px; height: 18px;"></i> IA - Modo Docente
+        </div>
+        <h2>Generador de Unidad Interactiva</h2>
+        <p class="subtitle">1. Dale instrucciones a la IA.</p>
+        <p class="subtitle">2. Revisa el contenido generado.</p>
+        <p class="subtitle">3. Guarda y publica.</p>
+
+    </div>
+
+    <div class="generator-layout">
+        <div class="prompt-section">
+            <label for="prompt-input" class="prompt-label">Paso 1: Instrucciones</label>
+            <textarea id="prompt-input" rows="6"
+                placeholder="Ej: Genera una unidad sobre 'Estructuras de Datos' en Java. Incluye teoría profunda, un quiz de 3 preguntas y 1 reto de código.">{prompt_docente}</textarea>
+            
+            <div class="actions" style="margin-top: 15px; text-align: left;">
+                <button id="btn-generar" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
+                    <span class="btn-icon" style="display: flex;"><i data-lucide="sparkles" style="width: 18px; height: 18px;"></i></span>
+                    <span class="btn-text">Generar Contenido</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="prompt-guide">
+            <h4 class="guide-title" style="display: flex; align-items: center; gap: 6px;">
+                <i data-lucide="lightbulb" style="width: 20px; height: 20px;"></i> Guía Rápida de Prompting
+            </h4>
+            <div class="guide-text">
+                <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px;">
+                    <i data-lucide="blocks" style="width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px;"></i>
+                    <div><strong>Elige componentes:</strong> Pide explícitamente Teoría, Quizzes, Preguntas abiertas o Retos de Código.</div>
+                </div>
+                
+                <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px;">
+                    <i data-lucide="target" style="width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px;"></i>
+                    <div><strong>Sé específico:</strong> "Genera un quiz de 3 preguntas de opción múltiple" es mejor que "haz un test".</div>
+                </div>
+                
+                <div style="display: flex; align-items: flex-start; gap: 8px;">
+                    <i data-lucide="brain" style="width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px;"></i>
+                    <div><strong>Nivel:</strong> Exige nivel universitario y análisis profundo.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

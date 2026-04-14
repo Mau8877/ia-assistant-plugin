@@ -1,0 +1,78 @@
+<div class="ia-editor-module" style="margin-top: 40px;"> <input type="hidden" id="json-inicial-db" value='{unidad_json_guardada}'>
+    
+    <div class="editor-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background-color: #f8fafc; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+        <h3 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.25rem; color: #1e293b;">
+            <i data-lucide="wrench" style="width: 24px; height: 24px; color: #475569;"></i> Paso 2: Taller de Edición
+        </h3>
+        <div class="main-tabs-nav">
+            <button class="main-tab-btn active" data-target="vista-visual" style="display: inline-flex; align-items: center; gap: 6px;">
+                <i data-lucide="layout-template" style="width: 16px; height: 16px;"></i> Editor Visual
+            </button>
+            <button class="main-tab-btn" data-target="vista-codigo" style="display: inline-flex; align-items: center; gap: 6px;">
+                <i data-lucide="braces" style="width: 16px; height: 16px;"></i> Modo Avanzado (JSON)
+            </button>
+        </div>
+    </div>
+
+    <div id="vista-visual" class="main-tab-content active">
+        
+        <div class="general-config-card">
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: bold; margin-bottom: 5px;">
+                <i data-lucide="pencil-line" style="width: 16px; height: 16px;"></i> Título de la Unidad:
+            </label>
+            <input type="text" id="edit-titulo-unidad" class="form-control" placeholder="Ej: Introducción a la Ecología...">
+        </div>
+
+        <nav class="ia-tabs-nav" style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button class="sub-tab-btn active" data-target="edit-teoria" style="display: inline-flex; align-items: center; gap: 6px;">
+                <i data-lucide="book-open" style="width: 16px; height: 16px;"></i> Teoría
+            </button>
+            <button class="sub-tab-btn" data-target="edit-quiz" style="display: inline-flex; align-items: center; gap: 6px;">
+                <i data-lucide="list-checks" style="width: 16px; height: 16px;"></i> Quizzes
+            </button>
+            <button class="sub-tab-btn" data-target="edit-abierta" style="display: inline-flex; align-items: center; gap: 6px;">
+                <i data-lucide="message-square-text" style="width: 16px; height: 16px;"></i> Preguntas
+            </button>
+            <button class="sub-tab-btn" data-target="edit-codigo" style="display: inline-flex; align-items: center; gap: 6px;">
+                <i data-lucide="terminal" style="width: 16px; height: 16px;"></i> Código
+            </button>
+        </nav>
+
+        <div class="ia-content-wrapper">
+            <div id="edit-teoria" class="sub-tab-content active-content">
+                <div class="empty-state">No hay contenido de teoría generado aún.</div>
+            </div>
+            <div id="edit-quiz" class="sub-tab-content">
+                <div class="empty-state">No hay quizzes generados aún.</div>
+            </div>
+            <div id="edit-abierta" class="sub-tab-content">
+                <div class="empty-state">No hay preguntas abiertas generadas aún.</div>
+            </div>
+            <div id="edit-codigo" class="sub-tab-content">
+                <div class="empty-state">No hay retos de código generados aún.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="vista-codigo" class="main-tab-content">
+        <textarea id="contenido-preview" placeholder="El JSON crudo aparecerá aquí..."></textarea>
+    </div>
+
+    <div class="publish-section">
+        <div class="mensajes-area">
+            <div id="mensaje-estado" class="alert alert-success" style="display: none; align-items: center; gap: 8px;">
+                <i data-lucide="check-circle-2" style="width: 20px; height: 20px; color: #15803d; flex-shrink: 0;"></i>
+                <div><strong>¡Éxito!</strong> La unidad se ha guardado y publicado en el curso.</div>
+            </div>
+            <div id="mensaje-error" class="alert alert-error" style="display: none; align-items: center; gap: 8px;">
+                <i data-lucide="alert-circle" style="width: 20px; height: 20px; color: #b91c1c; flex-shrink: 0;"></i>
+                <div><strong>Error:</strong> <span class="error-texto">Ocurrió un problema.</span></div>
+            </div>
+        </div>
+
+        <button id="btn-guardar-final" class="btn-success" disabled style="display: inline-flex; align-items: center; gap: 8px;">
+            <span class="btn-icon" style="display: flex;"><i data-lucide="save" style="width: 18px; height: 18px;"></i></span>
+            <span class="btn-text">Guardar y Publicar Unidad</span>
+        </button>
+    </div>
+</div>

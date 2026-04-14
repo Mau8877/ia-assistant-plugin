@@ -2,7 +2,7 @@ import json
 import logging
 from xblock.core import XBlock
 from xblock.fields import Scope, String, Dict, Integer
-from xblock.fragment import Fragment
+from web_fragments.fragment import Fragment
 
 # --- Importaciones de Capas Refactorizadas ---
 from .utils.load_resource import load_resource

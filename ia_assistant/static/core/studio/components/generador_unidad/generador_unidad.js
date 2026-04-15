@@ -1,4 +1,6 @@
-class GENERADOR_UNIDAD {
+window.IA_Components = window.IA_Components || {};
+
+window.IA_Components.GENERADOR_UNIDAD = class{
     constructor(element, handlerLlamar, callbacks) {
         this.ELEMENT = element;
         this.HANDLER_LLAMAR = handlerLlamar;

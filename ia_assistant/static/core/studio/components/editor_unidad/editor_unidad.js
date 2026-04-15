@@ -1,5 +1,6 @@
+window.IA_Components = window.IA_Components || {};
 
-class EDITOR_UNIDAD {
+window.IA_Components.EDITOR_UNIDAD = class {
     constructor(element, handlerGuardar) {
         this.ELEMENT = element;
         this.HANDLER_GUARDAR = handlerGuardar;

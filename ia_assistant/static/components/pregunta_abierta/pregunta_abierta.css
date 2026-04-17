@@ -1,100 +1,100 @@
 /* El wrapper principal (id puesto por Python) */
 .ia-comp-abierta {
-    background: #ffffff;
-    border: 1px solid #eef2f7;
-    border-left: 6px solid #adb5bd;
-    /* Gris neutro inicial */
-    border-radius: 12px;
-    padding: 25px;
-    margin-bottom: 30px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
+  background: #ffffff;
+  border: 1px solid #eef2f7;
+  border-left: 6px solid #adb5bd;
+  /* Gris neutro inicial */
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
 /* Estados de Calificación */
 .ia-comp-abierta.is-correct {
-    border-left-color: #28a745 !important;
-    background-color: #f4faf6;
+  border-left-color: #28a745 !important;
+  background-color: #f4faf6;
 }
 
 .ia-comp-abierta.is-incorrect {
-    border-left-color: #dc3545 !important;
-    background-color: #fef5f5;
+  border-left-color: #dc3545 !important;
+  background-color: #fef5f5;
 }
 
 .ia-abierta-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
 }
 
 .ia-badge {
-    background: #0056D2;
-    color: white;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    text-transform: uppercase;
-    font-weight: bold;
+  background: #0056d2;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
 .ia-abierta-enunciado {
-    font-size: 16px;
-    line-height: 1.6;
-    color: #34495e;
-    margin-bottom: 20px;
-    font-weight: 500;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #34495e;
+  margin-bottom: 20px;
+  font-weight: 500;
 }
 
 .ia-abierta-input-wrapper textarea {
-    width: 100%;
-    min-height: 150px;
-    padding: 15px;
-    border: 2px solid #e0e6ed;
-    border-radius: 10px;
-    font-size: 15px;
-    line-height: 1.5;
-    font-family: inherit;
-    resize: vertical;
-    box-sizing: border-box;
-    transition: border-color 0.2s;
+  width: 100%;
+  min-height: 150px;
+  padding: 15px;
+  border: 2px solid #e0e6ed;
+  border-radius: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
 }
 
 .ia-abierta-input-wrapper textarea:focus {
-    border-color: #0056D2;
-    outline: none;
+  border-color: #0056d2;
+  outline: none;
 }
 
 .ia-char-counter {
-    font-size: 12px;
-    color: #95a5a6;
-    margin-top: 5px;
-    text-align: right;
+  font-size: 12px;
+  color: #95a5a6;
+  margin-top: 5px;
+  text-align: right;
 }
 
 /* Estilo de la tarjeta de Feedback */
 .feedback-ia {
-    margin-top: 20px;
-    background: #ffffff;
-    border: 1px solid #ffeeba;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+  background: #ffffff;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .fb-content {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
 }
 
 .fb-icon {
-    font-size: 20px;
+  font-size: 20px;
 }
 
 .fb-text {
-    font-size: 14px;
-    color: #856404;
-    line-height: 1.5;
+  font-size: 14px;
+  color: #856404;
+  line-height: 1.5;
 }

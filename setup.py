@@ -1,6 +1,7 @@
 import os
 from setuptools import setup, find_packages
 
+
 def package_data(pkg, roots):
     """Función genérica para encontrar y empaquetar archivos estáticos."""
     data = []
@@ -12,6 +13,7 @@ def package_data(pkg, roots):
             for fname in files:
                 data.append(os.path.relpath(os.path.join(dirname, fname), pkg))
     return {pkg: data}
+
 
 setup(
     name='ia-assistant-plugin',

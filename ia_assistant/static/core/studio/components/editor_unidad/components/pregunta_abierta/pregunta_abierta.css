@@ -1,0 +1,25 @@
+.abierta-card {
+  border-left: 4px solid #855d1d; /* Color Ámbar/Naranja */
+  background-color: #f8fafc;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.abierta-label {
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.abierta-sublabel {
+  font-size: 0.9em;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 5px;
+}

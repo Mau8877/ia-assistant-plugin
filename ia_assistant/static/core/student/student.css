@@ -1,264 +1,264 @@
 :root {
-    --primary-uagrm: #0056d2;
-    --dark-bg: #1e1e1e;
-    --text-main: #333;
-    --border-color: #e0e0e0;
+  --primary-uagrm: #0056d2;
+  --dark-bg: #1e1e1e;
+  --text-main: #333;
+  --border-color: #e0e0e0;
 }
 
 .ia-master-container {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f9f9f9;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f9f9f9;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
 }
 
 /* Header & Progress */
 .ia-header {
-    padding: 20px;
-    background: white;
-    border-bottom: 1px solid var(--border-color);
+  padding: 20px;
+  background: white;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .progress-container {
-    height: 8px;
-    background: #eee;
-    border-radius: 4px;
-    margin-top: 10px;
-    position: relative;
+  height: 8px;
+  background: #eee;
+  border-radius: 4px;
+  margin-top: 10px;
+  position: relative;
 }
 
 .progress-bar {
-    height: 100%;
-    background: var(--primary-uagrm);
-    border-radius: 4px;
-    transition: width 0.5s ease;
+  height: 100%;
+  background: var(--primary-uagrm);
+  border-radius: 4px;
+  transition: width 0.5s ease;
 }
 
 /* Tabs */
 .ia-tabs-nav {
-    display: flex;
-    background: #f1f1f1;
-    border-bottom: 1px solid var(--border-color);
+  display: flex;
+  background: #f1f1f1;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .tab-btn {
-    flex: 1;
-    padding: 15px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-weight: bold;
-    color: #666;
-    transition: 0.3s;
+  flex: 1;
+  padding: 15px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-weight: bold;
+  color: #666;
+  transition: 0.3s;
 }
 
 .tab-btn.active {
-    background: white;
-    color: var(--primary-uagrm);
-    border-bottom: 3px solid var(--primary-uagrm);
+  background: white;
+  color: var(--primary-uagrm);
+  border-bottom: 3px solid var(--primary-uagrm);
 }
 
 /* Content Area */
 .tab-content {
-    display: none;
-    padding: 20px;
-    min-height: 300px;
+  display: none;
+  padding: 20px;
+  min-height: 300px;
 }
 
 .active-content {
-    display: block;
-    animation: fadeIn 0.3s;
+  display: block;
+  animation: fadeIn 0.3s;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
+  from {
+    opacity: 0;
+  }
 
-    to {
-        opacity: 1;
-    }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Sidekick Flotante */
 .ia-sidekick-circle {
-    position: absolute;
-    bottom: 60px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    background: var(--primary-uagrm);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    transition: transform 0.2s;
+  position: absolute;
+  bottom: 60px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: var(--primary-uagrm);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transition: transform 0.2s;
 }
 
 .ia-sidekick-circle:hover {
-    transform: scale(1.1);
+  transform: scale(1.1);
 }
 
 /* Footer */
 .ia-footer {
-    padding: 10px 20px;
-    background: #eee;
-    font-size: 13px;
-    display: flex;
-    justify-content: space-between;
-    color: #666;
+  padding: 10px 20px;
+  background: #eee;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  color: #666;
 }
 
 .ia-feedback-card {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-left: 5px solid #ccc;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    text-align: left;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-left: 5px solid #ccc;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  text-align: left;
 }
 
 .ia-feedback-card.fb-good {
-    border-left-color: #28a745;
+  border-left-color: #28a745;
 }
 
 .ia-feedback-card.fb-bad {
-    border-left-color: #dc3545;
+  border-left-color: #dc3545;
 }
 
 .ia-score-header {
-    font-size: 1.5em;
-    margin-bottom: 20px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 8px;
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
 }
 
 .item-enunciado {
-    color: #666;
-    font-style: italic;
-    margin-bottom: 5px;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 5px;
 }
 
 .item-feedback {
-    margin-top: 10px;
-    font-weight: 500;
+  margin-top: 10px;
+  font-weight: 500;
 }
 
 /* =========================================================
    ESTILOS DE LA PESTAÑA REVISIÓN (NUEVO)
    ========================================================= */
 .ia-revision-container {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 10px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 10px;
 }
 
 .revision-header {
-    margin-bottom: 25px;
-    border-bottom: 2px solid #eef2f7;
-    padding-bottom: 15px;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #eef2f7;
+  padding-bottom: 15px;
 }
 
 .revision-header h3 {
-    color: #2c3e50;
-    margin: 0 0 5px 0;
+  color: #2c3e50;
+  margin: 0 0 5px 0;
 }
 
 .revision-header p {
-    color: #6c757d;
-    font-size: 14px;
-    margin: 0;
+  color: #6c757d;
+  font-size: 14px;
+  margin: 0;
 }
 
 .rev-card {
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-left: 4px solid var(--primary-uagrm);
-    border-radius: 8px;
-    padding: 18px;
-    margin-bottom: 15px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-left: 4px solid var(--primary-uagrm);
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 15px;
 }
 
 .rev-tipo {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--primary-uagrm);
-    font-weight: bold;
-    margin-bottom: 10px;
-    display: inline-block;
-    background: #e6f0ff;
-    padding: 3px 8px;
-    border-radius: 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--primary-uagrm);
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: inline-block;
+  background: #e6f0ff;
+  padding: 3px 8px;
+  border-radius: 4px;
 }
 
 .rev-enunciado {
-    font-weight: 600;
-    color: #343a40;
-    font-size: 15px;
-    margin-bottom: 12px;
-    line-height: 1.4;
+  font-weight: 600;
+  color: #343a40;
+  font-size: 15px;
+  margin-bottom: 12px;
+  line-height: 1.4;
 }
 
 .rev-respuesta {
-    background: #ffffff;
-    border: 1px dashed #ced4da;
-    border-radius: 6px;
-    padding: 12px;
-    color: #495057;
-    font-size: 14px;
-    white-space: pre-wrap;
-    word-break: break-word;
+  background: #ffffff;
+  border: 1px dashed #ced4da;
+  border-radius: 6px;
+  padding: 12px;
+  color: #495057;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .rev-respuesta.es-codigo {
-    font-family: 'Consolas', 'Courier New', monospace;
-    background: #1e1e1e;
-    color: #d4d4d4;
-    border: 1px solid #444;
+  font-family: "Consolas", "Courier New", monospace;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border: 1px solid #444;
 }
 
 .rev-respuesta.es-vacio {
-    background: #fff5f5;
-    border-color: #ffcdd2;
-    color: #e53935;
-    font-style: italic;
-    font-weight: 500;
+  background: #fff5f5;
+  border-color: #ffcdd2;
+  color: #e53935;
+  font-style: italic;
+  font-weight: 500;
 }
 
 .ia-divider {
-    border: 0;
-    height: 1px;
-    background: #e0e0e0;
-    margin: 25px 0;
+  border: 0;
+  height: 1px;
+  background: #e0e0e0;
+  margin: 25px 0;
 }
 
 .btn-primary {
-    background: var(--primary-uagrm);
-    color: white;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s;
+  background: var(--primary-uagrm);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
 }
 
 .btn-primary:hover {
-    background: #0043a4;
+  background: #0043a4;
 }
 
 .btn-primary:disabled {
-    background: #a0c0e8;
-    cursor: not-allowed;
+  background: #a0c0e8;
+  cursor: not-allowed;
 }

@@ -88,12 +88,9 @@ class IAAssistantXBlock(XBlock):
         # 4. Crear el Fragmento y añadir Recursos Estáticos
         frag = Fragment(html_final)
 
-        # ── LIBRERÍAS EXTERNAS (CDNs) ───────────────────────────────────────
-        frag.add_css_url("https://cdn.quilljs.com/1.3.6/quill.snow.css")
-        frag.add_javascript_url("https://cdn.quilljs.com/1.3.6/quill.js")
-        frag.add_javascript_url("https://unpkg.com/lucide@latest")
-
         # ── CSS LOCALES ─────────────────────────────────────────────────────
+        frag.add_css(load_resource("static/vendors/quill.snow.css"))
+
         frag.add_css(load_resource("static/core/studio/studio.css"))
         frag.add_css(
             load_resource(
@@ -129,6 +126,8 @@ class IAAssistantXBlock(XBlock):
         )
 
         # ── JS LOCALES (ARQUITECTURA MODULAR ENTERPRISE) ────────────────────
+        js_quill = load_resource("static/vendors/quill.js")
+        js_lucide = load_resource("static/vendors/lucide.js")
 
         # A) Cargamos las fábricas de los componentes (Hijos)
         js_teoria = load_resource(
@@ -164,6 +163,8 @@ class IAAssistantXBlock(XBlock):
                 js_editor,
                 js_generador,
                 js_init,
+                js_quill,
+                js_lucide,
             ]
         )
 

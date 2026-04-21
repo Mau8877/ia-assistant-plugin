@@ -156,15 +156,15 @@ class IAAssistantXBlock(XBlock):
         # El orden es vital: Hijos -> Orquestador -> Inicializador
         paquete_js_completo = "\n\n".join(
             [
-                js_teoria,
+                js_quill,       # 1. LIBRERÍAS PRIMERO
+                js_lucide,      # 2. LIBRERÍAS PRIMERO
+                js_teoria,      # 3. Componentes
                 js_quiz,
                 js_abierta,
                 js_codigo,
-                js_editor,
+                js_editor,      # 4. Orquestadores
                 js_generador,
-                js_init,
-                js_quill,
-                js_lucide,
+                js_init,        # 5. Inicializador maestro al final
             ]
         )
 

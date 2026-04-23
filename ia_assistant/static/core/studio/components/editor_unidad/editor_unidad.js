@@ -114,14 +114,9 @@ window.IA_Components.EDITOR_UNIDAD = class {
 
     if (data.componentes && window.IA_Components.Renderers) {
       data.componentes.forEach((comp, idx) => {
-        // Buscamos dinámicamente si existe una fábrica para este tipo de componente
         let renderFunction = window.IA_Components.Renderers[comp.tipo];
-
         if (renderFunction) {
-          // Le pasamos el componente y nuestra función de escape
           let html = renderFunction(comp, this._ESC.bind(this), idx);
-
-          // Lo enviamos a la pestaña correspondiente
           if (comp.tipo === "teoria") $("#edit-teoria", el).append(html);
           else if (comp.tipo === "quiz_multiple")
             $("#edit-quiz", el).append(html);
@@ -132,9 +127,20 @@ window.IA_Components.EDITOR_UNIDAD = class {
       });
     }
 
-    // Inicializar Quill (Se queda igual que antes)
+    // NUEVO: Validación de seguridad para Quill
+    if (typeof window.Quill === "undefined") {
+      console.error(
+        "🚨 Quill sigue secuestrado o no cargó. Verifica el CDN en Python.",
+      );
+      this.MOSTRAR_ERROR(
+        "Error cargando el editor de texto. Recarga la página.",
+      );
+      return;
+    }
+
+    // Inicializar Quill
     $(".quill-container", el).each(function () {
-      var quill = new Quill(this, {
+      var quill = new window.Quill(this, {
         theme: "snow",
         modules: {
           toolbar: [
@@ -149,7 +155,7 @@ window.IA_Components.EDITOR_UNIDAD = class {
       $(this).data("quill-instance", quill);
     });
 
-    // Empty states (Se queda igual que antes)
+    // Empty states
     ["#edit-teoria", "#edit-quiz", "#edit-abierta", "#edit-codigo"].forEach(
       (target) => {
         if ($(target, el).is(":empty")) {
@@ -159,6 +165,16 @@ window.IA_Components.EDITOR_UNIDAD = class {
         }
       },
     );
+
+    // NUEVO: ¡Renderizar los iconos de Lucide!
+    // Lucide no dibuja los iconos automáticamente si el HTML se inyectó dinámicamente con JS (como estás haciendo tú).
+    if (window.lucide) {
+      window.lucide.createIcons({
+        root: el, // Solo busca etiquetas <i data-lucide="..."> dentro de tu XBlock
+      });
+    } else {
+      console.warn("⚠️ Lucide no está disponible globalmente.");
+    }
   }
 
   CARGAR_DATOS_EXISTENTES() {

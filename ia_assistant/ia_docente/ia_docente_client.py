@@ -2,6 +2,7 @@ import json
 import time
 import logging
 import re
+import re
 from openai import OpenAI
 from ia_assistant.config import (
     get_openrouter_api_key,
@@ -23,9 +24,13 @@ MODELO_PRINCIPAL = "openai/gpt-4o-mini"
 MODELOS_FALLBACK = [
     "google/gemini-2.0-flash-lite-preview-02-05:free",
     "openai/gpt-oss-120b:free",
+    "google/gemini-2.0-flash-lite-preview-02-05:free",
+    "openai/gpt-oss-120b:free",
     "nvidia/nemotron-3-super-120b-a12b:free",
     "google/gemma-4-31b-it:free",
+    "google/gemma-4-31b-it:free",
 ]
+
 
 
 def generar_contenido_unidad(prompt_usuario):
@@ -42,8 +47,11 @@ def generar_contenido_unidad(prompt_usuario):
         return {
             "resultado": "error",
             "mensaje": "Falta API Key del servicio de IA.",
+            "resultado": "error",
+            "mensaje": "Falta API Key del servicio de IA.",
         }
 
+    # Inicializamos el cliente con el header de la App
     # Inicializamos el cliente con el header de la App
     client = OpenAI(
         base_url=get_openrouter_base_url(),
@@ -53,6 +61,7 @@ def generar_contenido_unidad(prompt_usuario):
         },
     )
 
+    system_prompt = GENERAR_SYSTEM_PROMPT()
     system_prompt = GENERAR_SYSTEM_PROMPT()
 
     # Unimos el modelo de paga con los gratuitos para el bucle
@@ -68,14 +77,50 @@ def generar_contenido_unidad(prompt_usuario):
             print(
                 f">>> Intentando conectar con {tipo_modelo}: {modelo} (Timeout: {tiempo_espera}s)..."
             )
+    # Unimos el modelo de paga con los gratuitos para el bucle
+    cola_modelos = [MODELO_PRINCIPAL] + MODELOS_FALLBACK
+
+    for index, modelo in enumerate(cola_modelos):
+        es_premium = index == 0
+        tipo_modelo = "PREMIUM 💎" if es_premium else "RESPALDO GRATUITO 🛟"
+
+        tiempo_espera = 180 if es_premium else 30
+
+        try:
+            print(
+                f">>> Intentando conectar con {tipo_modelo}: {modelo} (Timeout: {tiempo_espera}s)..."
+            )
             logger.info(f"Intentando generar con modelo: {modelo}")
+
 
             completion = client.chat.completions.create(
                 model=modelo,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt_usuario},
+                    {"role": "user", "content": prompt_usuario},
                 ],
+                response_format={"type": "json_object"},
+                timeout=tiempo_espera,
+            )
+
+            # 🛡️ BLINDAJE 1: Prevenir respuesta vacía
+            if (
+                not completion
+                or not hasattr(completion, "choices")
+                or not completion.choices
+            ):
+                print(f"XXX Fallo vacío con {modelo}")
+                logger.warning(
+                    f"Fallo de API con {modelo}: La respuesta vino vacía."
+                )
+                if es_premium:
+                    print(
+                        "⚠️ ALERTA: El modelo Premium falló. ¿Se acabaron los créditos? "
+                        "Cambiando a gratuitos..."
+                    )
+                time.sleep(1)
+                continue
                 response_format={"type": "json_object"},
                 timeout=tiempo_espera,
             )
@@ -110,9 +155,22 @@ def generar_contenido_unidad(prompt_usuario):
 
             match = re.search(r"\{.*\}", respuesta_raw, re.DOTALL)
 
+
+            # 🛡️ BLINDAJE 2: Prevenir texto nulo
+            if not respuesta_raw:
+                print(f"XXX Fallo lógico (texto nulo) con {modelo}")
+                logger.warning(
+                    f"Fallo lógico con {modelo}: El modelo respondió con texto vacío."
+                )
+                continue
+
+            match = re.search(r"\{.*\}", respuesta_raw, re.DOTALL)
+
             if match:
                 respuesta_ia = match.group(0)
             else:
+                print(f"XXX No se encontró JSON en {modelo}")
+                logger.warning(f"Modelo {modelo} no devolvió un JSON válido.")
                 print(f"XXX No se encontró JSON en {modelo}")
                 logger.warning(f"Modelo {modelo} no devolvió un JSON válido.")
                 continue
@@ -121,7 +179,17 @@ def generar_contenido_unidad(prompt_usuario):
             json.loads(respuesta_ia)
 
             print(f"✅ ¡ÉXITO TOTAL con {tipo_modelo} ({modelo})!")
+
+            print(f"✅ ¡ÉXITO TOTAL con {tipo_modelo} ({modelo})!")
             logger.info(f"Éxito con modelo: {modelo}")
+            return {"resultado": "ok", "json_unidad": respuesta_ia}
+
+        except json.JSONDecodeError:
+            print(f"XXX JSON Corrupto devuelto por {modelo}")
+            logger.warning(
+                f"Error de formato con {modelo}: El JSON devuelto estaba corrupto."
+            )
+            continue
             return {"resultado": "ok", "json_unidad": respuesta_ia}
 
         except json.JSONDecodeError:
@@ -148,11 +216,32 @@ def generar_contenido_unidad(prompt_usuario):
 
             time.sleep(1)
             continue
+            print(f"XXX Error de API/Red con {modelo}: {error_msg[:100]}")
+            logger.warning(f"Fallo general/API con {modelo}: {error_msg}")
 
+            # Si el error menciona algo de cuota (402/429) y estamos en el premium, avisamos clarito.
+            if es_premium and (
+                "402" in error_msg
+                or "429" in error_msg
+                or "insufficient_quota" in error_msg.lower()
+            ):
+                print(
+                    "🚨 AVISO: Saldo agotado en OpenRouter. Activando protocolo de emergencia con IA gratuita..."
+                )
+
+            time.sleep(1)
+            continue
+
+    print(
+        "❌ CAÍDA TOTAL DEL SISTEMA: Ni el Premium ni los respaldos gratuitos respondieron."
+    )
     print(
         "❌ CAÍDA TOTAL DEL SISTEMA: Ni el Premium ni los respaldos gratuitos respondieron."
     )
     return {
         "resultado": "error",
         "mensaje": "Todos los motores de IA están saturados o sin saldo. Reintenta en un minuto.",
+        "resultado": "error",
+        "mensaje": "Todos los motores de IA están saturados o sin saldo. Reintenta en un minuto.",
     }
+

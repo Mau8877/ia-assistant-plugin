@@ -12,13 +12,6 @@ from .ia_alumno.evaluator.calcular_nota import calcular_nota_final
 
 logger = logging.getLogger(__name__)
 
-CRITICAL_STUDIO_CSS = {"static/vendors/quill.snow.css"}
-CRITICAL_STUDIO_JS = {
-    "static/vendors/quill.js",
-    "static/vendors/lucide.js",
-}
-
-
 class IAAssistantXBlock(XBlock):
     """
     XBlock principal del asistente IA.
@@ -80,184 +73,18 @@ class IAAssistantXBlock(XBlock):
         help="Resultado y feedback persistido de la última evaluación.",
     )
 
-    # ---------------------------------------------------------------------
-    # HELPERS PRIVADOS
-    # ---------------------------------------------------------------------
-    def _safe_json_string(self, value, default="{}"):
-        """
-        Convierte un valor a string JSON seguro para enviarlo al frontend.
-
-        - Si ya es string, lo devuelve.
-        - Si es falsy, devuelve default.
-        - Si no puede serializar, devuelve default.
-        """
-        if not value:
-            return default
-
-        if isinstance(value, str):
-            return value
-
-        try:
-            return json.dumps(value)
-        except Exception:
-            logger.exception("No se pudo serializar el valor a JSON string.")
-            return default
-
-    def _add_css_resources(self, frag, css_paths):
-        """
-        Agrega múltiples archivos CSS locales al fragmento.
-        Evita repetir código y centraliza logs de fallo.
-        """
-        for path in css_paths:
-            try:
-                frag.add_css(load_resource(path))
-            except Exception:
-                logger.exception(
-                    "Error cargando CSS en Studio. Recurso: %s", path
-                )
-                if path in CRITICAL_STUDIO_CSS:
-                    frag.add_javascript(
-                        (
-                            "console.error("
-                            "'[IA Assistant] Fallo cargando CSS crítico de Studio: %s'"
-                            ");"
-                        )
-                        % path
-                    )
-
-    def _add_js_resources(self, frag, js_paths):
-        """
-        Agrega múltiples archivos JS locales al fragmento.
-        El orden de js_paths importa.
-        """
-        for path in js_paths:
-            try:
-                frag.add_javascript(load_resource(path))
-            except Exception:
-                logger.exception(
-                    "Error cargando JS en Studio. Recurso: %s", path
-                )
-                if path in CRITICAL_STUDIO_JS:
-                    frag.add_javascript(
-                        (
-                            "console.error("
-                            "'[IA Assistant] Fallo cargando JS crítico de Studio: %s'"
-                            ");"
-                        )
-                        % path
-                    )
-
-    def _build_studio_templates_payload(self):
-        """
-        Carga los templates HTML de micro-componentes y los envía al JS
-        para renderizado dinámico en Studio.
-        """
-        return {
-            "teoria": load_resource(
-                "static/core/studio/components/editor_unidad/components/teoria/teoria.html"
-            ),
-            "quiz_multiple": load_resource(
-                "static/core/studio/components/editor_unidad/components/quiz_multiple/quiz.html"
-            ),
-            "pregunta_abierta": load_resource(
-                "static/core/studio/components/editor_unidad/components/pregunta_abierta/pregunta_abierta.html"
-            ),
-            "codigo": load_resource(
-                "static/core/studio/components/editor_unidad/components/codigo/codigo.html"
-            ),
-        }
-
-    def _build_studio_fragment(self):
-        """
-        Construye el Fragment de Studio.
-
-        Estrategia:
-        - HTML maestro + subcomponentes
-        - CSS local
-        - Vendors locales primero
-        - Luego renderers hijos
-        - Luego orquestadores/padres
-        - Finalmente initialize_js con los datos
-        """
-        # ---------------------------------------------------------------
-        # 1) HTML
-        # ---------------------------------------------------------------
-        html_generador_raw = load_resource(
-            "static/core/studio/components/generador_unidad/generador_unidad.html"
-        )
-        html_editor_raw = load_resource(
-            "static/core/studio/components/editor_unidad/editor_unidad.html"
-        )
-        html_maestro_raw = load_resource("static/core/studio/studio.html")
-
-        html_generador_formateado = html_generador_raw.format(
-            prompt_docente=self.prompt_docente
-        )
-
-        # No se inyecta el JSON de la unidad dentro del HTML del editor.
-        # El JSON se enviará luego vía initialize_js para evitar desbordes
-        # y problemas de escape en el DOM.
-        html_editor_formateado = html_editor_raw
-
-        html_final = html_maestro_raw.format(
-            html_generador=html_generador_formateado,
-            html_editor=html_editor_formateado,
-        )
-
-        frag = Fragment(html_final)
-
-        # ---------------------------------------------------------------
-        # 2) CSS
-        # ---------------------------------------------------------------
-        css_paths = [
-            # Vendor local
-            "static/vendors/quill.snow.css",
-            # Core Studio
-            "static/core/studio/studio.css",
-            "static/core/studio/components/generador_unidad/generador_unidad.css",
-            "static/core/studio/components/editor_unidad/editor_unidad.css",
-            # Micro-componentes del editor
-            "static/core/studio/components/editor_unidad/components/teoria/teoria.css",
-            "static/core/studio/components/editor_unidad/components/quiz_multiple/quiz.css",
-            "static/core/studio/components/editor_unidad/components/pregunta_abierta/pregunta_abierta.css",
-            "static/core/studio/components/editor_unidad/components/codigo/codigo.css",
-        ]
-        self._add_css_resources(frag, css_paths)
-
-        # ---------------------------------------------------------------
-        # 3) JS
-        # ---------------------------------------------------------------
-        # Importante:
-        # - Vendors primero
-        # - Luego renderers hijos
-        # - Luego editor/generador
-        # - Luego inicializador maestro
-        js_paths = [
-            # Vendors locales (más estables que depender de CDN)
-            "static/vendors/quill.js",
-            "static/vendors/lucide.js",
-            # Renderers hijos
-            "static/core/studio/components/editor_unidad/components/teoria/teoria_render.js",
-            "static/core/studio/components/editor_unidad/components/quiz_multiple/quiz_render.js",
-            "static/core/studio/components/editor_unidad/components/pregunta_abierta/pregunta_abierta_render.js",
-            "static/core/studio/components/editor_unidad/components/codigo/codigo_render.js",
-            # Orquestadores/padres
-            "static/core/studio/components/editor_unidad/editor_unidad.js",
-            "static/core/studio/components/generador_unidad/generador_unidad.js",
-            # Inicializador final
-            "static/core/studio/studio.js",
-        ]
-        self._add_js_resources(frag, js_paths)
-
-        # ---------------------------------------------------------------
-        # 4) Datos para el frontend
-        # ---------------------------------------------------------------
-        datos_para_js = {
-            "json_guardado": self.unidad_json if self.unidad_json else "{}",
-            "templates": self._build_studio_templates_payload(),
-        }
-
-        frag.initialize_js("STUDIO_DOCENTE_INIT", datos_para_js)
+    # -----------------------------------------------------------------------
+    # VISTA STUDIO (Configuración del Docente)
+    # -----------------------------------------------------------------------
+    def studio_view(self, context=None):
+        """ Renderiza la interfaz donde el profesor escribe el prompt. """
+        html_str = load_resource("static/core/studio/studio.html")
+        html_formateado = html_str.format(prompt_docente=self.prompt_docente)
+        
+        frag = Fragment(html_formateado)
+        frag.add_css(load_resource("static/core/studio/studio.css"))
+        frag.add_javascript(load_resource("static/core/studio/studio.js"))
+        frag.initialize_js('StudioDocenteInit')
         return frag
 
     def _build_student_fragment(self):
@@ -335,95 +162,9 @@ class IAAssistantXBlock(XBlock):
         frag.initialize_js("StudentMasterInit")
         return frag
 
-    # ---------------------------------------------------------------------
-    # VISTAS PRINCIPALES
-    # ---------------------------------------------------------------------
-    def studio_view(self, context=None):
-        """
-        Vista de Studio.
-
-        Permite al docente:
-        - redactar prompt
-        - generar borrador con IA
-        - editar visualmente la unidad
-        - guardar/publicar la versión final
-        """
-        try:
-            return self._build_studio_fragment()
-        except Exception:
-            logger.exception("Error construyendo studio_view.")
-            html_error = """
-                <div style="padding:16px;border:1px solid #d9534f;background:#fdf2f2;color:#a94442;">
-                    <strong>Error:</strong> no se pudo cargar la interfaz de Studio.
-                    Revisa logs del servidor para más detalles.
-                </div>
-            """
-            return Fragment(html_error)
-
-    def student_view(self, context=None):
-        """
-        Vista del alumno.
-
-        Renderiza la unidad ya publicada, no la interfaz de Studio.
-        """
-
-        return self.studio_view(context)
-
-        try:
-            return self._build_student_fragment()
-        except Exception:
-            logger.exception("Error construyendo student_view.")
-            html_error = """
-                <div style="padding:16px;border:1px solid #d9534f;background:#fdf2f2;color:#a94442;">
-                    <strong>Error:</strong> no se pudo cargar la interfaz del alumno.
-                    Revisa logs del servidor para más detalles.
-                </div>
-            """
-            return Fragment(html_error)
-
-    # ---------------------------------------------------------------------
-    # HANDLERS DE STUDIO
-    # ---------------------------------------------------------------------
-    @XBlock.json_handler
-    def generar_borrador_ia(self, data, suffix=""):
-        """
-        Genera un borrador de unidad usando el prompt actual del docente.
-
-        No publica todavía el resultado; solo lo devuelve al frontend para
-        previsualización/edición.
-        """
-        try:
-            nuevo_prompt = (data or {}).get("prompt", "").strip()
-            self.prompt_docente = nuevo_prompt
-
-            logger.info(
-                "IA Assistant: Iniciando generación de borrador para docente."
-            )
-
-            resultado = generar_contenido_unidad(nuevo_prompt)
-
-            if resultado.get("resultado") == "ok":
-                logger.info("IA Assistant: Borrador generado correctamente.")
-                return {
-                    "resultado": "ok",
-                    "contenido_crudo": resultado.get("json_unidad", "{}"),
-                }
-
-            logger.warning(
-                "IA Assistant: La generación devolvió error controlado: %s",
-                resultado,
-            )
-            return resultado
-
-        except Exception as exc:
-            logger.exception(
-                "IA Assistant: Error inesperado al generar borrador."
-            )
-            return {
-                "resultado": "error",
-                "mensaje": f"Error inesperado al generar el borrador: {str(exc)}",
-            }
-
+    # -----------------------------------------------------------------------
+    # HANDLER DE CALIFICACIÓN
+    # -----------------------------------------------------------------------
     @XBlock.json_handler
     def guardar_unidad_editada(self, data, suffix=""):
         """

@@ -1,4 +1,4 @@
-﻿window.IA_Components = window.IA_Components || {};
+window.IA_Components = window.IA_Components || {};
 
 window.IA_Components.EDITOR_UNIDAD = class {
   constructor(element, handlerGuardar, jsonInicial) {

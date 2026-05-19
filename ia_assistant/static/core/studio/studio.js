@@ -1,4 +1,4 @@
-﻿function renderLucideIcons(root) {
+function renderLucideIcons(root) {
   try {
     if (window.lucide && typeof window.lucide.createIcons === "function") {
       if (root) {

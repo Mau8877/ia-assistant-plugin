@@ -1,0 +1,57 @@
+<div
+  class="editor-card comp-block codigo-card"
+  data-tipo="codigo"
+  data-id="__ID__"
+>
+  <div class="form-group">
+    <label class="codigo-label">
+      <i
+        data-lucide="terminal-square"
+        style="width: 18px; height: 18px; color: #0d9488"
+      ></i>
+      Enunciado del Problema (Reto de Código)
+    </label>
+    <textarea class="form-control d-enunciado-gral" rows="2">
+__ENUNCIADO__</textarea
+    >
+  </div>
+
+  <div class="codigo-specs-row">
+    <div style="flex: 1">
+      <label class="codigo-sublabel">Lenguaje</label>
+      <input type="text" class="form-control d-lenguaje" value="__LENGUAJE__" />
+    </div>
+    <div style="flex: 2">
+      <label class="codigo-sublabel">Input Esperado</label>
+      <input type="text" class="form-control d-entrada" value="__ENTRADA__" />
+    </div>
+    <div style="flex: 2">
+      <label class="codigo-sublabel">Output Esperado</label>
+      <input type="text" class="form-control d-salida" value="__SALIDA__" />
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="codigo-sublabel">
+      <i
+        data-lucide="code"
+        style="width: 16px; height: 16px; color: #64748b"
+      ></i>
+      Código Inicial (Base para el alumno)
+    </label>
+    <textarea class="form-control d-codigo-base codigo-textarea" rows="6">
+__CODIGO_INICIAL__</textarea
+    >
+  </div>
+
+  <div class="form-group">
+    <label class="codigo-sublabel">
+      <i
+        data-lucide="list-checks"
+        style="width: 16px; height: 16px; color: #64748b"
+      ></i>
+      Criterios de Evaluación (Puntos Clave)
+    </label>
+    <input type="text" class="form-control d-puntos" value="__PUNTOS_CLAVE__" />
+  </div>
+</div>

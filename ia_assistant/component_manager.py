@@ -4,25 +4,31 @@ from .utils.load_resource import load_resource
 
 logger = logging.getLogger(__name__)
 
+
 def renderizar_unidad(json_str):
     """
     Toma el JSON de la IA y devuelve el HTML ensamblado con wrappers para las pestañas.
     Prioriza IDs descriptivos y normaliza nombres de campos para la calificación.
     """
+
     try:
         if not json_str or json_str == "{}" or json_str == "":
             return "", {"titulo": "Unidad Vacía", "css": set(), "js": set()}
-            
+
         datos = json.loads(json_str)
     except Exception as e:
         logger.error(f"Error al parsear unidad_json: {str(e)}")
-        return f"<p>Error al parsear unidad: {str(e)}</p>", {"titulo": "Error", "css": set(), "js": set()}
+        return f"<p>Error al parsear unidad: {str(e)}</p>", {
+            "titulo": "Error",
+            "css": set(),
+            "js": set(),
+        }
 
     html_final = ""
     recursos = {
         "titulo": datos.get("titulo_unidad", "Unidad Interactiva"),
         "css": set(),
-        "js": set()
+        "js": set(),
     }
 
     componentes = datos.get("componentes", [])
@@ -35,9 +41,13 @@ def renderizar_unidad(json_str):
         # --- SECCIÓN: TEORÍA ---
         if tipo == "teoria":
             template = load_resource("static/components/teoria/teoria.html")
-            contenido = template.format(contenido_html=comp.get("contenido_html", ""))
+            contenido = template.format(
+                contenido_html=comp.get("contenido_html", "")
+            )
             # El wrapper permite al JS moverlo a la pestaña correspondiente
-            html_final += f'<div class="ia-comp-teoria" id="{comp_id}">{contenido}</div>'
+            html_final += (
+                f'<div class="ia-comp-teoria" id="{comp_id}">{contenido}</div>'
+            )
             recursos["css"].add("static/components/teoria/teoria.css")
 
         # --- SECCIÓN: QUIZ MULTIPLE ---
@@ -53,44 +63,53 @@ def renderizar_unidad(json_str):
                     preguntas_html += (
                         f'<label class="ia-opcion">'
                         f'<input type="radio" name="answer_{comp_id}_{i}" value="{j}"> {opt}'
-                        f'</label>'
+                        f"</label>"
                     )
-                preguntas_html += '</div>'
-            
-            template = load_resource("static/components/quiz_multiple/quiz.html")
+                preguntas_html += "</div>"
+
+            template = load_resource(
+                "static/components/quiz_multiple/quiz.html"
+            )
             contenido = template.format(preguntas_html=preguntas_html)
-            html_final += f'<div class="ia-comp-quiz" id="{comp_id}">{contenido}</div>'
+            html_final += (
+                f'<div class="ia-comp-quiz" id="{comp_id}">{contenido}</div>'
+            )
             recursos["css"].add("static/components/quiz_multiple/quiz.css")
             recursos["js"].add("static/components/quiz_multiple/quiz.js")
 
         # --- SECCIÓN: PREGUNTA ABIERTA ---
         elif tipo == "pregunta_abierta":
-            template = load_resource("static/components/pregunta_abierta/pregunta_abierta.html")
+            template = load_resource(
+                "static/components/pregunta_abierta/pregunta_abierta.html"
+            )
             contenido = template.format(
-                comp_id=comp_id, 
-                enunciado=comp.get("enunciado", "")
+                comp_id=comp_id, enunciado=comp.get("enunciado", "")
             )
             html_final += f'<div class="ia-comp-abierta" id="{comp_id}">{contenido}</div>'
-            recursos["css"].add("static/components/pregunta_abierta/pregunta_abierta.css")
-            recursos["js"].add("static/components/pregunta_abierta/pregunta_abierta.js")
+            recursos["css"].add(
+                "static/components/pregunta_abierta/pregunta_abierta.css"
+            )
+            recursos["js"].add(
+                "static/components/pregunta_abierta/pregunta_abierta.js"
+            )
 
         # --- SECCIÓN: LABORATORIO DE CÓDIGO ---
         elif tipo == "codigo":
-            specs = comp.get('especificaciones', {})
+            specs = comp.get("especificaciones", {})
             # Limpiamos saltos de línea literales (\n) para que el textarea los renderice como saltos reales
-            codigo_limpio = comp.get('codigo_inicial', '').replace('\\n', '\n')
-            
+            codigo_limpio = comp.get("codigo_inicial", "").replace("\\n", "\n")
+
             # Guardamos la longitud del código base para que el JS sepa si el alumno escribió algo nuevo
             base_len = len(codigo_limpio)
 
             template = load_resource("static/components/codigo/codigo.html")
             contenido = template.format(
                 id=comp_id,
-                enunciado=comp.get('enunciado', ''),
-                lenguaje=comp.get('lenguaje', 'PYTHON').upper(),
+                enunciado=comp.get("enunciado", ""),
+                lenguaje=comp.get("lenguaje", "PYTHON").upper(),
                 codigo_inicial=codigo_limpio,
-                entrada=specs.get('entrada_esperada', 'N/A'),
-                salida=specs.get('salida_esperada', 'N/A')
+                entrada=specs.get("entrada_esperada", "N/A"),
+                salida=specs.get("salida_esperada", "N/A"),
             )
             html_final += f'<div class="ia-comp-codigo" id="{comp_id}" data-base-len="{base_len}">{contenido}</div>'
             recursos["css"].add("static/components/codigo/codigo.css")

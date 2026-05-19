@@ -1,112 +1,112 @@
 /* Contenedor Principal de la Unidad */
 .ia-component-teoria {
-    background-color: #ffffff;
-    padding: 30px;
-    margin-bottom: 25px;
-    border-left: 6px solid #0056D2;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    font-size: 16px;
-    line-height: 1.7;
-    color: #3c4043;
-    word-wrap: break-word;
+  background-color: #ffffff;
+  padding: 30px;
+  margin-bottom: 25px;
+  border-left: 6px solid #0056d2;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-size: 16px;
+  line-height: 1.7;
+  color: #3c4043;
+  word-wrap: break-word;
 }
 
 /* Títulos Jerárquicos */
 .ia-component-teoria h2 {
-    font-size: 24px;
-    margin-top: 0;
-    color: #0056D2;
-    border-bottom: 2px solid #f1f3f4;
-    padding-bottom: 12px;
-    margin-bottom: 20px;
+  font-size: 24px;
+  margin-top: 0;
+  color: #0056d2;
+  border-bottom: 2px solid #f1f3f4;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
 }
 
 .ia-component-teoria h3 {
-    font-size: 19px;
-    color: #1a1a1a;
-    margin-top: 25px;
-    margin-bottom: 15px;
-    font-weight: 600;
+  font-size: 19px;
+  color: #1a1a1a;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  font-weight: 600;
 }
 
 /* Párrafos y Texto */
 .ia-component-teoria p {
-    margin-bottom: 18px;
+  margin-bottom: 18px;
 }
 
 .ia-component-teoria strong {
-    color: #1a1a1a;
-    font-weight: 700;
+  color: #1a1a1a;
+  font-weight: 700;
 }
 
 /* --- SOPORTE PARA NOTAS DINÁMICAS (Blockquotes) --- */
 /* La IA usará <blockquote> para resaltar conceptos clave */
 .ia-component-teoria blockquote {
-    background-color: #e8f0fe;
-    /* Fondo azul muy claro */
-    border-left: 4px solid #1967d2;
-    margin: 25px 0;
-    padding: 18px 25px;
-    border-radius: 0 8px 8px 0;
-    color: #174ea6;
-    font-size: 0.95em;
+  background-color: #e8f0fe;
+  /* Fondo azul muy claro */
+  border-left: 4px solid #1967d2;
+  margin: 25px 0;
+  padding: 18px 25px;
+  border-radius: 0 8px 8px 0;
+  color: #174ea6;
+  font-size: 0.95em;
 }
 
 .ia-component-teoria blockquote p {
-    margin-bottom: 0;
-    /* Evita espacios extra dentro de la nota */
+  margin-bottom: 0;
+  /* Evita espacios extra dentro de la nota */
 }
 
 /* --- SOPORTE PARA CÓDIGO ESTÁTICO (Ejemplos) --- */
 /* Código dentro de línea (inline) */
 .ia-component-teoria code {
-    background-color: #f1f3f4;
-    color: #d81b60;
-    /* Color distintivo para sintaxis */
-    padding: 3px 6px;
-    border-radius: 4px;
-    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-    font-size: 0.9em;
+  background-color: #f1f3f4;
+  color: #d81b60;
+  /* Color distintivo para sintaxis */
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 0.9em;
 }
 
 /* Bloques de código (Snippets de lectura) */
 .ia-component-teoria pre {
-    background-color: #2d2d2d;
-    /* Fondo oscuro tipo editor */
-    color: #f8f8f2;
-    padding: 20px;
-    border-radius: 6px;
-    overflow-x: auto;
-    margin: 20px 0;
-    border: 1px solid #1a1a1a;
+  background-color: #2d2d2d;
+  /* Fondo oscuro tipo editor */
+  color: #f8f8f2;
+  padding: 20px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 20px 0;
+  border: 1px solid #1a1a1a;
 }
 
 .ia-component-teoria pre code {
-    background-color: transparent;
-    /* Quita el fondo gris en bloques pre */
-    color: inherit;
-    padding: 0;
-    font-size: 14px;
-    line-height: 1.5;
+  background-color: transparent;
+  /* Quita el fondo gris en bloques pre */
+  color: inherit;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 /* Listas */
 .ia-component-teoria ul,
 .ia-component-teoria ol {
-    padding-left: 25px;
-    margin-bottom: 20px;
+  padding-left: 25px;
+  margin-bottom: 20px;
 }
 
 .ia-component-teoria li {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 /* Ajuste para imágenes (por si la IA las incluye) */
 .ia-component-teoria img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
-    display: block;
-    margin: 20px auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  display: block;
+  margin: 20px auto;
 }

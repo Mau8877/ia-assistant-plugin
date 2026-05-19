@@ -1,0 +1,23 @@
+.teoria-card {
+  border-left: 4px solid #3b82f6; /* Borde azul distintivo para Teoría */
+  background-color: #f8fafc;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.teoria-label {
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.teoria-quill-wrapper {
+  height: 250px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0 0 4px 4px; /* Las esquinas de arriba se las dejamos al toolbar de Quill */
+}

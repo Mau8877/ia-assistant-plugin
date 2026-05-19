@@ -1,58 +1,79 @@
-function StudioDocenteInit(runtime, element) {
-    var handlerUrl = runtime.handlerUrl(element, 'guardar_prompt');
-    
-    $('#btn-generar', element).click(function(eventObject) {
-        eventObject.preventDefault();
-        
-        var $btn = $(this);
-        var prompt_texto = $('#prompt-input', element).val().trim();
-        
-        if (prompt_texto === '') {
-            $('#mensaje-error .error-texto', element).text('El prompt no puede estar vacío');
-            $('#mensaje-estado', element).hide();
-            $('#mensaje-error', element).slideDown(200);
-            return;
-        }
+﻿function renderLucideIcons(root) {
+  try {
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      if (root) {
+        window.lucide.createIcons({ root: root });
+      } else {
+        window.lucide.createIcons();
+      }
+    } else {
+      console.warn("[IA Assistant] Lucide no está disponible todavía.");
+    }
+  } catch (error) {
+    console.error("[IA Assistant] Error renderizando iconos Lucide:", error);
+  }
+}
 
-        // Estado de carga
-        var originalText = $btn.find('.btn-text').text();
-        $btn.prop('disabled', true).addClass('btn-loading');
-        $btn.find('.btn-icon').text('⏳');
-        $btn.find('.btn-text').text('Generando con IA...');
-        
-        $('#mensaje-error', element).slideUp(200);
-        $('#mensaje-estado', element).slideUp(200);
-        
-        $.ajax({
-            type: "POST",
-            url: handlerUrl,
-            data: JSON.stringify({"prompt": prompt_texto}),
-            success: function(data) {
-                // Restaurar botón
-                $btn.prop('disabled', false).removeClass('btn-loading');
-                $btn.find('.btn-icon').text('✨');
-                $btn.find('.btn-text').text(originalText);
+window.IA_RENDER_LUCIDE_ICONS = renderLucideIcons;
+window.renderLucideIcons = renderLucideIcons;
 
-                if (data.resultado === 'ok') {
-                    $('#mensaje-estado', element).slideDown(300);
-                    // Opcional: Ocultar el éxito después de unos segundos
-                    setTimeout(function() {
-                        $('#mensaje-estado', element).slideUp(300);
-                    }, 6000);
-                } else {
-                    $('#mensaje-error .error-texto', element).text(data.mensaje);
-                    $('#mensaje-error', element).slideDown(300);
-                }
-            },
-            error: function() {
-                // Restaurar botón
-                $btn.prop('disabled', false).removeClass('btn-loading');
-                $btn.find('.btn-icon').text('✨');
-                $btn.find('.btn-text').text(originalText);
-                
-                $('#mensaje-error .error-texto', element).text('Error de conexión con el servidor. Por favor, intenta de nuevo.');
-                $('#mensaje-error', element).slideDown(300);
-            }
-        });
-    });
+function STUDIO_DOCENTE_INIT(runtime, element, data) {
+  window.IA_Components = window.IA_Components || {};
+  window.IA_Components.Templates = data.templates || {};
+
+  if (typeof window.IA_Components.EDITOR_UNIDAD === "undefined") {
+    console.error(
+      "[STUDIO_DOCENTE_INIT] ERROR CRÍTICO: EDITOR_UNIDAD no está definido en IA_Components. " +
+        "Verificá que editor_unidad.js se carga ANTES que studio_docente_init.js " +
+        "en el método js_urls() de tu XBlock Python.",
+    );
+    window.IA_RENDER_LUCIDE_ICONS(element);
+    return;
+  }
+
+  if (typeof window.IA_Components.GENERADOR_UNIDAD === "undefined") {
+    console.error(
+      "[STUDIO_DOCENTE_INIT] ERROR CRÍTICO: GENERADOR_UNIDAD no está definido en IA_Components. " +
+        "Verificá que generador_unidad.js se carga ANTES que studio_docente_init.js.",
+    );
+    window.IA_RENDER_LUCIDE_ICONS(element);
+    return;
+  }
+
+  var HANDLER_LLAMAR_IA = runtime.handlerUrl(element, "generar_borrador_ia");
+  var HANDLER_GUARDAR_UNIDAD = runtime.handlerUrl(
+    element,
+    "guardar_unidad_editada",
+  );
+
+  var jsonInicial = data.json_guardado;
+
+  var EDITOR = new window.IA_Components.EDITOR_UNIDAD(
+    element,
+    HANDLER_GUARDAR_UNIDAD,
+    jsonInicial,
+  );
+
+  var GENERADOR = new window.IA_Components.GENERADOR_UNIDAD(
+    element,
+    HANDLER_LLAMAR_IA,
+    {
+      onStart: function () {
+        EDITOR.OCULTAR_MENSAJES();
+        $("#btn-guardar-final", element).prop("disabled", true);
+      },
+      onSuccess: function (jsonCrudo) {
+        EDITOR.PROCESAR_NUEVO_JSON(jsonCrudo);
+      },
+      onError: function (mensaje) {
+        EDITOR.MOSTRAR_ERROR(mensaje);
+      },
+    },
+  );
+
+  window.IA_RENDER_LUCIDE_ICONS(element);
+
+  console.log(
+    "[SISTEMA] Módulos de Studio inicializados y conectados correctamente.",
+  );
 }

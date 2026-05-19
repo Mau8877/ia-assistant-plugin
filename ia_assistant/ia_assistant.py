@@ -367,8 +367,6 @@ class IAAssistantXBlock(XBlock):
         Renderiza la unidad ya publicada, no la interfaz de Studio.
         """
 
-        return self.studio_view(context)
-
         try:
             return self._build_student_fragment()
         except Exception:

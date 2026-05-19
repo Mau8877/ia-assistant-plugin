@@ -20,13 +20,9 @@ MODELO_PRINCIPAL = "openai/gpt-4o-mini"
 MODELOS_FALLBACK = [
     "google/gemini-2.0-flash-lite-preview-02-05:free",
     "openai/gpt-oss-120b:free",
-    "google/gemini-2.0-flash-lite-preview-02-05:free",
-    "openai/gpt-oss-120b:free",
     "nvidia/nemotron-3-super-120b-a12b:free",
     "google/gemma-4-31b-it:free",
-    "google/gemma-4-31b-it:free",
 ]
-
 
 
 def evaluar_respuestas_batch(lista_tareas):
@@ -154,4 +150,3 @@ def evaluar_respuestas_batch(lista_tareas):
     )
     logger.critical("Todos los modelos fallaron en la evaluacion.")
     return None
-

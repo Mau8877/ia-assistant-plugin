@@ -1,0 +1,5 @@
+.ia-assistant-studio,
+.ia-assistant-student {
+    box-sizing: border-box;
+    color: var(--ia-assistant-color-text);
+}

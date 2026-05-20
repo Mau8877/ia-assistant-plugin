@@ -1,0 +1,15 @@
+.ia-assistant-student {
+    background: var(--ia-assistant-color-surface);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    padding: var(--ia-assistant-space-md);
+}
+
+.ia-assistant-student__title {
+    margin: 0 0 var(--ia-assistant-space-sm);
+}
+
+.ia-assistant-student__message {
+    margin: 0;
+    color: var(--ia-assistant-color-muted);
+}

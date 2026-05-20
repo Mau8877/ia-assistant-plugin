@@ -1,4 +1,5 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
 
 setup(
     name="ia-assistant-plugin",
@@ -8,8 +9,6 @@ setup(
     install_requires=[
         "XBlock",
         "web-fragments",
-        "openai>=1.0.0",
-        "python-dotenv",
     ],
     entry_points={
         "xblock.v1": [

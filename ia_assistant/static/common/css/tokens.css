@@ -1,0 +1,10 @@
+:root {
+    --ia-assistant-color-border: #d9dee8;
+    --ia-assistant-color-surface: #ffffff;
+    --ia-assistant-color-background: #f7f9fc;
+    --ia-assistant-color-text: #1f2937;
+    --ia-assistant-color-muted: #6b7280;
+    --ia-assistant-radius-sm: 6px;
+    --ia-assistant-space-sm: 8px;
+    --ia-assistant-space-md: 16px;
+}

@@ -1,17 +1,82 @@
 from xblock.core import XBlock
-from xblock.fields import Boolean, Scope, String
+from xblock.fields import Scope, String
 from web_fragments.fragment import Fragment
+
+from .utils.resources import read_static_text
+
+
+STUDIO_HTML_PATH = "studio/html/studio.html"
+STUDENT_HTML_PATH = "student/html/student.html"
+
+STUDIO_CSS_PATHS = [
+    "common/css/tokens.css",
+    "common/css/components.css",
+    "studio/css/studio.css",
+    "studio/css/layout.css",
+    "studio/css/forms.css",
+]
+
+STUDIO_JS_PATHS = [
+    "common/js/namespace.js",
+    "common/js/utils.js",
+    "common/js/registry.js",
+    "common/components/teoria/teoria.definition.js",
+    "common/components/quiz_multiple/quiz_multiple.definition.js",
+    "common/components/pregunta_abierta/pregunta_abierta.definition.js",
+    "common/components/codigo/codigo.definition.js",
+    "common/components/revision/revision.definition.js",
+    "studio/js/state.js",
+    "studio/js/dom.js",
+    "studio/js/api.js",
+    "studio/js/messages.js",
+    "studio/js/renderer.js",
+    "studio/js/events.js",
+    "studio/widgets/chatbar_ia/chatbar_ia.js",
+    "studio/widgets/component_picker/component_picker.js",
+    "studio/widgets/component_tabs/component_tabs.js",
+    "studio/components/teoria/teoria_editor.js",
+    "studio/components/quiz_multiple/quiz_multiple_editor.js",
+    "studio/components/pregunta_abierta/pregunta_abierta_editor.js",
+    "studio/components/codigo/codigo_editor.js",
+    "studio/components/revision/revision_editor.js",
+    "studio/js/studio.js",
+]
+
+STUDENT_CSS_PATHS = [
+    "common/css/tokens.css",
+    "common/css/components.css",
+    "student/css/student.css",
+]
+
+STUDENT_JS_PATHS = [
+    "common/js/namespace.js",
+    "common/js/utils.js",
+    "common/js/registry.js",
+    "common/components/teoria/teoria.definition.js",
+    "common/components/quiz_multiple/quiz_multiple.definition.js",
+    "common/components/pregunta_abierta/pregunta_abierta.definition.js",
+    "common/components/codigo/codigo.definition.js",
+    "common/components/revision/revision.definition.js",
+    "student/js/state.js",
+    "student/js/dom.js",
+    "student/js/renderer.js",
+    "student/js/events.js",
+    "student/components/teoria/teoria_player.js",
+    "student/components/quiz_multiple/quiz_multiple_player.js",
+    "student/components/pregunta_abierta/pregunta_abierta_player.js",
+    "student/components/codigo/codigo_player.js",
+    "student/components/revision/revision_player.js",
+    "student/js/student.js",
+]
 
 
 class IAAssistantXBlock(XBlock):
     """
     IA Assistant XBlock.
 
-    Versión mínima inicial para validar que el plugin:
-    - instala correctamente
-    - puede ser importado por el SDK
-    - expone student_view y studio_view
-    - permite probar Studio desde XBlock SDK sin romper LMS
+    Version minima inicial para validar que el plugin instala correctamente,
+    puede ser importado por el SDK y expone vistas separadas para Studio y
+    Student sin implementar todavia la interfaz final.
     """
 
     display_name = String(
@@ -29,99 +94,80 @@ class IAAssistantXBlock(XBlock):
     unidad_json = String(
         default="{}",
         scope=Scope.content,
-        help="JSON final de la unidad generada por IA.",
+        help="JSON final de la unidad.",
     )
 
-    sdk_force_studio_view = Boolean(
-        default=False,
+    sdk_view_mode = String(
+        default="student",
         scope=Scope.settings,
         help=(
             "Solo para pruebas en XBlock SDK. "
-            "Si está activo, student_view renderiza studio_view."
+            "Valores permitidos: student, studio."
         ),
     )
 
     def student_view(self, context=None):
         """
-        Vista mínima para LMS/alumno.
+        Renderiza la vista minima para LMS/alumno.
 
-        En producción, esta vista NO debe mostrar la interfaz docente.
-
-        En XBlock SDK, como el Workbench renderiza student_view por defecto,
-        usamos sdk_force_studio_view=True en un escenario especial para poder
-        probar la pantalla de Studio localmente.
+        En XBlock SDK, el escenario Studio usa sdk_view_mode='studio'
+        porque Workbench renderiza student_view por defecto.
         """
-        if self.sdk_force_studio_view:
+        if self._is_sdk_studio_mode():
             return self.studio_view(context)
 
-        html = """
-        <div class="ia-assistant-student">
-            <h3>IA Assistant</h3>
-            <p>Vista de alumno pendiente de implementación.</p>
-        </div>
-        """
-
-        return Fragment(html)
+        fragment = Fragment(read_static_text(STUDENT_HTML_PATH))
+        self._add_css_resources(fragment, STUDENT_CSS_PATHS)
+        self._add_js_resources(fragment, STUDENT_JS_PATHS)
+        return fragment
 
     def studio_view(self, context=None):
         """
-        Vista mínima para Studio/docente.
-
-        Esta será la primera parte real que vamos a desarrollar.
-        Por ahora solo confirma que la vista docente carga correctamente.
+        Renderiza la vista minima para Studio/docente.
         """
-        html = """
-        <div class="ia-assistant-studio">
-            <h2>IA Assistant - Studio</h2>
+        fragment = Fragment(read_static_text(STUDIO_HTML_PATH))
+        self._add_css_resources(fragment, STUDIO_CSS_PATHS)
+        self._add_js_resources(fragment, STUDIO_JS_PATHS)
+        return fragment
 
-            <p>
-                Plugin cargado correctamente en modo docente.
-            </p>
-
-            <div>
-                <label for="ia-assistant-prompt">
-                    Prompt del docente
-                </label>
-
-                <textarea
-                    id="ia-assistant-prompt"
-                    style="width: 100%; min-height: 120px;"
-                    placeholder="Escribe aquí el prompt para generar la unidad..."
-                ></textarea>
-            </div>
-
-            <br>
-
-            <div>
-                <button type="button">
-                    Generar unidad
-                </button>
-            </div>
-        </div>
+    def _is_sdk_studio_mode(self):
         """
+        Indica si el escenario del SDK debe mostrar la vista Studio.
+        """
+        return str(self.sdk_view_mode).strip().lower() == "studio"
 
-        return Fragment(html)
+    @staticmethod
+    def _add_css_resources(fragment, resource_paths):
+        """
+        Agrega recursos CSS al fragmento en el orden recibido.
+        """
+        for resource_path in resource_paths:
+            fragment.add_css(read_static_text(resource_path))
+
+    @staticmethod
+    def _add_js_resources(fragment, resource_paths):
+        """
+        Agrega recursos JavaScript al fragmento en el orden recibido.
+        """
+        for resource_path in resource_paths:
+            fragment.add_javascript(read_static_text(resource_path))
 
     @staticmethod
     def workbench_scenarios():
         """
         Escenarios para probar el XBlock en XBlock SDK.
-
-        El SDK renderiza student_view por defecto.
-        Por eso el segundo escenario activa sdk_force_studio_view,
-        para poder ver la interfaz docente localmente.
         """
         return [
             (
-                "IA Assistant - Student mínimo",
+                "IA Assistant - Student minimo",
                 """
-                <ia_assistant/>
+                <ia_assistant sdk_view_mode="student"/>
                 """,
             ),
             (
                 "IA Assistant - Studio SDK",
                 """
-                <ia_assistant sdk_force_studio_view="true"/>
+                <ia_assistant sdk_view_mode="studio"/>
                 """,
             ),
         ]
@@ -129,9 +175,7 @@ class IAAssistantXBlock(XBlock):
     @XBlock.json_handler
     def save_unit(self, data, suffix=""):
         """
-        Handler mínimo para guardar datos.
-
-        Más adelante aquí validaremos y guardaremos unidad_json.
+        Handler minimo para guardar datos.
         """
         self.prompt_docente = data.get("prompt_docente", "")
         self.unidad_json = data.get("unidad_json", "{}")

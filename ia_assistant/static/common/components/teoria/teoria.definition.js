@@ -6,7 +6,7 @@
     window.IAAssistant.Registry.register({
         type: "teoria",
         label: "Teoría",
-        allowMultiple: false,
+        allowMultiple: true,
         authorable: true,
         reviewable: false,
         system: false,

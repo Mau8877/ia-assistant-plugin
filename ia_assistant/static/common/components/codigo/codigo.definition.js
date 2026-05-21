@@ -6,7 +6,7 @@
     window.IAAssistant.Registry.register({
         type: "codigo",
         label: "Código",
-        allowMultiple: false,
+        allowMultiple: true,
         authorable: true,
         reviewable: true,
         system: false,

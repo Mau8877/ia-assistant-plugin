@@ -6,7 +6,7 @@
     window.IAAssistant.Registry.register({
         type: "pregunta_abierta",
         label: "Pregunta abierta",
-        allowMultiple: false,
+        allowMultiple: true,
         authorable: true,
         reviewable: true,
         system: false,

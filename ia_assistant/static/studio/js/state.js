@@ -6,6 +6,7 @@
 
     var currentUnit = createDefaultUnit();
     var activeComponentId = null;
+    var componentTypeSequences = {};
 
     function createDefaultUnit() {
         return {
@@ -31,6 +32,12 @@
         });
     }
 
+    function createComponentId(componentType) {
+        componentTypeSequences[componentType] = (componentTypeSequences[componentType] || 0) + 1;
+
+        return componentType + "_" + componentTypeSequences[componentType];
+    }
+
     window.IAAssistant.Studio.State = {
         getUnit: function () {
             return cloneData(currentUnit);
@@ -39,6 +46,13 @@
         resetUnit: function () {
             currentUnit = createDefaultUnit();
             activeComponentId = null;
+            componentTypeSequences = {};
+        },
+
+        setUnitTitle: function (title) {
+            var cleanTitle = typeof title === "string" ? title.trim() : "";
+
+            currentUnit.titulo = cleanTitle || "Unidad sin título";
         },
 
         addComponent: function (componentType) {
@@ -57,9 +71,12 @@
                 return null;
             }
 
+            var componentId = createComponentId(componentDefinition.type);
+
             component = {
-                id: componentDefinition.type,
+                id: componentId,
                 tipo: componentDefinition.type,
+                nombre: componentId,
                 data: componentDefinition.createDefaultData()
             };
 
@@ -91,6 +108,18 @@
             }
 
             activeComponentId = componentId;
+            return true;
+        },
+
+        renameComponent: function (componentId, newName) {
+            var component = findComponent(componentId);
+            var cleanName = typeof newName === "string" ? newName.trim() : "";
+
+            if (!component || !cleanName) {
+                return false;
+            }
+
+            component.nombre = cleanName;
             return true;
         },
 

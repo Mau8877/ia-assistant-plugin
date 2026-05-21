@@ -27,6 +27,26 @@
             }
 
             return componentPicker.querySelector(".ia-assistant-component-picker__button");
+        },
+
+        getComponentTabs: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector(".ia-assistant-component-tabs");
+        },
+
+        getUnitTitleInput: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector("[data-ia-assistant-unit-title]");
         }
     };
 }());

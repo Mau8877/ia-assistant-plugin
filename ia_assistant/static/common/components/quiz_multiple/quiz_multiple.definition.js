@@ -6,7 +6,7 @@
     window.IAAssistant.Registry.register({
         type: "quiz_multiple",
         label: "Quiz múltiple",
-        allowMultiple: false,
+        allowMultiple: true,
         authorable: true,
         reviewable: true,
         system: false,

@@ -1,0 +1,32 @@
+(function () {
+    "use strict";
+
+    window.IAAssistant = window.IAAssistant || {};
+    window.IAAssistant.Studio = window.IAAssistant.Studio || {};
+
+    window.IAAssistant.Studio.Dom = {
+        getRoot: function () {
+            return document.querySelector(".ia-assistant-studio");
+        },
+
+        getComponentPicker: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector(".ia-assistant-component-picker");
+        },
+
+        getComponentPickerButton: function (root) {
+            var componentPicker = this.getComponentPicker(root);
+
+            if (!componentPicker) {
+                return null;
+            }
+
+            return componentPicker.querySelector(".ia-assistant-component-picker__button");
+        }
+    };
+}());

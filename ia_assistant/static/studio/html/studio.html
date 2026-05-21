@@ -1,8 +1,61 @@
-<section class="ia-assistant-studio">
-    <header class="ia-assistant-studio__header">
-        <h2 class="ia-assistant-studio__title">IA Assistant - Studio</h2>
-        <p class="ia-assistant-studio__message">
-            Vista docente cargada desde archivos estaticos.
-        </p>
-    </header>
+<section class="ia-assistant-studio" data-ia-assistant-studio>
+    <div class="ia-assistant-studio__workspace">
+        <header class="ia-assistant-studio__header">
+            <h2 class="ia-assistant-studio__title">IA Assistant</h2>
+            <p class="ia-assistant-studio__subtitle">
+                Constructor de unidad interactiva.
+            </p>
+        </header>
+
+        <section class="ia-assistant-builder-card" aria-label="Gestion de componentes">
+            <div class="ia-assistant-builder-card__content">
+                <h3 class="ia-assistant-builder-card__title">Unidad educativa</h3>
+                <p class="ia-assistant-builder-card__message">
+                    Gestiona los componentes que formaran parte de la unidad.
+                </p>
+            </div>
+
+            <div class="ia-assistant-component-picker">
+                <button class="ia-assistant-component-picker__button" type="button">
+                    + Añadir componente
+                </button>
+            </div>
+        </section>
+
+        <section class="ia-assistant-component-tabs" aria-label="Tabs de componentes">
+            <p class="ia-assistant-component-tabs__empty">
+                Los componentes agregados apareceran aqui.
+            </p>
+        </section>
+
+        <section class="ia-assistant-component-editor" aria-label="Editor del componente activo">
+            <div class="ia-assistant-component-editor__empty">
+                <h3 class="ia-assistant-component-editor__title">
+                    Editor de componente
+                </h3>
+                <p class="ia-assistant-component-editor__message">
+                    Selecciona o agrega un componente para editar su contenido.
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <form class="ia-assistant-chatbar" data-ia-assistant-chatbar>
+        <label class="ia-assistant-chatbar__label" for="ia-assistant-chatbar-message">
+            Chatbar IA
+        </label>
+        <div class="ia-assistant-chatbar__controls">
+            <textarea
+                class="ia-assistant-chatbar__textarea"
+                id="ia-assistant-chatbar-message"
+                name="ia_assistant_chatbar_message"
+                rows="1"
+                placeholder="Escribe una indicacion para preparar la unidad."
+                data-ia-assistant-chatbar-textarea
+            ></textarea>
+            <button class="ia-assistant-chatbar__button" type="submit">
+                Enviar
+            </button>
+        </div>
+    </form>
 </section>

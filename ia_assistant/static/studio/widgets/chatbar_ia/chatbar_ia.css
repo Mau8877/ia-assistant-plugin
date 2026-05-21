@@ -1,0 +1,9 @@
+.ia-assistant-chatbar {
+    padding: var(--ia-assistant-space-base);
+}
+
+.ia-assistant-chatbar__controls {
+    align-items: flex-end;
+    display: flex;
+    gap: var(--ia-assistant-space-sm);
+}

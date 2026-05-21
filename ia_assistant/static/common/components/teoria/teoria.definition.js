@@ -1,0 +1,21 @@
+(function () {
+    "use strict";
+
+    window.IAAssistant = window.IAAssistant || {};
+
+    window.IAAssistant.Registry.register({
+        type: "teoria",
+        label: "Teoría",
+        allowMultiple: false,
+        authorable: true,
+        reviewable: false,
+        system: false,
+        studentVisible: true,
+        createDefaultData: function () {
+            return {
+                titulo: "",
+                contenido: ""
+            };
+        }
+    });
+}());

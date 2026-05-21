@@ -2,4 +2,19 @@
 .ia-assistant-student {
     box-sizing: border-box;
     color: var(--ia-assistant-color-text);
+    font-family: inherit;
+}
+
+.ia-assistant-studio *,
+.ia-assistant-studio *::before,
+.ia-assistant-studio *::after,
+.ia-assistant-student *,
+.ia-assistant-student *::before,
+.ia-assistant-student *::after {
+    box-sizing: border-box;
+}
+
+.ia-assistant-studio button,
+.ia-assistant-studio textarea {
+    font: inherit;
 }

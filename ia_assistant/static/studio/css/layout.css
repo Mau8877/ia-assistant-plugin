@@ -1,0 +1,77 @@
+.ia-assistant-studio__workspace {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--ia-assistant-space-md);
+    min-height: 0;
+}
+
+.ia-assistant-studio__header {
+    flex: 0 0 auto;
+}
+
+.ia-assistant-builder-card {
+    align-items: center;
+    display: flex;
+    gap: var(--ia-assistant-space-md);
+    justify-content: space-between;
+    min-height: 72px;
+    padding: var(--ia-assistant-space-md);
+    width: 100%;
+}
+
+.ia-assistant-builder-card__content {
+    min-width: 0;
+}
+
+.ia-assistant-component-picker {
+    flex: 0 0 auto;
+}
+
+.ia-assistant-component-tabs {
+    align-items: center;
+    display: flex;
+    min-height: 48px;
+    padding: var(--ia-assistant-space-base) var(--ia-assistant-space-md);
+}
+
+.ia-assistant-component-editor {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 220px;
+    padding: var(--ia-assistant-space-md);
+}
+
+.ia-assistant-component-editor__empty {
+    align-items: center;
+    border: 1px dashed var(--ia-assistant-color-border-strong);
+    border-radius: var(--ia-assistant-radius-sm);
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--ia-assistant-space-sm);
+    justify-content: center;
+    min-height: 180px;
+    padding: var(--ia-assistant-space-lg);
+    text-align: center;
+}
+
+.ia-assistant-chatbar {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 640px) {
+    .ia-assistant-studio {
+        padding: var(--ia-assistant-space-md);
+    }
+
+    .ia-assistant-builder-card {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .ia-assistant-component-picker,
+    .ia-assistant-component-picker__button {
+        width: 100%;
+    }
+}

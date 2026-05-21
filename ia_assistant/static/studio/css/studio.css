@@ -1,15 +1,49 @@
 .ia-assistant-studio {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ia-assistant-space-md);
     background: var(--ia-assistant-color-background);
     border: 1px solid var(--ia-assistant-color-border);
-    border-radius: var(--ia-assistant-radius-sm);
-    padding: var(--ia-assistant-space-md);
+    border-radius: var(--ia-assistant-radius-md);
+    min-height: 560px;
+    padding: var(--ia-assistant-space-lg);
 }
 
 .ia-assistant-studio__title {
-    margin: 0 0 var(--ia-assistant-space-sm);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0;
 }
 
 .ia-assistant-studio__message {
     margin: 0;
     color: var(--ia-assistant-color-muted);
+}
+
+.ia-assistant-builder-card,
+.ia-assistant-component-tabs,
+.ia-assistant-component-editor,
+.ia-assistant-chatbar {
+    background: var(--ia-assistant-color-surface);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-md);
+    box-shadow: var(--ia-assistant-shadow-sm);
+}
+
+.ia-assistant-builder-card__title,
+.ia-assistant-component-editor__title {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin: 0;
+}
+
+.ia-assistant-builder-card__message,
+.ia-assistant-component-tabs__empty,
+.ia-assistant-component-editor__message {
+    color: var(--ia-assistant-color-muted);
+    font-size: 14px;
+    line-height: 1.45;
+    margin: 0;
 }

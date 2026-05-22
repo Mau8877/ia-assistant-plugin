@@ -39,6 +39,16 @@
             return currentRoot.querySelector(".ia-assistant-component-tabs");
         },
 
+        getComponentEditor: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector(".ia-assistant-component-editor");
+        },
+
         getUnitTitleInput: function (root) {
             var currentRoot = root || this.getRoot();
 

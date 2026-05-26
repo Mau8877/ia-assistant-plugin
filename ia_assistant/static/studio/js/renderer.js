@@ -75,6 +75,8 @@
     function renderComponentEditor(editorRoot, component) {
         var teoriaEditor = window.IAAssistant.Studio.Components &&
             window.IAAssistant.Studio.Components.TeoriaEditor;
+        var quizMultipleEditor = window.IAAssistant.Studio.Components &&
+            window.IAAssistant.Studio.Components.QuizMultipleEditor;
 
         if (
             component.tipo === "teoria" &&
@@ -82,6 +84,15 @@
             typeof teoriaEditor.render === "function"
         ) {
             teoriaEditor.render(editorRoot, component);
+            return;
+        }
+
+        if (
+            component.tipo === "quiz_multiple" &&
+            quizMultipleEditor &&
+            typeof quizMultipleEditor.render === "function"
+        ) {
+            quizMultipleEditor.render(editorRoot, component);
             return;
         }
 

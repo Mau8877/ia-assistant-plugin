@@ -1,0 +1,31 @@
+.ia-assistant-pregunta-abierta-editor {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--ia-assistant-space-md);
+}
+
+.ia-assistant-pregunta-abierta-editor__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ia-assistant-space-xs);
+}
+
+.ia-assistant-pregunta-abierta-editor__label {
+    color: var(--ia-assistant-color-text);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.ia-assistant-pregunta-abierta-editor__textarea {
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    color: var(--ia-assistant-color-text);
+    font: inherit;
+    line-height: 1.5;
+    min-height: 112px;
+    padding: var(--ia-assistant-space-sm);
+    resize: vertical;
+    width: 100%;
+}

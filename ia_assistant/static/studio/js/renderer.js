@@ -77,6 +77,10 @@
             window.IAAssistant.Studio.Components.TeoriaEditor;
         var quizMultipleEditor = window.IAAssistant.Studio.Components &&
             window.IAAssistant.Studio.Components.QuizMultipleEditor;
+        var preguntaAbiertaEditor = window.IAAssistant.Studio.Components &&
+            window.IAAssistant.Studio.Components.PreguntaAbiertaEditor;
+        var codigoEditor = window.IAAssistant.Studio.Components &&
+            window.IAAssistant.Studio.Components.CodigoEditor;
 
         if (
             component.tipo === "teoria" &&
@@ -93,6 +97,24 @@
             typeof quizMultipleEditor.render === "function"
         ) {
             quizMultipleEditor.render(editorRoot, component);
+            return;
+        }
+
+        if (
+            component.tipo === "pregunta_abierta" &&
+            preguntaAbiertaEditor &&
+            typeof preguntaAbiertaEditor.render === "function"
+        ) {
+            preguntaAbiertaEditor.render(editorRoot, component);
+            return;
+        }
+
+        if (
+            component.tipo === "codigo" &&
+            codigoEditor &&
+            typeof codigoEditor.render === "function"
+        ) {
+            codigoEditor.render(editorRoot, component);
             return;
         }
 

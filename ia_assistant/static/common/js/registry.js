@@ -7,7 +7,7 @@
     var componentsByType = {};
 
     function copyComponentDefinition(componentDefinition) {
-        return {
+        var copiedDefinition = {
             type: componentDefinition.type,
             label: componentDefinition.label,
             allowMultiple: componentDefinition.allowMultiple,
@@ -17,6 +17,12 @@
             studentVisible: componentDefinition.studentVisible,
             createDefaultData: componentDefinition.createDefaultData
         };
+
+        if (typeof componentDefinition.createDefaultOption === "function") {
+            copiedDefinition.createDefaultOption = componentDefinition.createDefaultOption;
+        }
+
+        return copiedDefinition;
     }
 
     function hasAddedComponent(addedComponents, componentType) {

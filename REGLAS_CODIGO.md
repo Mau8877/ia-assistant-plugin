@@ -542,7 +542,7 @@ Ejemplo conceptual:
 window.IAAssistant.Registry.register({
     type: "teoria",
     label: "Teoría",
-    allowMultiple: false,
+    allowMultiple: true,
     createDefaultData: function () {
         return {
             titulo: "",
@@ -664,8 +664,8 @@ teoria:
 
 quiz_multiple:
 - pregunta
-- opciones
-- respuesta correcta
+- opciones con id, texto y feedback
+- respuestas correctas
 
 pregunta_abierta:
 - enunciado

@@ -9,6 +9,8 @@ STUDIO_CSS_PATHS = [
     "studio/css/forms.css",
     "studio/components/teoria/teoria_editor.css",
     "studio/components/quiz_multiple/quiz_multiple_editor.css",
+    "studio/components/pregunta_abierta/pregunta_abierta_editor.css",
+    "studio/components/codigo/codigo_editor.css",
 ]
 
 STUDIO_JS_PATHS = [

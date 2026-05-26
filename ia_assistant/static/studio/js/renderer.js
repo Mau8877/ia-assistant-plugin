@@ -39,7 +39,7 @@
         emptyState.appendChild(createTextElement(
             "p",
             "ia-assistant-component-editor__message",
-            "Selecciona o a\u00f1ade un componente para comenzar."
+            "Selecciona o añade un componente para comenzar."
         ));
 
         editorRoot.appendChild(emptyState);
@@ -66,7 +66,7 @@
         placeholder.appendChild(createTextElement(
             "p",
             "ia-assistant-component-editor__message",
-            "Aqu\u00ed se editar\u00e1 este componente."
+            "Aquí se editará este componente."
         ));
 
         editorRoot.appendChild(placeholder);

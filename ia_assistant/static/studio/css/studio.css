@@ -67,3 +67,45 @@
     line-height: 1.45;
     margin: 0;
 }
+
+.ia-assistant-json-toggle,
+.ia-assistant-json-close {
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    cursor: pointer;
+    font: inherit;
+    padding: var(--ia-assistant-space-xs) var(--ia-assistant-space-sm);
+}
+
+.ia-assistant-json-toggle {
+    background: var(--ia-assistant-color-surface);
+    color: var(--ia-assistant-color-text);
+}
+
+.ia-assistant-json-close {
+    align-self: flex-start;
+    background: var(--ia-assistant-color-background);
+    color: var(--ia-assistant-color-text);
+}
+
+.ia-assistant-json-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ia-assistant-space-sm);
+    margin-top: var(--ia-assistant-space-md);
+}
+
+.ia-assistant-json-output {
+    background: var(--ia-assistant-color-background);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    color: var(--ia-assistant-color-text);
+    font-family: Consolas, Monaco, "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.45;
+    margin: 0;
+    max-height: 320px;
+    overflow: auto;
+    padding: var(--ia-assistant-space-sm);
+    white-space: pre;
+}

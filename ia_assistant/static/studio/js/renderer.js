@@ -72,6 +72,22 @@
         editorRoot.appendChild(placeholder);
     }
 
+    function renderComponentEditor(editorRoot, component) {
+        var teoriaEditor = window.IAAssistant.Studio.Components &&
+            window.IAAssistant.Studio.Components.TeoriaEditor;
+
+        if (
+            component.tipo === "teoria" &&
+            teoriaEditor &&
+            typeof teoriaEditor.render === "function"
+        ) {
+            teoriaEditor.render(editorRoot, component);
+            return;
+        }
+
+        renderActiveEditor(editorRoot, component);
+    }
+
     window.IAAssistant.Studio.Renderer = {
         render: function () {
             var root = window.IAAssistant.Studio.Dom.getRoot();
@@ -99,7 +115,7 @@
                 return;
             }
 
-            renderActiveEditor(editorRoot, activeComponent);
+            renderComponentEditor(editorRoot, activeComponent);
         }
     };
 }());

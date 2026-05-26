@@ -7,6 +7,7 @@ STUDIO_CSS_PATHS = [
     "studio/css/studio.css",
     "studio/css/layout.css",
     "studio/css/forms.css",
+    "studio/components/teoria/teoria_editor.css",
 ]
 
 STUDIO_JS_PATHS = [

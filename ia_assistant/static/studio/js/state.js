@@ -123,6 +123,25 @@
             return true;
         },
 
+        updateComponentData: function (componentId, patch) {
+            var component = findComponent(componentId);
+            var dataPatch = patch && typeof patch === "object" ? patch : {};
+
+            if (!component) {
+                return null;
+            }
+
+            if (!component.data || typeof component.data !== "object") {
+                component.data = {};
+            }
+
+            Object.keys(dataPatch).forEach(function (key) {
+                component.data[key] = dataPatch[key];
+            });
+
+            return cloneData(component);
+        },
+
         getComponents: function () {
             return cloneData(currentUnit.componentes);
         },

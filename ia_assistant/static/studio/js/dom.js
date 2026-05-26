@@ -57,6 +57,46 @@
             }
 
             return currentRoot.querySelector("[data-ia-assistant-unit-title]");
+        },
+
+        getJsonToggleButton: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector(".ia-assistant-json-toggle");
+        },
+
+        getJsonPanel: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector(".ia-assistant-json-panel");
+        },
+
+        getJsonOutput: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector(".ia-assistant-json-output");
+        },
+
+        getJsonCloseButton: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector(".ia-assistant-json-close");
         }
     };
 }());

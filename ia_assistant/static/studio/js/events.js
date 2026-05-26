@@ -13,6 +13,7 @@
             }
 
             this.initUnitTitle(root);
+            this.initJsonViewer(root);
             window.IAAssistant.Studio.ComponentPicker.init(root);
             window.IAAssistant.Studio.Renderer.render();
 
@@ -37,6 +38,28 @@
             unitTitleInput.value = unitTitle;
             unitTitleInput.addEventListener("input", function () {
                 window.IAAssistant.Studio.State.setUnitTitle(unitTitleInput.value);
+            });
+        },
+
+        initJsonViewer: function (root) {
+            var jsonToggleButton = window.IAAssistant.Studio.Dom.getJsonToggleButton(root);
+            var jsonPanel = window.IAAssistant.Studio.Dom.getJsonPanel(root);
+            var jsonOutput = window.IAAssistant.Studio.Dom.getJsonOutput(root);
+            var jsonCloseButton = window.IAAssistant.Studio.Dom.getJsonCloseButton(root);
+
+            if (!jsonToggleButton || !jsonPanel || !jsonOutput || !jsonCloseButton) {
+                return;
+            }
+
+            jsonToggleButton.addEventListener("click", function () {
+                var unit = window.IAAssistant.Studio.State.getUnit();
+
+                jsonOutput.textContent = JSON.stringify(unit, null, 2);
+                jsonPanel.hidden = false;
+            });
+
+            jsonCloseButton.addEventListener("click", function () {
+                jsonPanel.hidden = true;
             });
         }
     };

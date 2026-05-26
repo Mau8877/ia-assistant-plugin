@@ -15,7 +15,14 @@
             return {
                 pregunta: "",
                 opciones: [],
-                respuesta_correcta: ""
+                respuestas_correctas: []
+            };
+        },
+        createDefaultOption: function (optionId) {
+            return {
+                id: optionId,
+                texto: "",
+                feedback: ""
             };
         }
     });

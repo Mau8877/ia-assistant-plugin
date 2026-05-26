@@ -11,6 +11,12 @@ DEFAULT_UNIT = {
     "componentes": [],
 }
 
+QUIZ_MULTIPLE_OPTION_DEFAULT = {
+    "id": "",
+    "texto": "",
+    "feedback": "",
+}
+
 COMPONENT_DEFINITIONS = {
     "teoria": {
         "type": "teoria",
@@ -40,12 +46,13 @@ COMPONENT_DEFINITIONS = {
         "default_data": {
             "pregunta": "",
             "opciones": [],
-            "respuesta_correcta": "",
+            "respuestas_correctas": [],
         },
+        "option_default_data": QUIZ_MULTIPLE_OPTION_DEFAULT,
         "ai_editable_fields": [
             "data.pregunta",
             "data.opciones",
-            "data.respuesta_correcta",
+            "data.respuestas_correctas",
         ],
     },
     "pregunta_abierta": {

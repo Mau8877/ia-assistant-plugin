@@ -14,7 +14,7 @@
         createDefaultData: function () {
             return {
                 enunciado: "",
-                criterio: ""
+                rubrica: ""
             };
         }
     });

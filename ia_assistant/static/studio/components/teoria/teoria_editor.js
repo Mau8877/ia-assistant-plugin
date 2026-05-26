@@ -27,6 +27,35 @@
         return element;
     }
 
+    function createTitleField(component) {
+        var field = document.createElement("label");
+        var labelText = document.createElement("span");
+        var input = document.createElement("input");
+        var componentData = component.data && typeof component.data === "object" ?
+            component.data :
+            {};
+
+        field.className = "ia-assistant-teoria-editor__field";
+        labelText.className = "ia-assistant-teoria-editor__label";
+        labelText.textContent = "T\u00edtulo visible";
+
+        input.className = "ia-assistant-teoria-editor__input";
+        input.name = "ia_assistant_teoria_titulo";
+        input.type = "text";
+        input.value = componentData.titulo || "";
+
+        input.addEventListener("input", function () {
+            window.IAAssistant.Studio.State.updateComponentData(component.id, {
+                titulo: input.value
+            });
+        });
+
+        field.appendChild(labelText);
+        field.appendChild(input);
+
+        return field;
+    }
+
     function createContentField(component) {
         var field = document.createElement("label");
         var labelText = document.createElement("span");
@@ -79,6 +108,7 @@
             details.appendChild(createDetailRow("Tipo", component.tipo));
 
             editor.appendChild(details);
+            editor.appendChild(createTitleField(component));
             editor.appendChild(createContentField(component));
 
             container.appendChild(editor);

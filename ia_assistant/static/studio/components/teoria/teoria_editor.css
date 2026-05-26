@@ -18,6 +18,16 @@
     line-height: 1.35;
 }
 
+.ia-assistant-teoria-editor__input {
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    color: var(--ia-assistant-color-text);
+    font: inherit;
+    line-height: 1.5;
+    padding: var(--ia-assistant-space-sm);
+    width: 100%;
+}
+
 .ia-assistant-teoria-editor__textarea {
     border: 1px solid var(--ia-assistant-color-border);
     border-radius: var(--ia-assistant-radius-sm);

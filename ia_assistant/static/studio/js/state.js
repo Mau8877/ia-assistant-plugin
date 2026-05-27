@@ -102,6 +102,41 @@
             return currentUnit.componentes.length !== initialLength;
         },
 
+        reorderComponent: function (sourceComponentId, targetComponentId, targetPosition) {
+            var sourceIndex = currentUnit.componentes.findIndex(function (component) {
+                return component.id === sourceComponentId;
+            });
+            var targetIndex = currentUnit.componentes.findIndex(function (component) {
+                return component.id === targetComponentId;
+            });
+            var movedComponent;
+
+            if (
+                sourceComponentId === targetComponentId ||
+                sourceIndex < 0 ||
+                targetIndex < 0
+            ) {
+                return false;
+            }
+
+            movedComponent = currentUnit.componentes.splice(sourceIndex, 1)[0];
+            targetIndex = currentUnit.componentes.findIndex(function (component) {
+                return component.id === targetComponentId;
+            });
+
+            if (targetIndex < 0) {
+                currentUnit.componentes.splice(sourceIndex, 0, movedComponent);
+                return false;
+            }
+
+            if (targetPosition === "after") {
+                targetIndex += 1;
+            }
+
+            currentUnit.componentes.splice(targetIndex, 0, movedComponent);
+            return true;
+        },
+
         activateComponent: function (componentId) {
             if (!findComponent(componentId)) {
                 return false;

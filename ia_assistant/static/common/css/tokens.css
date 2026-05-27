@@ -12,6 +12,16 @@
     --ia-assistant-color-danger-hover: #912018;
     --ia-assistant-color-success: #027a48;
     --ia-assistant-color-warning: #b54708;
+    --ia-assistant-color-purple: #6941c6;
+    --ia-assistant-color-purple-soft: #f4f3ff;
+    --ia-assistant-component-teoria-accent: var(--ia-assistant-color-primary);
+    --ia-assistant-component-teoria-soft: var(--ia-assistant-color-background-soft);
+    --ia-assistant-component-quiz-accent: var(--ia-assistant-color-warning);
+    --ia-assistant-component-quiz-soft: #fff7ed;
+    --ia-assistant-component-pregunta-accent: var(--ia-assistant-color-success);
+    --ia-assistant-component-pregunta-soft: #ecfdf3;
+    --ia-assistant-component-codigo-accent: var(--ia-assistant-color-purple);
+    --ia-assistant-component-codigo-soft: var(--ia-assistant-color-purple-soft);
     --ia-assistant-radius-sm: 6px;
     --ia-assistant-radius-md: 8px;
     --ia-assistant-radius-lg: 12px;

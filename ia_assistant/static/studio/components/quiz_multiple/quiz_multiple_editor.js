@@ -14,52 +14,16 @@
         return element;
     }
 
-    function createDetailRow(label, value) {
-        var row = document.createElement("p");
-        var labelElement = document.createElement("strong");
+    function getComponentData(component) {
+        if (!component.data || typeof component.data !== "object") {
+            component.data = {};
+        }
 
-        row.className = "ia-assistant-component-editor__detail";
-        labelElement.textContent = label + ": ";
-
-        row.appendChild(labelElement);
-        row.appendChild(document.createTextNode(value));
-
-        return row;
-    }
-
-    function createQuestionField(component) {
-        var field = document.createElement("label");
-        var labelText = document.createElement("span");
-        var textarea = document.createElement("textarea");
-        var componentData = component.data && typeof component.data === "object" ?
-            component.data :
-            {};
-
-        field.className = "ia-assistant-quiz-multiple-editor__field";
-        labelText.className = "ia-assistant-quiz-multiple-editor__label";
-        labelText.textContent = "Pregunta";
-
-        textarea.className = "ia-assistant-quiz-multiple-editor__textarea";
-        textarea.name = "ia_assistant_quiz_multiple_pregunta";
-        textarea.rows = 4;
-        textarea.value = componentData.pregunta || "";
-
-        textarea.addEventListener("input", function () {
-            window.IAAssistant.Studio.State.updateComponentData(component.id, {
-                pregunta: textarea.value
-            });
-        });
-
-        field.appendChild(labelText);
-        field.appendChild(textarea);
-
-        return field;
+        return component.data;
     }
 
     function getOptions(component) {
-        var componentData = component.data && typeof component.data === "object" ?
-            component.data :
-            {};
+        var componentData = getComponentData(component);
         var options = Array.isArray(componentData.opciones) ?
             componentData.opciones :
             [];
@@ -76,9 +40,7 @@
     }
 
     function getCorrectAnswers(component) {
-        var componentData = component.data && typeof component.data === "object" ?
-            component.data :
-            {};
+        var componentData = getComponentData(component);
         var correctAnswers = Array.isArray(componentData.respuestas_correctas) ?
             componentData.respuestas_correctas :
             null;
@@ -130,80 +92,209 @@
         };
     }
 
-    function updateOptions(component, options) {
-        var cleanOptions = options.map(function (option) {
+    function cleanOptions(options) {
+        return options.map(function (option) {
             return {
                 id: option.id,
                 texto: option.texto,
                 feedback: option.feedback
             };
-        });
-
-        if (!component.data || typeof component.data !== "object") {
-            component.data = {};
-        }
-
-        component.data.opciones = cleanOptions.map(function (option) {
-            return {
-                id: option.id,
-                texto: option.texto,
-                feedback: option.feedback
-            };
-        });
-
-        window.IAAssistant.Studio.State.updateComponentData(component.id, {
-            opciones: cleanOptions.map(function (option) {
-                return {
-                    id: option.id,
-                    texto: option.texto,
-                    feedback: option.feedback
-                };
-            })
         });
     }
 
-    function updateCorrectAnswers(component, correctAnswers) {
-        var cleanCorrectAnswers = correctAnswers.filter(function (optionId, index) {
+    function cleanCorrectAnswers(correctAnswers) {
+        return correctAnswers.filter(function (optionId, index) {
             return typeof optionId === "string" &&
                 optionId &&
                 correctAnswers.indexOf(optionId) === index;
         });
+    }
 
-        if (!component.data || typeof component.data !== "object") {
-            component.data = {};
-        }
+    function updateQuizData(component, patch) {
+        var componentData = getComponentData(component);
+        var dataPatch = patch && typeof patch === "object" ? patch : {};
 
-        component.data.respuestas_correctas = cleanCorrectAnswers;
-        delete component.data.respuesta_correcta;
+        Object.keys(dataPatch).forEach(function (key) {
+            if (typeof dataPatch[key] === "undefined") {
+                delete componentData[key];
+                return;
+            }
 
-        window.IAAssistant.Studio.State.updateComponentData(component.id, {
-            respuestas_correctas: cleanCorrectAnswers,
+            componentData[key] = dataPatch[key];
+        });
+
+        window.IAAssistant.Studio.State.updateComponentData(component.id, dataPatch);
+    }
+
+    function updateOptions(component, options) {
+        updateQuizData(component, {
+            opciones: cleanOptions(options)
+        });
+    }
+
+    function updateCorrectAnswers(component, correctAnswers) {
+        updateQuizData(component, {
+            respuestas_correctas: cleanCorrectAnswers(correctAnswers),
             respuesta_correcta: undefined
         });
     }
 
     function migrateCorrectAnswers(component) {
-        var componentData = component.data && typeof component.data === "object" ?
-            component.data :
-            {};
+        var componentData = getComponentData(component);
 
         if (Object.prototype.hasOwnProperty.call(componentData, "respuesta_correcta")) {
             updateCorrectAnswers(component, getCorrectAnswers(component));
         }
     }
 
-    function createOptionField(label, value, className, onInput) {
+    function createEditorHeader() {
+        var header = document.createElement("header");
+        var heading = document.createElement("div");
+        var title = document.createElement("h3");
+        var badge = document.createElement("span");
+        var description = document.createElement("p");
+
+        header.className = "ia-assistant-quiz-multiple-editor__header";
+        heading.className = "ia-assistant-quiz-multiple-editor__heading";
+        title.className = "ia-assistant-quiz-multiple-editor__title";
+        badge.className = "ia-assistant-quiz-multiple-editor__type-badge";
+        description.className = "ia-assistant-quiz-multiple-editor__description";
+
+        title.textContent = "❓ Quiz múltiple";
+        badge.textContent = "Quiz";
+        description.textContent = "Crea una pregunta con una o varias respuestas correctas.";
+
+        heading.appendChild(title);
+        heading.appendChild(badge);
+        header.appendChild(heading);
+        header.appendChild(description);
+
+        return header;
+    }
+
+    function createQuestionSection(component) {
+        var section = document.createElement("section");
+        var heading = createTextElement(
+            "h4",
+            "ia-assistant-quiz-multiple-editor__section-title",
+            "❓ Pregunta"
+        );
+        var help = createTextElement(
+            "p",
+            "ia-assistant-quiz-multiple-editor__help",
+            "Escribe la pregunta que verá el estudiante."
+        );
+        var textarea = document.createElement("textarea");
+
+        section.className = "ia-assistant-quiz-multiple-editor__question";
+        textarea.className = "ia-assistant-quiz-multiple-editor__question-textarea";
+        textarea.name = "ia_assistant_quiz_multiple_pregunta";
+        textarea.rows = 4;
+        textarea.value = getComponentData(component).pregunta || "";
+        textarea.addEventListener("input", function () {
+            updateQuizData(component, {
+                pregunta: textarea.value
+            });
+        });
+
+        section.appendChild(heading);
+        section.appendChild(help);
+        section.appendChild(textarea);
+
+        return section;
+    }
+
+    function getValidationMessages(component) {
+        var options = getOptions(component);
+        var correctAnswers = getCorrectAnswers(component);
+        var optionIds = options.map(function (option) {
+            return option.id;
+        });
+        var messages = [];
+
+        if (options.length < 2) {
+            messages.push("⚠ Debes agregar al menos 2 opciones.");
+        }
+
+        if (!correctAnswers.length) {
+            messages.push("⚠ Marca al menos una respuesta correcta.");
+        }
+
+        if (options.some(function (option) {
+            return !option.texto.trim();
+        })) {
+            messages.push("⚠ Hay opciones sin texto.");
+        }
+
+        if (correctAnswers.some(function (optionId) {
+            return optionIds.indexOf(optionId) === -1;
+        })) {
+            messages.push("⚠ Hay respuestas correctas que no existen en las opciones.");
+        }
+
+        return messages;
+    }
+
+    function renderStatus(statusRoot, component) {
+        var messages = getValidationMessages(component);
+        var statusItem;
+
+        while (statusRoot.firstChild) {
+            statusRoot.removeChild(statusRoot.firstChild);
+        }
+
+        if (!messages.length) {
+            statusItem = createTextElement(
+                "p",
+                "ia-assistant-quiz-multiple-editor__status " +
+                    "ia-assistant-quiz-multiple-editor__status--ready",
+                "✓ Quiz listo para revisar"
+            );
+            statusRoot.appendChild(statusItem);
+            return;
+        }
+
+        messages.forEach(function (message) {
+            statusItem = createTextElement(
+                "p",
+                "ia-assistant-quiz-multiple-editor__status " +
+                    "ia-assistant-quiz-multiple-editor__status--warning",
+                message
+            );
+            statusRoot.appendChild(statusItem);
+        });
+    }
+
+    function renderSummary(summaryRoot, component) {
+        var options = getOptions(component);
+        var correctAnswers = getCorrectAnswers(component);
+
+        summaryRoot.textContent = options.length + " opciones · " +
+            correctAnswers.length + " correctas";
+    }
+
+    function createOptionTextField(label, value, isMultiline, onInput) {
         var field = document.createElement("label");
         var labelText = document.createElement("span");
-        var input = document.createElement("input");
+        var input = isMultiline ?
+            document.createElement("textarea") :
+            document.createElement("input");
 
         field.className = "ia-assistant-quiz-multiple-editor__option-field";
         labelText.className = "ia-assistant-quiz-multiple-editor__option-label";
         labelText.textContent = label;
 
-        input.className = className;
-        input.type = "text";
+        input.className = isMultiline ?
+            "ia-assistant-quiz-multiple-editor__option-feedback" :
+            "ia-assistant-quiz-multiple-editor__option-input";
         input.value = value;
+
+        if (isMultiline) {
+            input.rows = 2;
+        } else {
+            input.type = "text";
+        }
+
         input.addEventListener("input", function () {
             onInput(input.value);
         });
@@ -214,21 +305,55 @@
         return field;
     }
 
-    function createCorrectAnswerField(component, option) {
+    function deleteOptionWithConfirmation(component, option, onChange) {
+        var confirmModal = window.IAAssistant.Studio.ConfirmModal;
+
+        if (!confirmModal || typeof confirmModal.confirm !== "function") {
+            if (window.console && typeof window.console.warn === "function") {
+                window.console.warn("ConfirmModal no esta disponible. No se elimino la opcion.");
+            }
+            return;
+        }
+
+        confirmModal.confirm({
+            title: "Eliminar opción",
+            message: "¿Seguro que deseas eliminar esta opción? Esta acción no se puede deshacer.",
+            confirmText: "Eliminar",
+            cancelText: "Cancelar",
+            variant: "danger",
+            onConfirm: function () {
+                var nextOptions = getOptions(component).filter(function (currentOption) {
+                    return currentOption.id !== option.id;
+                });
+                var nextCorrectAnswers = getCorrectAnswers(component).filter(function (optionId) {
+                    return optionId !== option.id;
+                });
+
+                updateQuizData(component, {
+                    opciones: cleanOptions(nextOptions),
+                    respuestas_correctas: cleanCorrectAnswers(nextCorrectAnswers),
+                    respuesta_correcta: undefined
+                });
+                onChange();
+            }
+        });
+    }
+
+    function createCorrectToggle(component, option, isCorrect, onChange) {
         var field = document.createElement("label");
         var checkbox = document.createElement("input");
         var labelText = document.createElement("span");
-        var correctAnswers = getCorrectAnswers(component);
 
         field.className = "ia-assistant-quiz-multiple-editor__correct-field";
         checkbox.className = "ia-assistant-quiz-multiple-editor__correct-checkbox";
         checkbox.type = "checkbox";
-        checkbox.checked = correctAnswers.indexOf(option.id) !== -1;
+        checkbox.checked = isCorrect;
         checkbox.addEventListener("change", function () {
             var currentCorrectAnswers = getCorrectAnswers(component);
 
             if (checkbox.checked && currentCorrectAnswers.indexOf(option.id) === -1) {
                 updateCorrectAnswers(component, currentCorrectAnswers.concat([option.id]));
+                onChange();
                 return;
             }
 
@@ -236,11 +361,12 @@
                 updateCorrectAnswers(component, currentCorrectAnswers.filter(function (optionId) {
                     return optionId !== option.id;
                 }));
+                onChange();
             }
         });
 
         labelText.className = "ia-assistant-quiz-multiple-editor__correct-label";
-        labelText.textContent = "Respuesta correcta";
+        labelText.textContent = isCorrect ? "✓ Correcta" : "Marcar correcta";
 
         field.appendChild(checkbox);
         field.appendChild(labelText);
@@ -248,7 +374,7 @@
         return field;
     }
 
-    function renderOptionsList(list, component) {
+    function renderOptionsList(list, component, onChange, onStatusChange) {
         var options = getOptions(component);
         var correctAnswers = getCorrectAnswers(component);
 
@@ -256,42 +382,44 @@
             list.removeChild(list.firstChild);
         }
 
-        options.forEach(function (option) {
-            var item = document.createElement("div");
+        options.forEach(function (option, index) {
+            var item = document.createElement("article");
             var header = document.createElement("div");
-            var optionId = document.createElement("span");
+            var title = createTextElement(
+                "h5",
+                "ia-assistant-quiz-multiple-editor__option-title",
+                "Opción " + (index + 1)
+            );
+            var actions = document.createElement("div");
             var deleteButton = document.createElement("button");
+            var isCorrect = correctAnswers.indexOf(option.id) !== -1;
 
             item.className = "ia-assistant-quiz-multiple-editor__option";
-            if (correctAnswers.indexOf(option.id) !== -1) {
+            if (isCorrect) {
                 item.className += " ia-assistant-quiz-multiple-editor__option--correct";
             }
-            header.className = "ia-assistant-quiz-multiple-editor__option-header";
-            optionId.className = "ia-assistant-quiz-multiple-editor__option-id";
-            optionId.textContent = option.id;
 
+            header.className = "ia-assistant-quiz-multiple-editor__option-header";
+            actions.className = "ia-assistant-quiz-multiple-editor__option-actions";
             deleteButton.className = "ia-assistant-quiz-multiple-editor__option-delete";
             deleteButton.type = "button";
-            deleteButton.textContent = "Eliminar";
+            deleteButton.textContent = "×";
+            deleteButton.setAttribute("aria-label", "Eliminar opción");
+            deleteButton.setAttribute("title", "Eliminar");
             deleteButton.addEventListener("click", function () {
-                updateCorrectAnswers(component, getCorrectAnswers(component).filter(function (optionId) {
-                    return optionId !== option.id;
-                }));
-                updateOptions(component, getOptions(component).filter(function (currentOption) {
-                    return currentOption.id !== option.id;
-                }));
-                renderOptionsList(list, component);
+                deleteOptionWithConfirmation(component, option, onChange);
             });
 
-            header.appendChild(optionId);
-            header.appendChild(deleteButton);
+            actions.appendChild(createCorrectToggle(component, option, isCorrect, onChange));
+            actions.appendChild(deleteButton);
+            header.appendChild(title);
+            header.appendChild(actions);
 
             item.appendChild(header);
-            item.appendChild(createCorrectAnswerField(component, option));
-            item.appendChild(createOptionField(
-                "Texto",
+            item.appendChild(createOptionTextField(
+                "Texto de la opción",
                 option.texto,
-                "ia-assistant-quiz-multiple-editor__option-input",
+                false,
                 function (newValue) {
                     updateOptions(component, getOptions(component).map(function (currentOption) {
                         if (currentOption.id !== option.id) {
@@ -304,12 +432,13 @@
                             feedback: currentOption.feedback
                         };
                     }));
+                    onStatusChange();
                 }
             ));
-            item.appendChild(createOptionField(
-                "Feedback",
+            item.appendChild(createOptionTextField(
+                "💬 Feedback",
                 option.feedback,
-                "ia-assistant-quiz-multiple-editor__option-input",
+                true,
                 function (newValue) {
                     updateOptions(component, getOptions(component).map(function (currentOption) {
                         if (currentOption.id !== option.id) {
@@ -329,39 +458,55 @@
         });
     }
 
-    function createOptionsSection(component) {
+    function createOptionsSection(component, statusRoot) {
         var section = document.createElement("section");
         var header = document.createElement("div");
+        var heading = document.createElement("div");
+        var title = createTextElement(
+            "h4",
+            "ia-assistant-quiz-multiple-editor__section-title",
+            "Opciones"
+        );
+        var summary = document.createElement("p");
         var list = document.createElement("div");
         var addButton = document.createElement("button");
 
+        function refreshOptions() {
+            renderSummary(summary, component);
+            renderOptionsList(list, component, refreshOptions, refreshStatus);
+            renderStatus(statusRoot, component);
+        }
+
+        function refreshStatus() {
+            renderSummary(summary, component);
+            renderStatus(statusRoot, component);
+        }
+
         section.className = "ia-assistant-quiz-multiple-editor__options";
         header.className = "ia-assistant-quiz-multiple-editor__options-header";
+        heading.className = "ia-assistant-quiz-multiple-editor__options-heading";
+        summary.className = "ia-assistant-quiz-multiple-editor__options-summary";
         list.className = "ia-assistant-quiz-multiple-editor__options-list";
-
-        header.appendChild(createTextElement(
-            "h4",
-            "ia-assistant-quiz-multiple-editor__options-title",
-            "Opciones"
-        ));
 
         addButton.className = "ia-assistant-quiz-multiple-editor__add-option";
         addButton.type = "button";
-        addButton.textContent = "A\u00f1adir opci\u00f3n";
+        addButton.textContent = "＋ Añadir opción";
         addButton.addEventListener("click", function () {
             var options = getOptions(component);
             var nextOption = createDefaultOption(getNextOptionId(options));
-            var nextOptions = options.concat([nextOption]);
 
-            updateOptions(component, nextOptions);
-            renderOptionsList(list, component);
+            updateOptions(component, options.concat([nextOption]));
+            refreshOptions();
         });
 
+        heading.appendChild(title);
+        heading.appendChild(summary);
+        header.appendChild(heading);
         header.appendChild(addButton);
         section.appendChild(header);
         section.appendChild(list);
 
-        renderOptionsList(list, component);
+        refreshOptions();
 
         return section;
     }
@@ -369,30 +514,19 @@
     window.IAAssistant.Studio.Components.QuizMultipleEditor = {
         render: function (container, component) {
             var editor = document.createElement("div");
-            var details = document.createElement("div");
+            var statusRoot = document.createElement("div");
 
-            if (!component.data || typeof component.data !== "object") {
-                component.data = {};
-            }
-
+            getComponentData(component);
             migrateCorrectAnswers(component);
 
             editor.className = "ia-assistant-quiz-multiple-editor";
-            details.className = "ia-assistant-component-editor__details";
+            statusRoot.className = "ia-assistant-quiz-multiple-editor__status-list";
 
-            editor.appendChild(createTextElement(
-                "h3",
-                "ia-assistant-component-editor__title",
-                "Editor de quiz m\u00faltiple"
-            ));
-
-            details.appendChild(createDetailRow("Nombre", component.nombre || component.id));
-            details.appendChild(createDetailRow("ID", component.id));
-            details.appendChild(createDetailRow("Tipo", component.tipo));
-
-            editor.appendChild(details);
-            editor.appendChild(createQuestionField(component));
-            editor.appendChild(createOptionsSection(component));
+            editor.appendChild(createEditorHeader());
+            editor.appendChild(createQuestionSection(component));
+            editor.appendChild(statusRoot);
+            editor.appendChild(createOptionsSection(component, statusRoot));
+            renderStatus(statusRoot, component);
 
             container.appendChild(editor);
         }

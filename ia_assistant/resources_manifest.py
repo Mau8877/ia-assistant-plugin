@@ -8,6 +8,7 @@ STUDIO_CSS_PATHS = [
     "studio/css/layout.css",
     "studio/css/forms.css",
     "studio/widgets/confirm_modal/confirm_modal.css",
+    "studio/widgets/component_picker/component_picker.css",
     "studio/widgets/component_tabs/component_tabs.css",
     "studio/components/teoria/teoria_editor.css",
     "studio/components/quiz_multiple/quiz_multiple_editor.css",

@@ -1,8 +1,10 @@
 .ia-assistant-component-tabs {
     align-items: center;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: var(--ia-assistant-space-sm);
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 .ia-assistant-component-tabs__tab {
@@ -11,12 +13,14 @@
     -webkit-appearance: none;
     background: var(--ia-assistant-color-surface);
     border: 1px solid var(--ia-assistant-color-border);
+    border-left-color: var(--ia-assistant-tab-accent);
+    border-left-width: var(--ia-assistant-space-xs);
     border-radius: var(--ia-assistant-radius-md);
     box-shadow: none;
     color: var(--ia-assistant-color-text);
     cursor: grab;
     display: inline-flex;
-    flex: 0 1 auto;
+    flex: 0 0 auto;
     font: inherit;
     gap: var(--ia-assistant-space-sm);
     margin: 0;
@@ -24,6 +28,8 @@
     min-height: 40px;
     padding: var(--ia-assistant-space-xs) var(--ia-assistant-space-base);
     position: relative;
+    --ia-assistant-tab-accent: var(--ia-assistant-color-muted);
+    --ia-assistant-tab-accent-soft: var(--ia-assistant-color-background-soft);
     transition: background-color var(--ia-assistant-transition-fast),
         border-color var(--ia-assistant-transition-fast),
         box-shadow var(--ia-assistant-transition-fast),
@@ -32,9 +38,30 @@
         transform var(--ia-assistant-transition-fast);
 }
 
+.ia-assistant-component-tabs__tab--type-teoria {
+    --ia-assistant-tab-accent: var(--ia-assistant-component-teoria-accent);
+    --ia-assistant-tab-accent-soft: var(--ia-assistant-component-teoria-soft);
+}
+
+.ia-assistant-component-tabs__tab--type-quiz-multiple {
+    --ia-assistant-tab-accent: var(--ia-assistant-component-quiz-accent);
+    --ia-assistant-tab-accent-soft: var(--ia-assistant-component-quiz-soft);
+}
+
+.ia-assistant-component-tabs__tab--type-pregunta-abierta {
+    --ia-assistant-tab-accent: var(--ia-assistant-component-pregunta-accent);
+    --ia-assistant-tab-accent-soft: var(--ia-assistant-component-pregunta-soft);
+}
+
+.ia-assistant-component-tabs__tab--type-codigo {
+    --ia-assistant-tab-accent: var(--ia-assistant-component-codigo-accent);
+    --ia-assistant-tab-accent-soft: var(--ia-assistant-component-codigo-soft);
+}
+
 .ia-assistant-component-tabs__tab:hover {
     background: var(--ia-assistant-color-background-soft);
     border-color: var(--ia-assistant-color-border-strong);
+    border-left-color: var(--ia-assistant-tab-accent);
     box-shadow: var(--ia-assistant-shadow-sm);
 }
 
@@ -45,13 +72,14 @@
 
 .ia-assistant-component-tabs__tab--active {
     background: var(--ia-assistant-color-surface);
-    border-color: var(--ia-assistant-color-primary);
-    box-shadow: inset 0 -3px 0 var(--ia-assistant-color-primary);
+    border-color: var(--ia-assistant-tab-accent);
+    border-left-color: var(--ia-assistant-tab-accent);
+    box-shadow: inset 0 -3px 0 var(--ia-assistant-tab-accent);
     color: var(--ia-assistant-color-text);
 }
 
 .ia-assistant-component-tabs__tab--active:hover {
-    border-color: var(--ia-assistant-color-primary-hover);
+    border-color: var(--ia-assistant-tab-accent);
 }
 
 .ia-assistant-component-tabs__tab--dragging {
@@ -63,13 +91,14 @@
 
 .ia-assistant-component-tabs__tab--drag-over {
     background: var(--ia-assistant-color-background-soft);
-    border-color: var(--ia-assistant-color-primary);
+    border-color: var(--ia-assistant-tab-accent);
+    border-left-color: var(--ia-assistant-tab-accent);
     box-shadow: var(--ia-assistant-shadow-sm);
 }
 
 .ia-assistant-component-tabs__tab--drop-before::before,
 .ia-assistant-component-tabs__tab--drop-after::before {
-    background: var(--ia-assistant-color-primary);
+    background: var(--ia-assistant-tab-accent);
     border-radius: var(--ia-assistant-radius-md);
     bottom: var(--ia-assistant-space-xs);
     content: "";
@@ -108,6 +137,19 @@
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ia-assistant-component-tabs__type-badge {
+    background: var(--ia-assistant-tab-accent-soft);
+    border: 1px solid var(--ia-assistant-tab-accent);
+    border-radius: var(--ia-assistant-radius-sm);
+    color: var(--ia-assistant-tab-accent);
+    flex: 0 0 auto;
+    font-size: var(--ia-assistant-font-size-xs);
+    font-weight: 700;
+    line-height: 1;
+    padding: var(--ia-assistant-space-xs) var(--ia-assistant-space-sm);
     white-space: nowrap;
 }
 

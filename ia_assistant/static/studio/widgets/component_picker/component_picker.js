@@ -25,6 +25,22 @@
         }
     }
 
+    function getTypeClassName(componentDefinition) {
+        return "ia-assistant-component-picker__option--type-" +
+            componentDefinition.type.replace(/_/g, "-");
+    }
+
+    function getTypeBadgeText(componentDefinition) {
+        var badgeTexts = {
+            teoria: "Teoría",
+            quiz_multiple: "Quiz",
+            pregunta_abierta: "Abierta",
+            codigo: "Código"
+        };
+
+        return badgeTexts[componentDefinition.type] || componentDefinition.label;
+    }
+
     function createEmptyMessage() {
         var emptyMessage = document.createElement("p");
 
@@ -36,10 +52,18 @@
 
     function createOption(componentDefinition, menu) {
         var option = document.createElement("button");
+        var label = document.createElement("span");
+        var badge = document.createElement("span");
 
-        option.className = "ia-assistant-component-picker__option";
+        option.className = "ia-assistant-component-picker__option " +
+            getTypeClassName(componentDefinition);
         option.type = "button";
-        option.textContent = componentDefinition.label;
+        label.className = "ia-assistant-component-picker__option-label";
+        label.textContent = componentDefinition.label;
+        badge.className = "ia-assistant-component-picker__option-badge";
+        badge.textContent = getTypeBadgeText(componentDefinition);
+        option.appendChild(label);
+        option.appendChild(badge);
         option.addEventListener("click", function () {
             window.IAAssistant.Studio.State.addComponent(componentDefinition.type);
             renderMenu(menu);

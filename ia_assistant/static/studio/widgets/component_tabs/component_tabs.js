@@ -26,6 +26,22 @@
         return component.nombre || component.id;
     }
 
+    function getTypeClassName(component) {
+        return "ia-assistant-component-tabs__tab--type-" +
+            component.tipo.replace(/_/g, "-");
+    }
+
+    function getTypeBadgeText(component) {
+        var badgeTexts = {
+            teoria: "Teoría",
+            quiz_multiple: "Quiz",
+            pregunta_abierta: "Abierta",
+            codigo: "Código"
+        };
+
+        return badgeTexts[component.tipo] || component.tipo;
+    }
+
     function isVisibleInStudio(component) {
         var componentDefinition = window.IAAssistant.Registry.get(component.tipo);
 
@@ -194,8 +210,10 @@
         var tab = document.createElement("div");
         var dragHandle = document.createElement("span");
         var label = document.createElement("span");
+        var typeBadge = document.createElement("span");
 
-        tab.className = "ia-assistant-component-tabs__tab";
+        tab.className = "ia-assistant-component-tabs__tab " +
+            getTypeClassName(component);
         tab.dataset.componentId = component.id;
         tab.draggable = true;
         tab.setAttribute("role", "button");
@@ -212,8 +230,12 @@
         label.className = "ia-assistant-component-tabs__label";
         label.textContent = getComponentName(component);
 
+        typeBadge.className = "ia-assistant-component-tabs__type-badge";
+        typeBadge.textContent = getTypeBadgeText(component);
+
         tab.appendChild(dragHandle);
         tab.appendChild(label);
+        tab.appendChild(typeBadge);
         tab.appendChild(createRenameButton(component, label));
         tab.appendChild(createRemoveButton(component));
         tab.addEventListener("click", function (event) {

@@ -64,6 +64,16 @@
         });
     }
 
+    function initCloseOnOutsideClick(componentPicker, menu) {
+        document.addEventListener("click", function (event) {
+            if (menu.hidden || componentPicker.contains(event.target)) {
+                return;
+            }
+
+            menu.hidden = true;
+        });
+    }
+
     window.IAAssistant.Studio.ComponentPicker = {
         init: function (root) {
             var dom = window.IAAssistant.Studio.Dom;
@@ -83,6 +93,7 @@
             }
 
             renderMenu(menu);
+            initCloseOnOutsideClick(componentPicker, menu);
 
             triggerButton.addEventListener("click", function () {
                 renderMenu(menu);

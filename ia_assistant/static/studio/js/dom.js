@@ -79,6 +79,20 @@
             return currentRoot.querySelector(".ia-assistant-json-panel");
         },
 
+        getJsonModalOverlay: function (root) {
+            return this.getJsonPanel(root);
+        },
+
+        getJsonModal: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector(".ia-assistant-json-modal");
+        },
+
         getJsonOutput: function (root) {
             var currentRoot = root || this.getRoot();
 
@@ -97,6 +111,16 @@
             }
 
             return currentRoot.querySelector(".ia-assistant-json-close");
+        },
+
+        getJsonCopyButton: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector(".ia-assistant-json-copy");
         }
     };
 }());

@@ -13,33 +13,51 @@
 .ia-assistant-builder-card {
     align-items: center;
     display: flex;
-    gap: var(--ia-assistant-space-md);
+    gap: var(--ia-assistant-space-lg);
     justify-content: space-between;
-    min-height: 72px;
-    padding: var(--ia-assistant-space-md);
+    min-height: 88px;
+    padding: var(--ia-assistant-space-lg);
+    position: relative;
     width: 100%;
+    flex-wrap: wrap;
 }
 
 .ia-assistant-builder-card__content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--ia-assistant-space-xs);
     min-width: 0;
 }
 
 .ia-assistant-component-picker {
+    align-items: center;
+    display: flex;
+    flex-direction: row-reverse;
     flex: 0 0 auto;
+    gap: var(--ia-assistant-space-sm);
+    position: relative;
+    z-index: 3;
+}
+
+.ia-assistant-json-panel {
+    flex: 1 0 100%;
 }
 
 .ia-assistant-component-tabs {
     align-items: center;
     display: flex;
-    min-height: 48px;
+    gap: var(--ia-assistant-space-sm);
+    min-height: 56px;
+    overflow-x: auto;
     padding: var(--ia-assistant-space-base) var(--ia-assistant-space-md);
 }
 
 .ia-assistant-component-editor {
     display: flex;
     flex: 1 1 auto;
-    min-height: 220px;
-    padding: var(--ia-assistant-space-md);
+    min-height: 280px;
+    padding: var(--ia-assistant-space-lg);
 }
 
 .ia-assistant-component-editor__empty {
@@ -68,10 +86,16 @@
     .ia-assistant-builder-card {
         align-items: stretch;
         flex-direction: column;
+        gap: var(--ia-assistant-space-md);
     }
 
     .ia-assistant-component-picker,
-    .ia-assistant-component-picker__button {
+    .ia-assistant-component-picker__button,
+    .ia-assistant-json-toggle {
         width: 100%;
+    }
+
+    .ia-assistant-component-editor {
+        padding: var(--ia-assistant-space-md);
     }
 }

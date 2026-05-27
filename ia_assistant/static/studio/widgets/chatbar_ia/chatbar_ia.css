@@ -1,9 +1,30 @@
 .ia-assistant-chatbar {
-    padding: var(--ia-assistant-space-base);
+    padding: var(--ia-assistant-space-md);
+}
+
+.ia-assistant-chatbar__label {
+    color: var(--ia-assistant-color-muted);
+    display: block;
+    font-size: var(--ia-assistant-font-size-sm);
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: var(--ia-assistant-space-sm);
 }
 
 .ia-assistant-chatbar__controls {
     align-items: flex-end;
     display: flex;
     gap: var(--ia-assistant-space-sm);
+}
+
+.ia-assistant-chatbar__textarea {
+    background: var(--ia-assistant-color-surface);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-md);
+    color: var(--ia-assistant-color-text);
+    min-height: 44px;
+}
+
+.ia-assistant-chatbar__button {
+    border-radius: var(--ia-assistant-radius-md);
 }

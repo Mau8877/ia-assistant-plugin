@@ -34,13 +34,39 @@
                 </button>
             </div>
 
-            <div class="ia-assistant-json-panel" hidden>
-                <button class="ia-assistant-json-close" type="button">
-                    Cerrar
-                </button>
+        </section>
+
+        <div
+            class="ia-assistant-json-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ia-assistant-json-title"
+            hidden
+        >
+            <div class="ia-assistant-json-modal">
+                <header class="ia-assistant-json-modal__header">
+                    <h3
+                        class="ia-assistant-json-modal__title"
+                        id="ia-assistant-json-title"
+                    >
+                        JSON de la unidad
+                    </h3>
+                    <div class="ia-assistant-json-modal__actions">
+                        <button class="ia-assistant-json-copy" type="button">
+                            Copiar JSON
+                        </button>
+                        <button
+                            class="ia-assistant-json-close"
+                            type="button"
+                            aria-label="Cerrar JSON"
+                        >
+                            X
+                        </button>
+                    </div>
+                </header>
                 <pre class="ia-assistant-json-output"></pre>
             </div>
-        </section>
+        </div>
 
         <section class="ia-assistant-component-tabs" aria-label="Tabs de componentes">
             <p class="ia-assistant-component-tabs__empty">

@@ -160,7 +160,7 @@
         badge.className = "ia-assistant-quiz-multiple-editor__type-badge";
         description.className = "ia-assistant-quiz-multiple-editor__description";
 
-        title.textContent = "❓ Quiz múltiple";
+        title.textContent = "Quiz múltiple";
         badge.textContent = "Quiz";
         description.textContent = "Crea una pregunta con una o varias respuestas correctas.";
 
@@ -172,12 +172,12 @@
         return header;
     }
 
-    function createQuestionSection(component) {
+    function createQuestionSection(component, onStatusChange) {
         var section = document.createElement("section");
         var heading = createTextElement(
             "h4",
             "ia-assistant-quiz-multiple-editor__section-title",
-            "❓ Pregunta"
+            "Pregunta"
         );
         var help = createTextElement(
             "p",
@@ -195,6 +195,7 @@
             updateQuizData(component, {
                 pregunta: textarea.value
             });
+            onStatusChange();
         });
 
         section.appendChild(heading);
@@ -205,6 +206,7 @@
     }
 
     function getValidationMessages(component) {
+        var componentData = getComponentData(component);
         var options = getOptions(component);
         var correctAnswers = getCorrectAnswers(component);
         var optionIds = options.map(function (option) {
@@ -212,24 +214,28 @@
         });
         var messages = [];
 
+        if (!String(componentData.pregunta || "").trim()) {
+            messages.push("Escribe la pregunta del quiz.");
+        }
+
         if (options.length < 2) {
-            messages.push("⚠ Debes agregar al menos 2 opciones.");
+            messages.push("Agrega al menos 2 opciones.");
         }
 
         if (!correctAnswers.length) {
-            messages.push("⚠ Marca al menos una respuesta correcta.");
+            messages.push("Marca al menos una respuesta correcta.");
         }
 
         if (options.some(function (option) {
             return !option.texto.trim();
         })) {
-            messages.push("⚠ Hay opciones sin texto.");
+            messages.push("Completa el texto de las opciones vacías.");
         }
 
         if (correctAnswers.some(function (optionId) {
             return optionIds.indexOf(optionId) === -1;
         })) {
-            messages.push("⚠ Hay respuestas correctas que no existen en las opciones.");
+            messages.push("Revisa respuestas correctas que no existen en las opciones.");
         }
 
         return messages;
@@ -237,32 +243,53 @@
 
     function renderStatus(statusRoot, component) {
         var messages = getValidationMessages(component);
-        var statusItem;
+        var statusBox;
+        var statusHeader;
+        var statusTitle;
+        var statusBadge;
+        var messageList;
 
         while (statusRoot.firstChild) {
             statusRoot.removeChild(statusRoot.firstChild);
         }
 
         if (!messages.length) {
-            statusItem = createTextElement(
-                "p",
-                "ia-assistant-quiz-multiple-editor__status " +
-                    "ia-assistant-quiz-multiple-editor__status--ready",
-                "✓ Quiz listo para revisar"
-            );
-            statusRoot.appendChild(statusItem);
             return;
         }
 
+        statusBox = document.createElement("section");
+        statusHeader = document.createElement("div");
+        statusTitle = createTextElement(
+            "h4",
+            "ia-assistant-quiz-multiple-editor__status-title",
+            "Estado del quiz"
+        );
+        statusBadge = createTextElement(
+            "span",
+            "ia-assistant-quiz-multiple-editor__status-badge",
+            "Requiere revisión"
+        );
+        messageList = document.createElement("ul");
+
+        statusBox.className = "ia-assistant-quiz-multiple-editor__status-box";
+        statusHeader.className = "ia-assistant-quiz-multiple-editor__status-header";
+        messageList.className = "ia-assistant-quiz-multiple-editor__status-list-items";
+
         messages.forEach(function (message) {
-            statusItem = createTextElement(
-                "p",
-                "ia-assistant-quiz-multiple-editor__status " +
-                    "ia-assistant-quiz-multiple-editor__status--warning",
+            var messageItem = createTextElement(
+                "li",
+                "ia-assistant-quiz-multiple-editor__status-item",
                 message
             );
-            statusRoot.appendChild(statusItem);
+
+            messageList.appendChild(messageItem);
         });
+
+        statusHeader.appendChild(statusTitle);
+        statusHeader.appendChild(statusBadge);
+        statusBox.appendChild(statusHeader);
+        statusBox.appendChild(messageList);
+        statusRoot.appendChild(statusBox);
     }
 
     function renderSummary(summaryRoot, component) {
@@ -283,6 +310,11 @@
         field.className = "ia-assistant-quiz-multiple-editor__option-field";
         labelText.className = "ia-assistant-quiz-multiple-editor__option-label";
         labelText.textContent = label;
+
+        if (isMultiline) {
+            field.className += " ia-assistant-quiz-multiple-editor__option-field--feedback";
+            labelText.className += " ia-assistant-quiz-multiple-editor__option-label--feedback";
+        }
 
         input.className = isMultiline ?
             "ia-assistant-quiz-multiple-editor__option-feedback" :
@@ -436,7 +468,7 @@
                 }
             ));
             item.appendChild(createOptionTextField(
-                "💬 Feedback",
+                "Feedback",
                 option.feedback,
                 true,
                 function (newValue) {
@@ -523,7 +555,9 @@
             statusRoot.className = "ia-assistant-quiz-multiple-editor__status-list";
 
             editor.appendChild(createEditorHeader());
-            editor.appendChild(createQuestionSection(component));
+            editor.appendChild(createQuestionSection(component, function () {
+                renderStatus(statusRoot, component);
+            }));
             editor.appendChild(statusRoot);
             editor.appendChild(createOptionsSection(component, statusRoot));
             renderStatus(statusRoot, component);

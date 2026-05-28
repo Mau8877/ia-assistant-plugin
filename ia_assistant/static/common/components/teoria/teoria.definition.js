@@ -14,6 +14,7 @@
         createDefaultData: function () {
             return {
                 titulo: "",
+                formato: "markdown",
                 contenido: ""
             };
         }

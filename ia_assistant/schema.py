@@ -28,10 +28,12 @@ COMPONENT_DEFINITIONS = {
         "student_visible": True,
         "default_data": {
             "titulo": "",
+            "formato": "markdown",
             "contenido": "",
         },
         "ai_editable_fields": [
             "data.titulo",
+            "data.formato",
             "data.contenido",
         ],
     },

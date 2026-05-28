@@ -38,6 +38,7 @@ STUDIO_JS_PATHS = [
     "studio/components/teoria/teoria_editor.js",
     "studio/components/quiz_multiple/quiz_multiple_editor.js",
     "studio/components/pregunta_abierta/pregunta_abierta_editor.js",
+    "studio/components/codigo/codigo_base.js",
     "studio/components/codigo/codigo_editor.js",
     "studio/components/revision/revision_editor.js",
     "studio/js/studio.js",

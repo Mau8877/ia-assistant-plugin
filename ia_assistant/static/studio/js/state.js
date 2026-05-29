@@ -20,6 +20,103 @@
         return JSON.parse(JSON.stringify(data));
     }
 
+    function isPlainObject(value) {
+        return Boolean(
+            value &&
+            typeof value === "object" &&
+            !Array.isArray(value)
+        );
+    }
+
+    function isKnownComponentType(componentType) {
+        return Boolean(window.IAAssistant.Registry.get(componentType));
+    }
+
+    function isValidComponent(component) {
+        if (!isPlainObject(component)) {
+            return false;
+        }
+
+        if (typeof component.id !== "string" || !component.id.trim()) {
+            return false;
+        }
+
+        if (
+            typeof component.tipo !== "string" ||
+            !isKnownComponentType(component.tipo)
+        ) {
+            return false;
+        }
+
+        if (typeof component.nombre !== "string") {
+            return false;
+        }
+
+        if (!isPlainObject(component.data)) {
+            return false;
+        }
+
+        if (component.tipo === "teoria" && component.data.formato !== "markdown") {
+            return false;
+        }
+
+        return true;
+    }
+
+    function isValidUnit(unit) {
+        if (!isPlainObject(unit)) {
+            return false;
+        }
+
+        if (unit.version !== 1) {
+            return false;
+        }
+
+        if (typeof unit.titulo !== "string") {
+            return false;
+        }
+
+        if (!Array.isArray(unit.componentes)) {
+            return false;
+        }
+
+        return unit.componentes.every(isValidComponent);
+    }
+
+    function rebuildComponentTypeSequences() {
+        componentTypeSequences = {};
+
+        currentUnit.componentes.forEach(function (component) {
+            var expectedPrefix = component.tipo + "_";
+            var numberPart;
+            var sequenceNumber;
+
+            if (component.id.indexOf(expectedPrefix) !== 0) {
+                return;
+            }
+
+            numberPart = component.id.slice(expectedPrefix.length);
+
+            if (!/^\d+$/.test(numberPart)) {
+                return;
+            }
+
+            sequenceNumber = parseInt(numberPart, 10);
+            componentTypeSequences[component.tipo] = Math.max(
+                componentTypeSequences[component.tipo] || 0,
+                sequenceNumber
+            );
+        });
+    }
+
+    function setCurrentUnit(unit) {
+        currentUnit = cloneData(unit);
+        activeComponentId = currentUnit.componentes.length ?
+            currentUnit.componentes[0].id :
+            null;
+        rebuildComponentTypeSequences();
+    }
+
     function findComponent(componentId) {
         return currentUnit.componentes.find(function (component) {
             return component.id === componentId;
@@ -47,6 +144,16 @@
             currentUnit = createDefaultUnit();
             activeComponentId = null;
             componentTypeSequences = {};
+        },
+
+        loadUnit: function (unit) {
+            if (!isValidUnit(unit)) {
+                this.resetUnit();
+                return false;
+            }
+
+            setCurrentUnit(unit);
+            return true;
         },
 
         setUnitTitle: function (title) {

@@ -141,6 +141,11 @@ STUDENT_VISIBLE_COMPONENT_TYPES = tuple(
 )
 
 
+def get_default_unit():
+    """Return a safe copy of the default unit payload."""
+    return deepcopy(DEFAULT_UNIT)
+
+
 def get_component_definition(component_type):
     """Return a safe copy of a component definition."""
     component_definition = COMPONENT_DEFINITIONS.get(component_type)

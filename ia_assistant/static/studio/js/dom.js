@@ -69,6 +69,26 @@
             return currentRoot.querySelector(".ia-assistant-json-toggle");
         },
 
+        getSaveButton: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector(".ia-assistant-save-button");
+        },
+
+        getSaveStatus: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector(".ia-assistant-save-status");
+        },
+
         getJsonPanel: function (root) {
             var currentRoot = root || this.getRoot();
 

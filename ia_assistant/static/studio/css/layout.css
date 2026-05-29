@@ -91,6 +91,7 @@
 
     .ia-assistant-component-picker,
     .ia-assistant-component-picker__button,
+    .ia-assistant-save-button,
     .ia-assistant-json-toggle {
         width: 100%;
     }

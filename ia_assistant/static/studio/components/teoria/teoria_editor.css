@@ -81,19 +81,34 @@
     margin: 0;
 }
 
-.ia-assistant-teoria-editor__status-empty,
 .ia-assistant-teoria-editor__status-list-items {
     color: var(--ia-assistant-color-muted);
-    font-size: var(--ia-assistant-font-size-sm);
-    line-height: 1.4;
-    margin: 0;
-}
-
-.ia-assistant-teoria-editor__status-list-items {
     display: flex;
     flex-direction: column;
+    font-size: var(--ia-assistant-font-size-sm);
     gap: var(--ia-assistant-space-xs);
+    line-height: 1.4;
+    margin: 0;
     padding-left: var(--ia-assistant-space-base);
+}
+
+.ia-assistant-teoria-editor__status-header {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ia-assistant-space-sm);
+    justify-content: space-between;
+}
+
+.ia-assistant-teoria-editor__status-badge {
+    background: var(--ia-assistant-component-teoria-soft);
+    border: 1px solid var(--ia-assistant-component-teoria-accent);
+    border-radius: var(--ia-assistant-radius-sm);
+    color: var(--ia-assistant-component-teoria-accent);
+    font-size: var(--ia-assistant-font-size-xs);
+    font-weight: 700;
+    line-height: 1;
+    padding: var(--ia-assistant-space-xs) var(--ia-assistant-space-sm);
 }
 
 .ia-assistant-teoria-editor__status-item {

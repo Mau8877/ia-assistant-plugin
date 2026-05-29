@@ -55,34 +55,34 @@
     function renderTheoryStatus(statusRoot, component) {
         var recommendations = getTheoryRecommendations(component);
         var statusBox = document.createElement("section");
+        var statusHeader = document.createElement("div");
         var statusTitle = createTextElement(
             "h4",
             "ia-assistant-teoria-editor__status-title",
             "Estado de la teor\u00eda"
         );
-        var message;
+        var statusBadge = createTextElement(
+            "span",
+            "ia-assistant-teoria-editor__status-badge",
+            "Requiere revisi\u00f3n"
+        );
         var recommendationList;
 
         while (statusRoot.firstChild) {
             statusRoot.removeChild(statusRoot.firstChild);
         }
 
-        statusBox.className = "ia-assistant-teoria-editor__status-box";
-        statusBox.appendChild(statusTitle);
-
         if (!recommendations.length) {
-            message = createTextElement(
-                "p",
-                "ia-assistant-teoria-editor__status-empty",
-                "Sin recomendaciones pendientes."
-            );
-            statusBox.appendChild(message);
-            statusRoot.appendChild(statusBox);
             return;
         }
 
+        statusBox.className = "ia-assistant-teoria-editor__status-box";
+        statusHeader.className = "ia-assistant-teoria-editor__status-header";
         recommendationList = document.createElement("ul");
         recommendationList.className = "ia-assistant-teoria-editor__status-list-items";
+
+        statusHeader.appendChild(statusTitle);
+        statusHeader.appendChild(statusBadge);
 
         recommendations.forEach(function (recommendation) {
             recommendationList.appendChild(createTextElement(
@@ -92,6 +92,7 @@
             ));
         });
 
+        statusBox.appendChild(statusHeader);
         statusBox.appendChild(recommendationList);
         statusRoot.appendChild(statusBox);
     }

@@ -14,12 +14,15 @@
     }
 
     function updateDataField(component, fieldName, value) {
-        var patch = {};
+        var patch;
 
         ensureMarkdownFormat(component);
         component.data[fieldName] = value;
-        patch.formato = "markdown";
-        patch[fieldName] = value;
+        patch = {
+            titulo: component.data.titulo || "",
+            formato: "markdown",
+            contenido: component.data.contenido || ""
+        };
         window.IAAssistant.Studio.State.updateComponentData(component.id, patch);
     }
 
@@ -159,151 +162,70 @@
         return field;
     }
 
-    function getSelectedText(textarea) {
-        return textarea.value.slice(textarea.selectionStart, textarea.selectionEnd);
+    function handleContentChange(component, markdown, onStatusChange) {
+        updateDataField(component, "contenido", markdown);
+        onStatusChange();
     }
 
-    function replaceSelection(textarea, replacement, selectionMode) {
-        textarea.setRangeText(
-            replacement,
-            textarea.selectionStart,
-            textarea.selectionEnd,
-            selectionMode || "end"
-        );
-    }
+    function createSimpleTextareaEditor(container, initialMarkdown, onChange) {
+        var textarea = document.createElement("textarea");
 
-    function wrapSelection(textarea, beforeText, afterText, fallbackText) {
-        var selectionStart = textarea.selectionStart;
-        var selectedText = getSelectedText(textarea);
-        var innerText = selectedText || fallbackText;
-        var replacement = beforeText + innerText + afterText;
-        var cursorStart;
-        var cursorEnd;
-
-        replaceSelection(textarea, replacement, "end");
-
-        if (!selectedText) {
-            cursorStart = selectionStart + beforeText.length;
-            cursorEnd = cursorStart + fallbackText.length;
-            textarea.setSelectionRange(cursorStart, cursorEnd);
-        }
-    }
-
-    function prefixMarkdownLines(textarea, prefixText, fallbackText) {
-        var value = textarea.value;
-        var selectionStart = textarea.selectionStart;
-        var selectionEnd = textarea.selectionEnd;
-        var hasSelection = selectionStart !== selectionEnd;
-        var lineStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
-        var lineEnd = hasSelection ?
-            selectionEnd :
-            selectionStart;
-        var selectedBlock;
-        var replacement;
-
-        if (!hasSelection) {
-            replaceSelection(textarea, prefixText + fallbackText, "end");
-            textarea.setSelectionRange(
-                selectionStart + prefixText.length,
-                selectionStart + prefixText.length + fallbackText.length
-            );
-            return;
-        }
-
-        if (lineEnd > lineStart && value.charAt(lineEnd - 1) === "\n") {
-            lineEnd -= 1;
-        }
-
-        selectedBlock = value.slice(lineStart, lineEnd);
-        replacement = selectedBlock
-            .split("\n")
-            .map(function (line) {
-                return prefixText + line;
-            })
-            .join("\n");
-
-        textarea.setRangeText(replacement, lineStart, lineEnd, "select");
-    }
-
-    function applyMarkdownAction(textarea, action) {
-        if (action === "bold") {
-            wrapSelection(textarea, "**", "**", "texto");
-            return;
-        }
-
-        if (action === "italic") {
-            wrapSelection(textarea, "*", "*", "texto");
-            return;
-        }
-
-        if (action === "heading") {
-            prefixMarkdownLines(textarea, "## ", "T\u00edtulo");
-            return;
-        }
-
-        if (action === "list") {
-            prefixMarkdownLines(textarea, "- ", "Elemento");
-            return;
-        }
-
-        if (action === "code") {
-            wrapSelection(textarea, "`", "`", "codigo");
-            return;
-        }
-
-        if (action === "quote") {
-            prefixMarkdownLines(textarea, "> ", "Cita");
-        }
-    }
-
-    function createToolbarButton(label, action, textarea, component, onStatusChange) {
-        var button = document.createElement("button");
-
-        button.className = "ia-assistant-teoria-editor__toolbar-button";
-        button.type = "button";
-        button.textContent = label;
-        button.addEventListener("click", function () {
-            applyMarkdownAction(textarea, action);
-            updateDataField(component, "contenido", textarea.value);
-            onStatusChange();
-            textarea.focus();
+        textarea.className = "ia-assistant-teoria-editor__textarea ia-assistant-teoria-editor__fallback";
+        textarea.name = "ia_assistant_teoria_contenido";
+        textarea.rows = 12;
+        textarea.value = initialMarkdown || "";
+        textarea.spellcheck = true;
+        textarea.setAttribute("aria-label", "Contenido Markdown");
+        textarea.addEventListener("input", function () {
+            onChange(textarea.value);
         });
 
-        return button;
+        container.appendChild(textarea);
     }
 
-    function createMarkdownToolbar(textarea, component, onStatusChange) {
-        var toolbar = document.createElement("div");
-        var actions = [
-            { label: "B", action: "bold" },
-            { label: "I", action: "italic" },
-            { label: "H2", action: "heading" },
-            { label: "Lista", action: "list" },
-            { label: "C\u00f3digo", action: "code" },
-            { label: "Cita", action: "quote" }
-        ];
+    function createContentEditor(editorContainer, componentData, onChange) {
+        var toastAdapter = window.IAAssistant.Studio.TeoriaToastUIAdapter;
+        var markdownEditor = window.IAAssistant.Studio.TeoriaMarkdownEditor;
+        var initialMarkdown = componentData.contenido || "";
 
-        toolbar.className = "ia-assistant-teoria-editor__toolbar";
-        toolbar.setAttribute("aria-label", "Herramientas Markdown");
+        if (toastAdapter && typeof toastAdapter.create === "function") {
+            try {
+                toastAdapter.create({
+                    container: editorContainer,
+                    initialMarkdown: initialMarkdown,
+                    onChange: onChange
+                });
+                return;
+            } catch (error) {
+                while (editorContainer.firstChild) {
+                    editorContainer.removeChild(editorContainer.firstChild);
+                }
+            }
+        }
 
-        actions.forEach(function (actionDefinition) {
-            toolbar.appendChild(createToolbarButton(
-                actionDefinition.label,
-                actionDefinition.action,
-                textarea,
-                component,
-                onStatusChange
-            ));
-        });
+        if (markdownEditor && typeof markdownEditor.create === "function") {
+            try {
+                markdownEditor.create({
+                    container: editorContainer,
+                    initialMarkdown: initialMarkdown,
+                    onChange: onChange
+                });
+                return;
+            } catch (error) {
+                while (editorContainer.firstChild) {
+                    editorContainer.removeChild(editorContainer.firstChild);
+                }
+            }
+        }
 
-        return toolbar;
+        createSimpleTextareaEditor(editorContainer, initialMarkdown, onChange);
     }
 
     function createContentField(component, onStatusChange) {
         var field = document.createElement("div");
         var labelText = document.createElement("span");
         var help = document.createElement("span");
-        var textarea = document.createElement("textarea");
+        var editorContainer = document.createElement("div");
         var componentData = component.data && typeof component.data === "object" ?
             component.data :
             {};
@@ -313,23 +235,15 @@
         labelText.textContent = "Contenido Markdown";
         help.className = "ia-assistant-teoria-editor__help";
         help.textContent = "Redacta el contenido usando Markdown simple.";
-
-        textarea.className = "ia-assistant-teoria-editor__textarea";
-        textarea.name = "ia_assistant_teoria_contenido";
-        textarea.rows = 12;
-        textarea.value = componentData.contenido || "";
-        textarea.spellcheck = true;
-        textarea.setAttribute("aria-label", "Contenido Markdown");
-
-        textarea.addEventListener("input", function () {
-            updateDataField(component, "contenido", textarea.value);
-            onStatusChange();
-        });
+        editorContainer.className = "ia-assistant-teoria-editor__toastui";
 
         field.appendChild(labelText);
         field.appendChild(help);
-        field.appendChild(createMarkdownToolbar(textarea, component, onStatusChange));
-        field.appendChild(textarea);
+        field.appendChild(editorContainer);
+
+        createContentEditor(editorContainer, componentData, function (markdown) {
+            handleContentChange(component, markdown, onStatusChange);
+        });
 
         return field;
     }

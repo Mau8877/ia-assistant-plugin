@@ -25,6 +25,22 @@
             "No se pudo guardar la unidad.";
     }
 
+    function hasLoadedContent() {
+        var unit = window.IAAssistant.Studio.State.getUnit();
+        var title = unit && typeof unit.titulo === "string" ? unit.titulo.trim() : "";
+        var defaultTitles = [
+            "Unidad sin titulo",
+            "Unidad sin título",
+            "Unidad sin tÃ­tulo"
+        ];
+
+        if (unit.componentes && unit.componentes.length) {
+            return true;
+        }
+
+        return Boolean(title && defaultTitles.indexOf(title) < 0);
+    }
+
     window.IAAssistant.Studio.Events = {
         init: function (root, initArgs) {
             var currentRoot = root || window.IAAssistant.Studio.Dom.getRoot();
@@ -48,7 +64,7 @@
                     "warning",
                     ERROR_STATUS_CLEAR_MS
                 );
-            } else {
+            } else if (hasLoadedContent()) {
                 this.setSaveStatus(
                     currentRoot,
                     "Unidad cargada correctamente.",

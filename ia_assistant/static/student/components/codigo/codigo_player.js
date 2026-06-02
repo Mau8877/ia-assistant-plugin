@@ -165,7 +165,6 @@
         var solution = createElement("div", "ia-assistant-student-code__solution");
         var label = createElement("label", "ia-assistant-student-code__solution-label", "Tu solucion");
         var textarea = document.createElement("textarea");
-        var help = createElement("p", "ia-assistant-student-code__help", "Tab indenta - Shift+Tab desindenta");
         var actions = createElement("div", "ia-assistant-student-code__actions");
         var resetButton = createElement("button", "ia-assistant-student-code__reset", "Restaurar codigo base");
 
@@ -189,7 +188,9 @@
 
         textarea.className = "ia-assistant-student-code__textarea";
         textarea.value = baseCode;
-        textarea.placeholder = "Escribe tu solucion aqui...";
+        textarea.placeholder = baseCode ?
+            "Modifica el codigo base aqui..." :
+            "No hay codigo base configurado. Puedes escribir tu solucion desde cero.";
         textarea.rows = Math.max(12, baseCode.split("\n").length + 3);
         textarea.spellcheck = false;
         textarea.autocomplete = "off";
@@ -208,7 +209,6 @@
         label.appendChild(textarea);
         actions.appendChild(resetButton);
         solution.appendChild(label);
-        solution.appendChild(help);
         solution.appendChild(actions);
         wrapper.appendChild(solution);
         container.appendChild(wrapper);

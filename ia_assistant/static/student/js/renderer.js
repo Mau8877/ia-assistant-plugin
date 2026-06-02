@@ -5,11 +5,11 @@
     window.IAAssistant.Student = window.IAAssistant.Student || {};
 
     var TYPE_LABELS = {
-        teoria: "Teoría",
-        quiz_multiple: "Quiz múltiple",
+        teoria: "Teoria",
+        quiz_multiple: "Quiz multiple",
         pregunta_abierta: "Pregunta abierta",
-        codigo: "Código",
-        revision: "Revisión"
+        codigo: "Codigo",
+        revision: "Revision"
     };
 
     function clearElement(element) {
@@ -59,7 +59,7 @@
         var message = createElement(
             "p",
             "ia-assistant-student-empty__message",
-            "El contenido de esta unidad todavía no está disponible."
+            "Esta unidad todavia no tiene componentes para mostrar."
         );
 
         empty.appendChild(title);
@@ -71,7 +71,7 @@
         var message = createElement(
             "p",
             "ia-assistant-student-placeholder",
-            "Este componente todavía no está disponible para el alumno."
+            "Este componente todavia no esta disponible para el alumno."
         );
 
         message.setAttribute("data-component-type", component.tipo || "");
@@ -143,7 +143,7 @@
         }
 
         if (titleElement) {
-            titleElement.textContent = unit.titulo || "Unidad sin título";
+            titleElement.textContent = unit.titulo || "Unidad sin titulo";
         }
 
         clearElement(container);

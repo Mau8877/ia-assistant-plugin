@@ -32,6 +32,7 @@
         textarea.className = "ia-assistant-student-open-question__textarea";
         textarea.placeholder = "Escribe tu respuesta aqui...";
         textarea.rows = 6;
+        textarea.setAttribute("aria-label", "Respuesta de pregunta abierta");
 
         wrapper.appendChild(prompt);
         wrapper.appendChild(textarea);

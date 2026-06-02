@@ -36,7 +36,11 @@
     flex-direction: row-reverse;
     flex: 0 0 auto;
     gap: var(--ia-assistant-space-sm);
+    justify-content: flex-end;
+    max-width: 100%;
     position: relative;
+    row-gap: var(--ia-assistant-space-sm);
+    flex-wrap: wrap;
     z-index: 3;
 }
 
@@ -51,6 +55,12 @@
     min-height: 56px;
     overflow-x: auto;
     padding: var(--ia-assistant-space-base) var(--ia-assistant-space-md);
+}
+
+.ia-assistant-component-tabs__empty {
+    color: var(--ia-assistant-color-muted);
+    line-height: 1.45;
+    margin: 0;
 }
 
 .ia-assistant-component-editor {
@@ -72,6 +82,12 @@
     min-height: 180px;
     padding: var(--ia-assistant-space-lg);
     text-align: center;
+}
+
+.ia-assistant-component-editor__message {
+    color: var(--ia-assistant-color-muted);
+    line-height: 1.45;
+    margin: 0;
 }
 
 .ia-assistant-chatbar {
@@ -180,6 +196,12 @@
         width: 100%;
     }
 
+    .ia-assistant-save-status {
+        justify-content: center;
+        white-space: normal;
+        width: 100%;
+    }
+
     .ia-assistant-component-editor {
         padding: var(--ia-assistant-space-md);
     }
@@ -200,5 +222,15 @@
 
     .ia-assistant-student-preview__body {
         padding: var(--ia-assistant-space-md);
+    }
+}
+
+@media (max-width: 900px) {
+    .ia-assistant-builder-card {
+        align-items: stretch;
+    }
+
+    .ia-assistant-component-picker {
+        flex: 1 1 100%;
     }
 }

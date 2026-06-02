@@ -26,20 +26,33 @@
             </div>
 
             <div class="ia-assistant-component-picker">
-                <button class="ia-assistant-component-picker__button" type="button">
-                    + Añadir componente
+                <button
+                    class="ia-assistant-component-picker__button"
+                    type="button"
+                    aria-label="Agregar componente"
+                >
+                    + Agregar componente
                 </button>
-                <button class="ia-assistant-save-button" type="button">
+                <button
+                    class="ia-assistant-save-button"
+                    type="button"
+                    aria-label="Guardar unidad"
+                >
                     Guardar
                 </button>
                 <button
                     class="ia-assistant-student-preview-button"
                     type="button"
+                    aria-label="Abrir vista previa alumno"
                     data-ia-assistant-student-preview-button
                 >
                     Vista previa alumno
                 </button>
-                <button class="ia-assistant-json-toggle" type="button">
+                <button
+                    class="ia-assistant-json-toggle"
+                    type="button"
+                    aria-label="Ver JSON de la unidad"
+                >
                     Ver JSON
                 </button>
                 <span
@@ -49,7 +62,6 @@
                     hidden
                 ></span>
             </div>
-
         </section>
 
         <div
@@ -114,6 +126,7 @@
                     <button
                         class="ia-assistant-student-preview__close"
                         type="button"
+                        aria-label="Cerrar vista previa alumno"
                         data-ia-assistant-student-preview-close
                     >
                         Cerrar
@@ -145,14 +158,15 @@
 
         <section class="ia-assistant-component-tabs" aria-label="Tabs de componentes">
             <p class="ia-assistant-component-tabs__empty">
-                Los componentes agregados apareceran aqui.
+                Aun no hay componentes. Usa Agregar componente para crear teoria,
+                quiz, pregunta abierta o codigo.
             </p>
         </section>
 
         <section class="ia-assistant-component-editor" aria-label="Editor del componente activo">
             <div class="ia-assistant-component-editor__empty">
                 <p class="ia-assistant-component-editor__message">
-                    Selecciona o añade un componente para comenzar.
+                    Selecciona un componente o agrega uno nuevo para comenzar a editar.
                 </p>
             </div>
         </section>

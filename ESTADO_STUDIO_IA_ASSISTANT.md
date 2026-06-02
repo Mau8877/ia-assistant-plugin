@@ -612,4 +612,6 @@ Studio ahora incluye una Vista previa alumno que toma `State.getUnit()` y reutil
 
 El quiz multiple fue refinado para separar correctas seleccionadas, correctas faltantes e incorrectas seleccionadas. El textarea de codigo ahora tiene comportamiento de editor basico local: `Tab`, `Shift+Tab` y `Enter` con indentacion.
 
+Se realizo una microfase de pulido visual final del MVP: copy visible mas claro, estados vacios mas orientados, ajustes responsive pequenos, foco visible en controles clave y creacion de `CHECKLIST_VALIDACION_MVP_IA_ASSISTANT.md` para la validacion manual antes de abrir IA docente.
+
 Despues deben venir revision, persistencia/calificacion de respuestas si se decide, y mejoras opcionales como acordeon o editor de codigo. Finalmente debe venir IA, porque necesita generar o editar JSON validado y persistible.

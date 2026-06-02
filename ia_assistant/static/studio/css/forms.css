@@ -86,6 +86,7 @@
 .ia-assistant-component-picker__button:focus,
 .ia-assistant-save-button:focus,
 .ia-assistant-student-preview-button:focus,
+.ia-assistant-json-toggle:focus,
 .ia-assistant-chatbar__button:focus,
 .ia-assistant-chatbar__textarea:focus {
     outline: 2px solid var(--ia-assistant-color-primary);

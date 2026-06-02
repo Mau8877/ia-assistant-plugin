@@ -608,6 +608,8 @@ La persistencia minima ya permite guardar `State.getUnit()` en `unidad_json`, re
 
 En XBlock SDK se retiro el escenario `IA Assistant - Student minimo` porque abria otra instancia vacia y confundia las pruebas. Student View real sigue existiendo; la validacion alumno debe hacerse despues mediante vista previa conectada al JSON actual o en Open edX/LMS real.
 
-Studio ahora incluye una Vista previa alumno que toma `State.getUnit()` y reutiliza el renderer Student sin guardar, sin llamar backend y sin depender de `unidad_json` persistido.
+Studio ahora incluye una Vista previa alumno que toma `State.getUnit()` y reutiliza el renderer Student sin guardar, sin llamar backend y sin depender de `unidad_json` persistido. Student fase 1B ya agrega players basicos para quiz multiple, pregunta abierta y codigo; el quiz muestra feedback agrupado por opcion y contador `X/Y` en respuestas multiples, pregunta abierta oculta rubrica por seguridad, y codigo permite editar una solucion local basada en `codigo_base`. Las respuestas no se guardan, no hay calificacion, no hay IA y el codigo no se ejecuta.
 
-Despues deben venir los players Student restantes para quiz, pregunta abierta y codigo. Finalmente debe venir IA, porque necesita generar o editar JSON validado y persistible.
+El quiz multiple fue refinado para separar correctas seleccionadas, correctas faltantes e incorrectas seleccionadas. El textarea de codigo ahora tiene comportamiento de editor basico local: `Tab`, `Shift+Tab` y `Enter` con indentacion.
+
+Despues deben venir revision, persistencia/calificacion de respuestas si se decide, y mejoras opcionales como acordeon o editor de codigo. Finalmente debe venir IA, porque necesita generar o editar JSON validado y persistible.

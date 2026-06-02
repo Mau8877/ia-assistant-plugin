@@ -621,3 +621,38 @@ Se agrego una vista previa alumno dentro de Studio para validar la unidad actual
 - mantiene placeholders seguros para quiz multiple, pregunta abierta, codigo y revision hasta implementar sus players completos.
 
 Student View real para LMS/Open edX se mantiene separado.
+
+## 27. Nota de implementacion fase 1B
+
+Student View fase 1B agrega players basicos para los componentes pendientes:
+
+- quiz multiple renderiza opciones con radio o checkbox segun cantidad de respuestas correctas, permite comprobar localmente y muestra feedback de opciones seleccionadas;
+- pregunta abierta muestra enunciado, textarea local y rubrica si existe;
+- codigo muestra enunciado, lenguaje, instrucciones y bloque `<pre><code>` con `textContent`;
+- las respuestas viven solo en el navegador y no se guardan;
+- no hay calificacion global;
+- no hay IA;
+- el codigo no se ejecuta;
+- `revision` sigue pendiente.
+
+## 28. Nota de ajuste visual fase 1B
+
+Se ajusto la salida visual de los players Student:
+
+- quiz multiple muestra contador `X/Y` cuando hay varias respuestas correctas;
+- el feedback de quiz se agrupa por opcion, con estado de correcta seleccionada, incorrecta seleccionada o correcta faltante;
+- la rubrica de pregunta abierta no se muestra al alumno por ahora, porque puede contener criterios internos o respuesta esperada;
+- codigo ahora muestra un textarea local inicializado con `codigo_base` y boton para restaurar la plantilla;
+- nada de esto guarda respuestas ni llama backend;
+- calificacion, persistencia de respuestas y visibilidad configurable de rubrica siguen pendientes.
+
+## 29. Nota de UX quiz y codigo
+
+Se refino la experiencia de Student/Preview:
+
+- quiz multiple separa el detalle en secciones: correctas seleccionadas, correctas faltantes e incorrectas seleccionadas;
+- quiz multiple mantiene resumen `X/Y` para respuestas multiples y muestra mensajes claros para seleccion exacta o parcial;
+- respuesta unica conserva radio y muestra detalle estructurado de opcion seleccionada y respuesta correcta cuando corresponde;
+- el textarea de codigo ahora funciona como editor basico local: `Tab` indenta, `Shift+Tab` desindenta y `Enter` conserva indentacion;
+- el textarea de codigo desactiva autocorreccion/autocapitalizacion y mantiene fuente monoespaciada;
+- no hay syntax highlighting, ejecucion, persistencia ni calificacion.

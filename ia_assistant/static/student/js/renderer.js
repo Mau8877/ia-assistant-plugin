@@ -80,14 +80,27 @@
 
     function renderComponentBody(component, container) {
         var components = window.IAAssistant.Student.Components || {};
-        var teoriaPlayer = components.TeoriaPlayer;
+        var playerByType = {
+            teoria: components.TeoriaPlayer,
+            quiz_multiple: components.QuizMultiplePlayer,
+            pregunta_abierta: components.PreguntaAbiertaPlayer,
+            codigo: components.CodigoPlayer
+        };
+        var player = playerByType[component.tipo];
 
         if (
-            component.tipo === "teoria" &&
-            teoriaPlayer &&
-            typeof teoriaPlayer.render === "function"
+            player &&
+            typeof player.render === "function"
         ) {
-            teoriaPlayer.render(component, container);
+            try {
+                player.render(component, container);
+            } catch (error) {
+                if (window.console && window.console.warn) {
+                    window.console.warn("No se pudo renderizar el componente Student.", component.tipo, error);
+                }
+
+                renderPlaceholder(component, container);
+            }
             return;
         }
 

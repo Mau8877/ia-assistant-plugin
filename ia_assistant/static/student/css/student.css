@@ -2,14 +2,183 @@
     background: var(--ia-assistant-color-surface);
     border: 1px solid var(--ia-assistant-color-border);
     border-radius: var(--ia-assistant-radius-sm);
-    padding: var(--ia-assistant-space-md);
+    color: var(--ia-assistant-color-text);
+    padding: var(--ia-assistant-space-lg);
+}
+
+.ia-assistant-student__header {
+    margin-bottom: var(--ia-assistant-space-lg);
+}
+
+.ia-assistant-student__eyebrow {
+    color: var(--ia-assistant-color-muted);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0;
+    margin: 0 0 var(--ia-assistant-space-xs);
+    text-transform: uppercase;
 }
 
 .ia-assistant-student__title {
+    font-size: 28px;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.ia-assistant-student__notice {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: var(--ia-assistant-radius-sm);
+    color: #9a3412;
+    margin-bottom: var(--ia-assistant-space-md);
+    padding: var(--ia-assistant-space-sm) var(--ia-assistant-space-md);
+}
+
+.ia-assistant-student__notice[hidden] {
+    display: none;
+}
+
+.ia-assistant-student__components {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ia-assistant-space-md);
+}
+
+.ia-assistant-student-empty {
+    background: var(--ia-assistant-color-background);
+    border: 1px dashed var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    padding: var(--ia-assistant-space-lg);
+}
+
+.ia-assistant-student-empty__title {
+    font-size: 18px;
+    margin: 0 0 var(--ia-assistant-space-xs);
+}
+
+.ia-assistant-student-empty__message {
+    color: var(--ia-assistant-color-muted);
+    margin: 0;
+}
+
+.ia-assistant-student-card {
+    background: var(--ia-assistant-color-surface);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-left: 5px solid var(--ia-assistant-color-primary);
+    border-radius: var(--ia-assistant-radius-sm);
+    overflow: hidden;
+}
+
+.ia-assistant-student-card--teoria {
+    border-left-color: var(--ia-assistant-component-teoria-accent, var(--ia-assistant-color-primary));
+}
+
+.ia-assistant-student-card--quiz_multiple {
+    border-left-color: var(--ia-assistant-component-quiz-accent, var(--ia-assistant-color-primary));
+}
+
+.ia-assistant-student-card--pregunta_abierta {
+    border-left-color: var(--ia-assistant-component-pregunta-accent, var(--ia-assistant-color-primary));
+}
+
+.ia-assistant-student-card--codigo {
+    border-left-color: var(--ia-assistant-component-codigo-accent, var(--ia-assistant-color-primary));
+}
+
+.ia-assistant-student-card__header {
+    border-bottom: 1px solid var(--ia-assistant-color-border);
+    padding: var(--ia-assistant-space-md) var(--ia-assistant-space-lg);
+}
+
+.ia-assistant-student-card__meta {
+    align-items: center;
+    display: flex;
+    gap: var(--ia-assistant-space-sm);
+    margin-bottom: var(--ia-assistant-space-xs);
+}
+
+.ia-assistant-student-card__number,
+.ia-assistant-student-card__badge {
+    align-items: center;
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    min-height: 24px;
+    padding: 0 var(--ia-assistant-space-sm);
+}
+
+.ia-assistant-student-card__number {
+    background: var(--ia-assistant-color-background);
+    color: var(--ia-assistant-color-muted);
+}
+
+.ia-assistant-student-card__badge {
+    background: #e8f0ff;
+    color: var(--ia-assistant-color-primary);
+}
+
+.ia-assistant-student-card__title {
+    font-size: 20px;
+    line-height: 1.25;
+    margin: 0;
+}
+
+.ia-assistant-student-card__body {
+    padding: var(--ia-assistant-space-lg);
+}
+
+.ia-assistant-student-placeholder {
+    background: var(--ia-assistant-color-background);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    color: var(--ia-assistant-color-muted);
+    margin: 0;
+    padding: var(--ia-assistant-space-md);
+}
+
+.ia-assistant-student-theory__title {
+    font-size: 18px;
+    margin: 0 0 var(--ia-assistant-space-md);
+}
+
+.ia-assistant-student-markdown {
+    overflow-x: auto;
+}
+
+.ia-assistant-student-markdown .toastui-editor-contents {
+    font-size: 16px;
+}
+
+.ia-assistant-student-markdown-fallback {
+    background: var(--ia-assistant-color-background);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    padding: var(--ia-assistant-space-md);
+}
+
+.ia-assistant-student-markdown-fallback__notice {
+    color: var(--ia-assistant-color-muted);
     margin: 0 0 var(--ia-assistant-space-sm);
 }
 
-.ia-assistant-student__message {
+.ia-assistant-student-markdown-fallback__content {
     margin: 0;
-    color: var(--ia-assistant-color-muted);
+    white-space: pre-wrap;
+}
+
+@media (max-width: 640px) {
+    .ia-assistant-student {
+        padding: var(--ia-assistant-space-md);
+    }
+
+    .ia-assistant-student__title {
+        font-size: 24px;
+    }
+
+    .ia-assistant-student-card__header,
+    .ia-assistant-student-card__body {
+        padding: var(--ia-assistant-space-md);
+    }
 }

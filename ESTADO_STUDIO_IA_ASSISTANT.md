@@ -8,9 +8,9 @@ El componente teoria fue migrado al editor TOAST UI Editor mediante un adapter s
 
 El JSON de unidad se genera correctamente en memoria mediante `window.IAAssistant.Studio.State`. Los componentes quiz multiple, pregunta abierta y codigo siguen funcionando visualmente despues de la integracion de Toast UI.
 
-La persistencia minima ya fue implementada: Studio puede enviar `State.getUnit()` al handler `save_unit`, guardar en `unidad_json`, recargar datos iniciales y reconstruir el estado desde lo persistido. Tambien cuenta con boton Guardar con feedback visual y autoguardado cada 60 segundos si detecta cambios reales. Todavia falta validar manualmente el flujo completo en Studio/Open edX. Tambien falta Student para renderizar la unidad guardada al alumno. La IA para generar o editar unidades sigue pendiente y debe venir despues.
+La persistencia minima ya fue implementada: Studio puede enviar `State.getUnit()` al handler `save_unit`, guardar en `unidad_json`, recargar datos iniciales y reconstruir el estado desde lo persistido. Tambien cuenta con boton Guardar con feedback visual y autoguardado cada 60 segundos si detecta cambios reales. Student fase 1A ya recibe la unidad persistida y renderiza titulo, unidad vacia, cards verticales y teoria con Toast Viewer local. Quiz, pregunta abierta, codigo, respuestas, calificacion e IA siguen pendientes.
 
-Veredicto: Studio como editor base esta practicamente finalizado. El siguiente paso recomendado es probar guardar/recargar y luego avanzar a Student.
+Veredicto: Studio como editor base esta practicamente finalizado. El siguiente paso recomendado es probar el flujo completo y avanzar con los players Student restantes.
 
 ## 2. Objetivo del Studio
 
@@ -402,15 +402,15 @@ Ejemplo de JSON validado:
 | Codigo | Casi cerrado | Validado visualmente; default de lenguaje debe revisarse si se exige `"c"`. |
 | JSON en memoria | Funcional | `State.getUnit()` produce estructura de unidad. |
 | Persistencia XBlock | Implementada, pendiente de prueba manual final | Studio guarda con boton manual en `unidad_json` y carga unidad inicial desde el XBlock. |
-| Student | Pendiente | Falta renderizar unidad guardada al alumno. |
+| Student | Parcial | Fase 1A renderiza titulo, unidad vacia, cards y teoria con Toast Viewer local. |
 | IA | Pendiente | Debe venir despues de persistencia y Student base. |
-| Render Markdown avanzado en Student | Pendiente | Debe soportar Markdown compatible con Toast. |
+| Render Markdown avanzado en Student | Parcial | Teoria usa Toast Viewer local; queda validacion manual completa. |
 | Politica HTML crudo | Pendiente | Solo hay normalizacion puntual para `<br>` e imagenes. |
 
 ## 11. Riesgos actuales
 
 1. El JSON todavia podria estar solo en memoria si no esta conectado al guardado real del XBlock.
-2. Student todavia no renderiza necesariamente Markdown compatible con Toast.
+2. Student fase 1A renderiza teoria con Toast Viewer, pero faltan players interactivos y validacion manual completa.
 3. HTML crudo completo no esta sanitizado/definido.
 4. Imagenes estan bloqueadas en toolbar y existe defensa normalizadora, pero conviene revisar persistencia final.
 5. El fallback artesanal sigue existiendo y luego habra que decidir cuando retirarlo.
@@ -604,6 +604,10 @@ feat: persist studio unit json
 
 Studio editor base esta listo en lo esencial. Toast UI resolvio el problema del editor Markdown artesanal en teoria y mantiene una salida Markdown compatible con el contrato actual. El JSON de componentes esta estable en memoria y los editores base se mantienen funcionales.
 
-La persistencia minima ya permite guardar `State.getUnit()` en `unidad_json`, recargarlo y reconstruir Studio desde ese dato persistido. La siguiente decision debe centrarse en probar ese flujo en Studio/Open edX y luego pasar a Student.
+La persistencia minima ya permite guardar `State.getUnit()` en `unidad_json`, recargarlo y reconstruir Studio desde ese dato persistido. Student fase 1A ya muestra la unidad persistida como lista vertical y renderiza teoria con Toast Viewer local.
 
-Despues debe venir Student, porque necesita contenido guardado. Finalmente debe venir IA, porque necesita generar o editar JSON validado y persistible.
+En XBlock SDK se retiro el escenario `IA Assistant - Student minimo` porque abria otra instancia vacia y confundia las pruebas. Student View real sigue existiendo; la validacion alumno debe hacerse despues mediante vista previa conectada al JSON actual o en Open edX/LMS real.
+
+Studio ahora incluye una Vista previa alumno que toma `State.getUnit()` y reutiliza el renderer Student sin guardar, sin llamar backend y sin depender de `unidad_json` persistido.
+
+Despues deben venir los players Student restantes para quiz, pregunta abierta y codigo. Finalmente debe venir IA, porque necesita generar o editar JSON validado y persistible.

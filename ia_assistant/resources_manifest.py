@@ -15,6 +15,7 @@ STUDIO_CSS_PATHS = [
     "studio/components/quiz_multiple/quiz_multiple_editor.css",
     "studio/components/pregunta_abierta/pregunta_abierta_editor.css",
     "studio/components/codigo/codigo_editor.css",
+    "student/css/student.css",
 ]
 
 STUDIO_JS_PATHS = [
@@ -32,6 +33,11 @@ STUDIO_JS_PATHS = [
     "studio/js/api.js",
     "studio/js/messages.js",
     "studio/js/renderer.js",
+    "student/js/state.js",
+    "student/js/dom.js",
+    "student/js/renderer.js",
+    "student/components/teoria/teoria_player.js",
+    "studio/js/student_preview.js",
     "studio/js/events.js",
     "studio/widgets/chatbar_ia/chatbar_ia.js",
     "studio/widgets/component_picker/component_picker.js",
@@ -52,6 +58,7 @@ STUDIO_JS_PATHS = [
 STUDENT_CSS_PATHS = [
     "common/css/tokens.css",
     "common/css/components.css",
+    "vendor/toastui/toastui-editor-viewer.css",
     "student/css/student.css",
 ]
 
@@ -68,6 +75,7 @@ STUDENT_JS_PATHS = [
     "student/js/dom.js",
     "student/js/renderer.js",
     "student/js/events.js",
+    "vendor/toastui/toastui-editor-viewer.js",
     "student/components/teoria/teoria_player.js",
     "student/components/quiz_multiple/quiz_multiple_player.js",
     "student/components/pregunta_abierta/pregunta_abierta_player.js",

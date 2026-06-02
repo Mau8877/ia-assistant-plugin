@@ -62,9 +62,17 @@ class IAAssistantXBlock(XBlock):
         if self._is_sdk_studio_mode():
             return self.studio_view(context)
 
+        initial_unit, load_warning = self._get_initial_unit()
         fragment = Fragment(read_static_text(STUDENT_HTML_PATH))
         self._add_css_resources(fragment, STUDENT_CSS_PATHS)
         self._add_js_resources(fragment, STUDENT_JS_PATHS)
+        fragment.initialize_js(
+            "IAAssistantStudent",
+            {
+                "initial_unit": initial_unit,
+                "load_warning": load_warning,
+            },
+        )
         return fragment
 
     def studio_view(self, context=None):
@@ -197,12 +205,6 @@ class IAAssistantXBlock(XBlock):
         Escenarios para probar el XBlock en XBlock SDK.
         """
         return [
-            (
-                "IA Assistant - Student minimo",
-                """
-                <ia_assistant sdk_view_mode="student"/>
-                """,
-            ),
             (
                 "IA Assistant - Studio SDK",
                 """

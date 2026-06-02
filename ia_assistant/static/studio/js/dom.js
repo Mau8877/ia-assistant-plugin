@@ -89,6 +89,36 @@
             return currentRoot.querySelector(".ia-assistant-save-status");
         },
 
+        getStudentPreviewButton: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector("[data-ia-assistant-student-preview-button]");
+        },
+
+        getStudentPreview: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector("[data-ia-assistant-student-preview]");
+        },
+
+        getStudentPreviewCloseButtons: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return [];
+            }
+
+            return currentRoot.querySelectorAll("[data-ia-assistant-student-preview-close]");
+        },
+
         getJsonPanel: function (root) {
             var currentRoot = root || this.getRoot();
 

@@ -6,6 +6,7 @@ para mantener liviana la inicialización del XBlock.
 
 __all__ = [
     "ai_errors",
+    "component_service",
     "openrouter_client",
     "prompt_builder",
     "unit_service",

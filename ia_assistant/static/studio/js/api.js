@@ -5,6 +5,9 @@
     window.IAAssistant.Studio = window.IAAssistant.Studio || {};
 
     var saveUrl = "";
+    var generateTeacherUnitUrl = "";
+    var generateTeacherComponentCreateUrl = "";
+    var generateTeacherComponentEditUrl = "";
 
     function getCookie(name) {
         var cookieName = name + "=";
@@ -74,11 +77,37 @@
         return payload;
     }
 
+    function postJson(url, payload) {
+        if (!url) {
+            return Promise.reject(
+                new Error("No hay URL configurada para esta accion.")
+            );
+        }
+
+        return fetch(url, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: createJsonHeaders(),
+            body: JSON.stringify(payload || {})
+        }).then(function (response) {
+            if (!response.ok) {
+                return createHttpError(response);
+            }
+
+            return parseJsonResponse(response);
+        }).then(ensureOkResponse);
+    }
+
     window.IAAssistant.Studio.Api = {
         configure: function (options) {
             var apiOptions = options || {};
 
             saveUrl = apiOptions.saveUrl || "";
+            generateTeacherUnitUrl = apiOptions.generateTeacherUnitUrl || "";
+            generateTeacherComponentCreateUrl =
+                apiOptions.generateTeacherComponentCreateUrl || "";
+            generateTeacherComponentEditUrl =
+                apiOptions.generateTeacherComponentEditUrl || "";
         },
 
         isConfigured: function () {
@@ -86,24 +115,40 @@
         },
 
         saveUnit: function (unit) {
-            if (!saveUrl) {
-                return Promise.reject(new Error("No hay URL de guardado configurada."));
-            }
+            return postJson(saveUrl, {
+                unit: unit
+            });
+        },
 
-            return fetch(saveUrl, {
-                method: "POST",
-                credentials: "same-origin",
-                headers: createJsonHeaders(),
-                body: JSON.stringify({
-                    unit: unit
-                })
-            }).then(function (response) {
-                if (!response.ok) {
-                    return createHttpError(response);
-                }
+        generateTeacherUnit: function (promptDocente, contexto) {
+            return postJson(generateTeacherUnitUrl, {
+                prompt_docente: promptDocente,
+                contexto: contexto || {}
+            });
+        },
 
-                return parseJsonResponse(response);
-            }).then(ensureOkResponse);
+        generateTeacherComponentCreate: function (
+            promptDocente,
+            targetComponentType,
+            unitContext
+        ) {
+            return postJson(generateTeacherComponentCreateUrl, {
+                prompt_docente: promptDocente,
+                target_component_type: targetComponentType,
+                unit_context: unitContext || {}
+            });
+        },
+
+        generateTeacherComponentEdit: function (
+            promptDocente,
+            activeComponent,
+            unitContext
+        ) {
+            return postJson(generateTeacherComponentEditUrl, {
+                prompt_docente: promptDocente,
+                active_component: activeComponent,
+                unit_context: unitContext || {}
+            });
         }
     };
 }());

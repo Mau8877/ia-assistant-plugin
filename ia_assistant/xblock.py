@@ -4,6 +4,7 @@ from xblock.core import XBlock
 from xblock.fields import Scope, String
 from web_fragments.fragment import Fragment
 
+from .services.ai_errors import AIError, ai_error_to_payload
 from .resources_manifest import (
     STUDIO_CSS_PATHS,
     STUDIO_HTML_PATH,
@@ -80,15 +81,25 @@ class IAAssistantXBlock(XBlock):
         Renderiza la vista minima para Studio/docente.
         """
         initial_unit, load_warning = self._get_initial_unit()
+        initialize_data = {
+            "initial_unit": initial_unit,
+            "load_warning": load_warning,
+        }
         fragment = Fragment(read_static_text(STUDIO_HTML_PATH))
         self._add_css_resources(fragment, STUDIO_CSS_PATHS)
         self._add_js_resources(fragment, STUDIO_JS_PATHS)
+        initialize_data["generate_teacher_unit_url"] = self._handler_url(
+            "generate_teacher_unit"
+        )
+        initialize_data["generate_teacher_component_create_url"] = self._handler_url(
+            "generate_teacher_component_create"
+        )
+        initialize_data["generate_teacher_component_edit_url"] = self._handler_url(
+            "generate_teacher_component_edit"
+        )
         fragment.initialize_js(
             "IAAssistantStudio",
-            {
-                "initial_unit": initial_unit,
-                "load_warning": load_warning,
-            },
+            initialize_data,
         )
         return fragment
 
@@ -200,6 +211,52 @@ class IAAssistantXBlock(XBlock):
             fragment.add_javascript(read_static_text(resource_path))
 
     @staticmethod
+    def _extract_handler_payload(data):
+        if isinstance(data, dict):
+            return data
+
+        return {}
+
+    def _handler_url(self, handler_name):
+        if not hasattr(self, "runtime") or not self.runtime:
+            return ""
+
+        if hasattr(self.runtime, "handler_url"):
+            return self.runtime.handler_url(self, handler_name)
+
+        if not hasattr(self.runtime, "handlerUrl"):
+            return ""
+
+        return self.runtime.handlerUrl(self, handler_name)
+
+    @staticmethod
+    def _build_context_payload(payload, preferred_key="contexto"):
+        contexto = payload.get(preferred_key)
+
+        if isinstance(contexto, dict):
+            return contexto
+
+        fallback_key = "unit_context" if preferred_key == "contexto" else "contexto"
+        contexto = payload.get(fallback_key)
+
+        if isinstance(contexto, dict):
+            return contexto
+
+        return {}
+
+    def _handle_ai_error(self, error):
+        if isinstance(error, AIError):
+            return ai_error_to_payload(error)
+
+        return {
+            "ok": False,
+            "success": False,
+            "error": "No se pudo completar la operacion de IA.",
+            "code": "ai_error",
+            "details": [],
+        }
+
+    @staticmethod
     def workbench_scenarios():
         """
         Escenarios para probar el XBlock en XBlock SDK.
@@ -245,3 +302,69 @@ class IAAssistantXBlock(XBlock):
             "message": "Unidad guardada correctamente.",
             "unit": unit,
         }
+
+    @XBlock.json_handler
+    def generate_teacher_unit(self, data, suffix=""):
+        """Genera una unidad completa a partir del prompt docente."""
+        payload = self._extract_handler_payload(data)
+        from .services.unit_service import generate_unit_from_teacher_prompt
+
+        try:
+            result = generate_unit_from_teacher_prompt(
+                payload.get("prompt_docente"),
+                self._build_context_payload(payload, preferred_key="contexto"),
+            )
+        except Exception as error:
+            return self._handle_ai_error(error)
+
+        return result
+
+    @XBlock.json_handler
+    def generate_teacher_component_create(self, data, suffix=""):
+        """Genera un componente nuevo a partir del prompt docente."""
+        payload = self._extract_handler_payload(data)
+        from .services.component_service import (
+            generate_component_create_from_teacher_prompt,
+        )
+        prompt_docente = payload.get("prompt_docente")
+        target_component_type = payload.get("target_component_type")
+        unit_context = self._build_context_payload(
+            payload,
+            preferred_key="unit_context",
+        )
+
+        try:
+            result = generate_component_create_from_teacher_prompt(
+                prompt_docente,
+                target_component_type,
+                unit_context=unit_context,
+            )
+        except Exception as error:
+            return self._handle_ai_error(error)
+
+        return result
+
+    @XBlock.json_handler
+    def generate_teacher_component_edit(self, data, suffix=""):
+        """Edita un componente activo a partir del prompt docente."""
+        payload = self._extract_handler_payload(data)
+        from .services.component_service import (
+            generate_component_edit_from_teacher_prompt,
+        )
+        prompt_docente = payload.get("prompt_docente")
+        active_component = payload.get("active_component")
+        unit_context = self._build_context_payload(
+            payload,
+            preferred_key="unit_context",
+        )
+
+        try:
+            result = generate_component_edit_from_teacher_prompt(
+                prompt_docente,
+                active_component,
+                unit_context=unit_context,
+            )
+        except Exception as error:
+            return self._handle_ai_error(error)
+
+        return result

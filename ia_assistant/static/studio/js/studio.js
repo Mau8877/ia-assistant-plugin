@@ -30,17 +30,35 @@
         var settings = initArgs || {};
         var root = getRootFromElement(element);
         var saveUrl = "";
+        var generateTeacherUnitUrl = "";
+        var generateTeacherComponentCreateUrl = "";
+        var generateTeacherComponentEditUrl = "";
 
         if (
             runtime &&
             typeof runtime.handlerUrl === "function"
         ) {
             saveUrl = runtime.handlerUrl(element, "save_unit");
+            generateTeacherUnitUrl = runtime.handlerUrl(
+                element,
+                "generate_teacher_unit"
+            );
+            generateTeacherComponentCreateUrl = runtime.handlerUrl(
+                element,
+                "generate_teacher_component_create"
+            );
+            generateTeacherComponentEditUrl = runtime.handlerUrl(
+                element,
+                "generate_teacher_component_edit"
+            );
         }
 
         if (window.IAAssistant.Studio.Api) {
             window.IAAssistant.Studio.Api.configure({
-                saveUrl: saveUrl
+                saveUrl: saveUrl,
+                generateTeacherUnitUrl: generateTeacherUnitUrl,
+                generateTeacherComponentCreateUrl: generateTeacherComponentCreateUrl,
+                generateTeacherComponentEditUrl: generateTeacherComponentEditUrl
             });
         }
 

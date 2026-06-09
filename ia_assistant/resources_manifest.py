@@ -8,6 +8,7 @@ STUDIO_CSS_PATHS = [
     "studio/css/layout.css",
     "studio/css/forms.css",
     "studio/widgets/confirm_modal/confirm_modal.css",
+    "studio/widgets/chatbar_ia/chatbar_ia.css",
     "studio/widgets/component_picker/component_picker.css",
     "studio/widgets/component_tabs/component_tabs.css",
     "vendor/toastui/toastui-editor.min.css",

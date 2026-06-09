@@ -1,193 +1,285 @@
 <section class="ia-assistant-studio" data-ia-assistant-studio>
-    <div class="ia-assistant-studio__workspace">
-        <header class="ia-assistant-studio__header">
-            <h2 class="ia-assistant-studio__title">IA Assistant</h2>
-            <p class="ia-assistant-studio__subtitle">
-                Constructor de unidad interactiva.
-            </p>
-        </header>
+  <div class="ia-assistant-studio__workspace">
+    <header class="ia-assistant-studio__header">
+      <h2 class="ia-assistant-studio__title">IA Assistant</h2>
+      <p class="ia-assistant-studio__subtitle">
+        Constructor de unidad interactiva.
+      </p>
+    </header>
 
-        <section class="ia-assistant-builder-card" aria-label="Gestion de componentes">
-            <div class="ia-assistant-builder-card__content">
-                <label
-                    class="ia-assistant-builder-card__title"
-                    for="ia-assistant-unit-title"
-                >
-                    Titulo de la unidad
-                </label>
-                <input
-                    class="ia-assistant-builder-card__title-input"
-                    id="ia-assistant-unit-title"
-                    name="ia_assistant_unit_title"
-                    type="text"
-                    value="Unidad sin titulo"
-                    data-ia-assistant-unit-title
-                >
-            </div>
-
-            <div class="ia-assistant-component-picker">
-                <button
-                    class="ia-assistant-component-picker__button"
-                    type="button"
-                    aria-label="Agregar componente"
-                >
-                    + Agregar componente
-                </button>
-                <button
-                    class="ia-assistant-save-button"
-                    type="button"
-                    aria-label="Guardar unidad"
-                >
-                    Guardar
-                </button>
-                <button
-                    class="ia-assistant-student-preview-button"
-                    type="button"
-                    aria-label="Abrir vista previa alumno"
-                    data-ia-assistant-student-preview-button
-                >
-                    Vista previa alumno
-                </button>
-                <button
-                    class="ia-assistant-json-toggle"
-                    type="button"
-                    aria-label="Ver JSON de la unidad"
-                >
-                    Ver JSON
-                </button>
-                <span
-                    class="ia-assistant-save-status"
-                    role="status"
-                    aria-live="polite"
-                    hidden
-                ></span>
-            </div>
-        </section>
-
-        <div
-            class="ia-assistant-json-panel"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="ia-assistant-json-title"
-            hidden
+    <section
+      class="ia-assistant-builder-card"
+      aria-label="Gestion de componentes"
+    >
+      <div class="ia-assistant-builder-card__content">
+        <label
+          class="ia-assistant-builder-card__title"
+          for="ia-assistant-unit-title"
         >
-            <div class="ia-assistant-json-modal">
-                <header class="ia-assistant-json-modal__header">
-                    <h3
-                        class="ia-assistant-json-modal__title"
-                        id="ia-assistant-json-title"
-                    >
-                        JSON de la unidad
-                    </h3>
-                    <div class="ia-assistant-json-modal__actions">
-                        <button class="ia-assistant-json-copy" type="button">
-                            Copiar JSON
-                        </button>
-                        <button
-                            class="ia-assistant-json-close"
-                            type="button"
-                            aria-label="Cerrar JSON"
-                        >
-                            X
-                        </button>
-                    </div>
-                </header>
-                <pre class="ia-assistant-json-output"></pre>
-            </div>
-        </div>
+          Titulo de la unidad
+        </label>
+        <input
+          class="ia-assistant-builder-card__title-input"
+          id="ia-assistant-unit-title"
+          name="ia_assistant_unit_title"
+          type="text"
+          value="Unidad sin titulo"
+          data-ia-assistant-unit-title
+        />
+      </div>
 
-        <div
-            class="ia-assistant-student-preview"
-            data-ia-assistant-student-preview
-            hidden
+      <div class="ia-assistant-component-picker">
+        <button
+          class="ia-assistant-component-picker__button"
+          type="button"
+          aria-label="Agregar componente"
         >
-            <div
-                class="ia-assistant-student-preview__backdrop"
-                data-ia-assistant-student-preview-close
-            ></div>
-            <section
-                class="ia-assistant-student-preview__dialog"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="ia-assistant-student-preview-title"
+          + Agregar componente
+        </button>
+        <button
+          class="ia-assistant-save-button"
+          type="button"
+          aria-label="Guardar unidad"
+        >
+          Guardar
+        </button>
+        <button
+          class="ia-assistant-student-preview-button"
+          type="button"
+          aria-label="Abrir vista previa alumno"
+          data-ia-assistant-student-preview-button
+        >
+          Vista previa alumno
+        </button>
+        <button
+          class="ia-assistant-json-toggle"
+          type="button"
+          aria-label="Ver JSON de la unidad"
+        >
+          Ver JSON
+        </button>
+        <span
+          class="ia-assistant-save-status"
+          role="status"
+          aria-live="polite"
+          hidden
+        ></span>
+      </div>
+    </section>
+
+    <div
+      class="ia-assistant-json-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ia-assistant-json-title"
+      hidden
+    >
+      <div class="ia-assistant-json-modal">
+        <header class="ia-assistant-json-modal__header">
+          <h3
+            class="ia-assistant-json-modal__title"
+            id="ia-assistant-json-title"
+          >
+            JSON de la unidad
+          </h3>
+          <div class="ia-assistant-json-modal__actions">
+            <button class="ia-assistant-json-copy" type="button">
+              Copiar JSON
+            </button>
+            <button
+              class="ia-assistant-json-close"
+              type="button"
+              aria-label="Cerrar JSON"
             >
-                <header class="ia-assistant-student-preview__header">
-                    <div>
-                        <p class="ia-assistant-student-preview__eyebrow">
-                            Vista previa alumno
-                        </p>
-                        <h3
-                            class="ia-assistant-student-preview__title"
-                            id="ia-assistant-student-preview-title"
-                        >
-                            Asi vera la unidad el estudiante
-                        </h3>
-                    </div>
-                    <button
-                        class="ia-assistant-student-preview__close"
-                        type="button"
-                        aria-label="Cerrar vista previa alumno"
-                        data-ia-assistant-student-preview-close
-                    >
-                        Cerrar
-                    </button>
-                </header>
-
-                <div class="ia-assistant-student-preview__body">
-                    <div class="ia-assistant-student" data-ia-assistant-student-root>
-                        <header class="ia-assistant-student__header">
-                            <p class="ia-assistant-student__eyebrow">IA Assistant</p>
-                            <h2
-                                class="ia-assistant-student__title"
-                                data-ia-assistant-student-title
-                            ></h2>
-                        </header>
-                        <div
-                            class="ia-assistant-student__notice"
-                            data-ia-assistant-student-notice
-                            hidden
-                        ></div>
-                        <main
-                            class="ia-assistant-student__components"
-                            data-ia-assistant-student-components
-                        ></main>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <section class="ia-assistant-component-tabs" aria-label="Tabs de componentes">
-            <p class="ia-assistant-component-tabs__empty">
-                Aun no hay componentes. Usa Agregar componente para crear teoria,
-                quiz, pregunta abierta o codigo.
-            </p>
-        </section>
-
-        <section class="ia-assistant-component-editor" aria-label="Editor del componente activo">
-            <div class="ia-assistant-component-editor__empty">
-                <p class="ia-assistant-component-editor__message">
-                    Selecciona un componente o agrega uno nuevo para comenzar a editar.
-                </p>
-            </div>
-        </section>
+              X
+            </button>
+          </div>
+        </header>
+        <pre class="ia-assistant-json-output"></pre>
+      </div>
     </div>
 
-    <form class="ia-assistant-chatbar" data-ia-assistant-chatbar>
-        <label class="ia-assistant-chatbar__label" for="ia-assistant-chatbar-message">
-            Chatbar IA
-        </label>
-        <div class="ia-assistant-chatbar__controls">
-            <textarea
-                class="ia-assistant-chatbar__textarea"
-                id="ia-assistant-chatbar-message"
-                name="ia_assistant_chatbar_message"
-                rows="1"
-                placeholder="Escribe una indicacion para preparar la unidad."
-                data-ia-assistant-chatbar-textarea
-            ></textarea>
-            <button class="ia-assistant-chatbar__button" type="submit">
-                Enviar
-            </button>
+    <div
+      class="ia-assistant-student-preview"
+      data-ia-assistant-student-preview
+      hidden
+    >
+      <div
+        class="ia-assistant-student-preview__backdrop"
+        data-ia-assistant-student-preview-close
+      ></div>
+      <section
+        class="ia-assistant-student-preview__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ia-assistant-student-preview-title"
+      >
+        <header class="ia-assistant-student-preview__header">
+          <div>
+            <p class="ia-assistant-student-preview__eyebrow">
+              Vista previa alumno
+            </p>
+            <h3
+              class="ia-assistant-student-preview__title"
+              id="ia-assistant-student-preview-title"
+            >
+              Asi vera la unidad el estudiante
+            </h3>
+          </div>
+          <button
+            class="ia-assistant-student-preview__close"
+            type="button"
+            aria-label="Cerrar vista previa alumno"
+            data-ia-assistant-student-preview-close
+          >
+            Cerrar
+          </button>
+        </header>
+
+        <div class="ia-assistant-student-preview__body">
+          <div class="ia-assistant-student" data-ia-assistant-student-root>
+            <header class="ia-assistant-student__header">
+              <p class="ia-assistant-student__eyebrow">IA Assistant</p>
+              <h2
+                class="ia-assistant-student__title"
+                data-ia-assistant-student-title
+              ></h2>
+            </header>
+            <div
+              class="ia-assistant-student__notice"
+              data-ia-assistant-student-notice
+              hidden
+            ></div>
+            <main
+              class="ia-assistant-student__components"
+              data-ia-assistant-student-components
+            ></main>
+          </div>
         </div>
-    </form>
+      </section>
+    </div>
+
+    <section
+      class="ia-assistant-component-tabs"
+      aria-label="Tabs de componentes"
+    >
+      <p class="ia-assistant-component-tabs__empty">
+        Aun no hay componentes. Usa Agregar componente para crear teoria, quiz,
+        pregunta abierta o codigo.
+      </p>
+    </section>
+
+    <section
+      class="ia-assistant-component-editor"
+      aria-label="Editor del componente activo"
+    >
+      <div class="ia-assistant-component-editor__empty">
+        <p class="ia-assistant-component-editor__message">
+          Selecciona un componente o agrega uno nuevo para comenzar a editar.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <form class="ia-assistant-chatbar" data-ia-assistant-chatbar>
+    <div class="ia-assistant-chatbar__row">
+      <select
+        class="ia-assistant-chatbar__mode-select"
+        aria-label="Modo de IA"
+        data-ia-assistant-chatbar-mode-select
+      >
+        <option value="unit">Generar Unidad</option>
+        <option value="create">Crear Componente</option>
+        <option value="edit">Editar Componente</option>
+      </select>
+
+      <div
+        class="ia-assistant-chatbar__context"
+        data-ia-assistant-chatbar-context
+      >
+        <span
+          class="ia-assistant-chatbar__context-pill"
+          data-ia-assistant-chatbar-unit-context
+        >
+          Unidad
+        </span>
+
+        <select
+          class="ia-assistant-chatbar__component-type"
+          aria-label="Tipo de componente"
+          data-ia-assistant-chatbar-component-type
+          hidden
+        >
+          <option value="teoria">Teoría</option>
+          <option value="quiz_multiple">Quiz</option>
+          <option value="pregunta_abierta">Pregunta abierta</option>
+          <option value="codigo">Código</option>
+        </select>
+
+        <span
+          class="ia-assistant-chatbar__active-component"
+          data-ia-assistant-chatbar-active-component
+          hidden
+        >
+          <span
+            class="ia-assistant-chatbar__active-title"
+            data-ia-assistant-chatbar-active-title
+          >
+            Sin componente activo
+          </span>
+          <span
+            class="ia-assistant-chatbar__active-type"
+            data-ia-assistant-chatbar-active-type
+          ></span>
+        </span>
+      </div>
+
+      <textarea
+        class="ia-assistant-chatbar__textarea"
+        id="ia-assistant-chatbar-message"
+        name="ia_assistant_chatbar_message"
+        rows="1"
+        placeholder="Escribe qué quieres que haga la IA..."
+        data-ia-assistant-chatbar-textarea
+      ></textarea>
+
+      <button
+        class="ia-assistant-chatbar__button"
+        type="submit"
+        aria-label="Generar propuesta"
+        data-ia-assistant-chatbar-submit
+      >
+        ↑
+      </button>
+    </div>
+
+    <div class="ia-assistant-chatbar__footer">
+      <p
+        class="ia-assistant-chatbar__status ia-assistant-chatbar__status--neutral"
+        data-ia-assistant-chatbar-status
+        hidden
+      ></p>
+
+      <div
+        class="ia-assistant-chatbar__proposal-actions"
+        data-ia-assistant-chatbar-proposal-actions
+        hidden
+      >
+        <button
+          class="ia-assistant-chatbar__apply"
+          type="button"
+          data-ia-assistant-chatbar-apply
+        >
+          Aplicar
+        </button>
+        <button
+          class="ia-assistant-chatbar__discard"
+          type="button"
+          data-ia-assistant-chatbar-discard
+        >
+          Descartar
+        </button>
+      </div>
+    </div>
+  </form>
 </section>

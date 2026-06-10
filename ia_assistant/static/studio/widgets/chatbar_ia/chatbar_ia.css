@@ -30,70 +30,58 @@
   width: 100%;
 }
 
-.ia-assistant-chatbar__mode-select,
-.ia-assistant-chatbar__component-type {
-  background: #f8fafc;
-  border: 1px solid var(--ia-assistant-color-border);
-  border-radius: 999px;
-  color: var(--ia-assistant-color-text);
-  cursor: pointer;
-  flex: 0 0 auto;
-  font-size: 13px;
-  font-weight: 700;
-  height: 42px;
-  max-width: 180px;
-  outline: none;
-  padding: 0 12px;
-}
-
-.ia-assistant-chatbar__mode-select:focus,
-.ia-assistant-chatbar__component-type:focus {
-  border-color: #1f4178;
-  box-shadow: 0 0 0 3px rgba(31, 65, 120, 0.12);
-}
-
-.ia-assistant-chatbar__context {
-  align-items: center;
-  display: flex;
-  flex: 0 0 auto;
-  min-height: 42px;
-  max-width: 280px;
-}
-
-.ia-assistant-chatbar__context-pill,
-.ia-assistant-chatbar__active-component {
+.ia-assistant-chatbar__intent {
   align-items: center;
   background: #f8fafc;
   border: 1px solid var(--ia-assistant-color-border);
   border-radius: 999px;
   color: var(--ia-assistant-color-muted);
   display: inline-flex;
+  flex: 0 0 auto;
   font-size: 13px;
   font-weight: 800;
-  gap: 8px;
   height: 42px;
-  max-width: 280px;
+  max-width: 320px;
+  min-width: 165px;
   padding: 0 12px;
   white-space: nowrap;
 }
 
-.ia-assistant-chatbar__active-title {
-  color: var(--ia-assistant-color-text);
+.ia-assistant-chatbar__intent-label {
   display: block;
-  max-width: 170px;
+  max-width: 290px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.ia-assistant-chatbar__active-type {
+.ia-assistant-chatbar__intent--idle {
+  background: #f8fafc;
+  border-color: var(--ia-assistant-color-border);
+  color: var(--ia-assistant-color-muted);
+}
+
+.ia-assistant-chatbar__intent--unit {
   background: #eef4ff;
-  border: 1px solid #cfe0ff;
-  border-radius: 999px;
+  border-color: #cfe0ff;
   color: #1e3a8a;
-  flex: 0 0 auto;
-  font-size: 11px;
-  font-weight: 800;
-  padding: 4px 8px;
+}
+
+.ia-assistant-chatbar__intent--create {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.ia-assistant-chatbar__intent--edit {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
+}
+
+.ia-assistant-chatbar__intent--warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
 }
 
 .ia-assistant-chatbar__textarea {
@@ -105,10 +93,10 @@
   flex: 1 1 auto;
   font-size: 14px;
   line-height: 1.35;
-  max-height: 96px;
+  max-height: 82px;
   min-height: 42px;
   outline: none;
-  overflow-y: auto;
+  overflow-y: hidden;
   padding: 11px 14px;
   resize: none;
 }
@@ -127,7 +115,7 @@
   cursor: pointer;
   display: inline-flex;
   flex: 0 0 auto;
-  font-size: 24px;
+  font-size: 14px;
   font-weight: 800;
   height: 42px;
   justify-content: center;
@@ -141,9 +129,7 @@
 }
 
 .ia-assistant-chatbar__button:disabled,
-.ia-assistant-chatbar__textarea:disabled,
-.ia-assistant-chatbar__mode-select:disabled,
-.ia-assistant-chatbar__component-type:disabled {
+.ia-assistant-chatbar__textarea:disabled {
   cursor: not-allowed;
   opacity: 0.65;
 }
@@ -249,18 +235,17 @@
     flex-wrap: wrap;
   }
 
-  .ia-assistant-chatbar__mode-select,
-  .ia-assistant-chatbar__context,
-  .ia-assistant-chatbar__textarea {
+  .ia-assistant-chatbar__intent {
     flex: 1 1 auto;
+    max-width: none;
   }
 
-  .ia-assistant-chatbar__context {
+  .ia-assistant-chatbar__intent-label {
     max-width: none;
   }
 
   .ia-assistant-chatbar__textarea {
-    flex-basis: 100%;
+    flex: 1 1 100%;
   }
 
   .ia-assistant-chatbar__footer {

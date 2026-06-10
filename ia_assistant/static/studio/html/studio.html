@@ -188,54 +188,15 @@
 
   <form class="ia-assistant-chatbar" data-ia-assistant-chatbar>
     <div class="ia-assistant-chatbar__row">
-      <select
-        class="ia-assistant-chatbar__mode-select"
-        aria-label="Modo de IA"
-        data-ia-assistant-chatbar-mode-select
-      >
-        <option value="unit">Generar Unidad</option>
-        <option value="create">Crear Componente</option>
-        <option value="edit">Editar Componente</option>
-      </select>
-
       <div
-        class="ia-assistant-chatbar__context"
-        data-ia-assistant-chatbar-context
+        class="ia-assistant-chatbar__intent ia-assistant-chatbar__intent--idle"
+        data-ia-assistant-chatbar-intent
       >
         <span
-          class="ia-assistant-chatbar__context-pill"
-          data-ia-assistant-chatbar-unit-context
+          class="ia-assistant-chatbar__intent-label"
+          data-ia-assistant-chatbar-intent-label
         >
-          Unidad
-        </span>
-
-        <select
-          class="ia-assistant-chatbar__component-type"
-          aria-label="Tipo de componente"
-          data-ia-assistant-chatbar-component-type
-          hidden
-        >
-          <option value="teoria">Teoría</option>
-          <option value="quiz_multiple">Quiz</option>
-          <option value="pregunta_abierta">Pregunta abierta</option>
-          <option value="codigo">Código</option>
-        </select>
-
-        <span
-          class="ia-assistant-chatbar__active-component"
-          data-ia-assistant-chatbar-active-component
-          hidden
-        >
-          <span
-            class="ia-assistant-chatbar__active-title"
-            data-ia-assistant-chatbar-active-title
-          >
-            Sin componente activo
-          </span>
-          <span
-            class="ia-assistant-chatbar__active-type"
-            data-ia-assistant-chatbar-active-type
-          ></span>
+          Auto: escribe una indicación
         </span>
       </div>
 
@@ -244,7 +205,7 @@
         id="ia-assistant-chatbar-message"
         name="ia_assistant_chatbar_message"
         rows="1"
-        placeholder="Escribe qué quieres que haga la IA..."
+        placeholder="Ejemplo: Crea un componente teoría sobre arqueología..."
         data-ia-assistant-chatbar-textarea
       ></textarea>
 
@@ -254,7 +215,7 @@
         aria-label="Generar propuesta"
         data-ia-assistant-chatbar-submit
       >
-        ↑
+        →
       </button>
     </div>
 

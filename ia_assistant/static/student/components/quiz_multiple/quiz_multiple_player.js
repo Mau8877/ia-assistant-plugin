@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     "use strict";
 
     window.IAAssistant = window.IAAssistant || {};
@@ -23,14 +23,13 @@
         return list.indexOf(value) >= 0;
     }
 
-    function getSelectedOptionIds(form) {
+    function getSelectedOptionIdsFromGroup(groupName) {
         var selected = [];
-        var inputs = form.querySelectorAll("input:checked");
-
+        var selector = 'input[name="' + groupName + '"]:checked';
+        var inputs = document.querySelectorAll(selector);
         Array.prototype.forEach.call(inputs, function (input) {
             selected.push(input.value);
         });
-
         return selected;
     }
 
@@ -208,7 +207,7 @@
         );
     }
 
-    function renderOption(option, inputType, groupName, index) {
+    function renderOption(option, inputType, groupName, index, componentId) {
         var optionId = getOptionId(option, index);
         var fieldId = groupName + "_" + getSafeFieldId(optionId);
         var label = createElement("label", "ia-assistant-student-quiz__option");
@@ -225,6 +224,32 @@
         label.setAttribute("for", fieldId);
         label.appendChild(input);
         label.appendChild(text);
+
+        // reflect existing answer if present
+        try {
+            var existing = window.IAAssistant.Student.Answers && window.IAAssistant.Student.Answers.getAnswer(componentId);
+            if (existing && existing.value) {
+                var val = existing.value;
+                if (Array.isArray(val) && val.indexOf(optionId) >= 0) input.checked = true;
+                if (!Array.isArray(val) && String(val) === String(optionId)) input.checked = true;
+            }
+        } catch (e) {
+            // ignore
+        }
+
+        input.addEventListener('change', function () {
+            // gather selection for this group
+            var selected = getSelectedOptionIdsFromGroup(groupName);
+            var payload = {
+                componentId: componentId,
+                tipo: 'quiz_multiple',
+                value: selected.length === 1 ? selected[0] : selected,
+                metadata: { checked: false }
+            };
+            if (window.IAAssistant && window.IAAssistant.Student && window.IAAssistant.Student.Answers) {
+                window.IAAssistant.Student.Answers.setAnswer(componentId, payload);
+            }
+        });
 
         return label;
     }
@@ -261,7 +286,7 @@
             result.className = "ia-assistant-student-quiz__result";
             result.textContent = "";
 
-            selectedIds = getSelectedOptionIds(form);
+            selectedIds = getSelectedOptionIdsFromGroup(groupName);
 
             if (!selectedIds.length) {
                 result.classList.add("ia-assistant-student-quiz__result--warning");
@@ -281,6 +306,17 @@
                     "ia-assistant-student-quiz__summary--warning"
                 ));
                 renderSelectedOnly(selectedIds, optionMap, result);
+
+                // persist answer partially
+                if (window.IAAssistant && window.IAAssistant.Student && window.IAAssistant.Student.Answers) {
+                    window.IAAssistant.Student.Answers.setAnswer(component.id, {
+                        componentId: component.id,
+                        tipo: 'quiz_multiple',
+                        value: selectedIds.length === 1 ? selectedIds[0] : selectedIds,
+                        metadata: { checked: true }
+                    });
+                }
+
                 return;
             }
 
@@ -313,6 +349,17 @@
                         "ia-assistant-student-quiz__summary--warning"
                 ));
                 renderMultipleDetails(selectionDetails, optionMap, result);
+
+                // persist checked state
+                if (window.IAAssistant && window.IAAssistant.Student && window.IAAssistant.Student.Answers) {
+                    window.IAAssistant.Student.Answers.setAnswer(component.id, {
+                        componentId: component.id,
+                        tipo: 'quiz_multiple',
+                        value: selectedIds.length === 1 ? selectedIds[0] : selectedIds,
+                        metadata: { checked: true, isCorrect: !!isCorrect }
+                    });
+                }
+
                 return;
             }
 
@@ -328,6 +375,16 @@
                     "ia-assistant-student-quiz__summary--error"
             ));
             renderSingleDetails(selectedIds, correctIds, optionMap, isCorrect, result);
+
+            // persist checked state
+            if (window.IAAssistant && window.IAAssistant.Student && window.IAAssistant.Student.Answers) {
+                window.IAAssistant.Student.Answers.setAnswer(component.id, {
+                    componentId: component.id,
+                    tipo: 'quiz_multiple',
+                    value: selectedIds.length === 1 ? selectedIds[0] : selectedIds,
+                    metadata: { checked: true, isCorrect: !!isCorrect }
+                });
+            }
         });
 
         quiz.appendChild(questionElement);
@@ -343,7 +400,7 @@
         }
 
         options.forEach(function (option, index) {
-            optionsContainer.appendChild(renderOption(option || {}, inputType, groupName, index));
+            optionsContainer.appendChild(renderOption(option || {}, inputType, groupName, index, component.id));
         });
 
         checkButton.type = "submit";

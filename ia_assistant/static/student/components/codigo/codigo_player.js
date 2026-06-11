@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     "use strict";
 
     window.IAAssistant = window.IAAssistant || {};
@@ -200,10 +200,39 @@
         textarea.setAttribute("aria-label", "Editor de codigo del estudiante");
         bindEditorKeys(textarea);
 
+        // prefill from frontend answers if present
+        try {
+            var existing = window.IAAssistant.Student.Answers && window.IAAssistant.Student.Answers.getAnswer(component.id);
+            if (existing && typeof existing.value === 'string') {
+                textarea.value = existing.value;
+            }
+        } catch (e) {}
+
+        textarea.addEventListener('input', function () {
+            if (window.IAAssistant && window.IAAssistant.Student && window.IAAssistant.Student.Answers) {
+                window.IAAssistant.Student.Answers.setAnswer(component.id, {
+                    componentId: component.id,
+                    tipo: 'codigo',
+                    value: textarea.value,
+                    metadata: { lenguaje: data.lenguaje || '' }
+                });
+            }
+        });
+
         resetButton.type = "button";
         resetButton.addEventListener("click", function () {
             textarea.value = baseCode;
             textarea.focus();
+
+            // update frontend answer to baseCode
+            if (window.IAAssistant && window.IAAssistant.Student && window.IAAssistant.Student.Answers) {
+                window.IAAssistant.Student.Answers.setAnswer(component.id, {
+                    componentId: component.id,
+                    tipo: 'codigo',
+                    value: textarea.value,
+                    metadata: { lenguaje: data.lenguaje || '' }
+                });
+            }
         });
 
         label.appendChild(textarea);

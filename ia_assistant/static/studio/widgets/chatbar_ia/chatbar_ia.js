@@ -13,18 +13,22 @@
     return textarea && textarea.value ? textarea.value.trim() : "";
   }
 
-  function normalizeText(value) {
-    var text = value || "";
+  function detectIntent(prompt) {
+    var Detector = window.IAAssistant.Studio.ChatbarIntentDetector;
+    var activeComponent = window.IAAssistant.Studio.State.getActiveComponent();
 
-    return text
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-  }
+    if (!Detector || typeof Detector.detect !== "function") {
+      return {
+        mode: "unit",
+        componentType: "",
+        confidence: "low",
+        scores: { unit: 0, create: 0, edit: 0 },
+        reason: "Detector de intención no disponible."
+      };
+    }
 
-  function includesAny(text, words) {
-    return words.some(function (word) {
-      return text.indexOf(word) >= 0;
+    return Detector.detect(prompt, {
+      activeComponent: activeComponent
     });
   }
 
@@ -122,192 +126,6 @@
     textarea.style.height = textarea.scrollHeight + "px";
     textarea.style.overflowY = "hidden";
   }
-
-  function detectComponentType(prompt) {
-    var text = normalizeText(prompt);
-
-    if (
-      includesAny(text, [
-        "pregunta abierta",
-        "respuesta abierta",
-        "pregunta de desarrollo",
-        "desarrollo",
-        "reflexion",
-        "reflexiva",
-      ])
-    ) {
-      return "pregunta_abierta";
-    }
-
-    if (
-      includesAny(text, [
-        "quiz",
-        "cuestionario",
-        "seleccion multiple",
-        "opcion multiple",
-        "opciones",
-        "pregunta multiple",
-        "preguntas multiples",
-        "test",
-      ])
-    ) {
-      return "quiz_multiple";
-    }
-
-    if (
-      includesAny(text, [
-        "codigo",
-        "programa",
-        "programacion",
-        "algoritmo",
-        "ejercicio de codigo",
-        "java",
-        "python",
-        "javascript",
-        "typescript",
-        "c++",
-        "c#",
-        "php",
-        "html",
-        "css",
-      ])
-    ) {
-      return "codigo";
-    }
-
-    if (
-      includesAny(text, [
-        "teoria",
-        "teorico",
-        "explicacion",
-        "contenido teorico",
-        "lectura",
-        "concepto",
-        "conceptos",
-      ])
-    ) {
-      return "teoria";
-    }
-
-    return "";
-  }
-
-  function detectPromptIntent(prompt) {
-    var text = normalizeText(prompt);
-    var componentType = detectComponentType(prompt);
-    var hasPrompt = Boolean(text.trim());
-    var hasEditVerb;
-    var hasCreateVerb;
-    var hasUnitWord;
-    var hasComponentWord;
-
-    if (!hasPrompt) {
-      return {
-        mode: MODE_IDLE,
-        componentType: "",
-        confidence: "low",
-      };
-    }
-
-    hasEditVerb = includesAny(text, [
-      "edita",
-      "editar",
-      "modifica",
-      "modificar",
-      "mejora",
-      "mejorar",
-      "corrige",
-      "corregir",
-      "reescribe",
-      "reescribir",
-      "ajusta",
-      "ajustar",
-      "cambia",
-      "cambiar",
-      "amplia este",
-      "resume este",
-      "agrega feedback",
-      "agregar feedback",
-      "feedbacks",
-    ]);
-
-    hasCreateVerb = includesAny(text, [
-      "crea",
-      "crear",
-      "genera",
-      "generar",
-      "haz",
-      "hacer",
-      "agrega",
-      "agregar",
-      "anade",
-      "añade",
-      "anadir",
-      "añadir",
-      "prepara",
-      "preparar",
-    ]);
-
-    hasUnitWord = includesAny(text, [
-      "unidad",
-      "tema",
-      "clase",
-      "leccion",
-      "leccion",
-      "modulo",
-      "curso",
-    ]);
-
-    hasComponentWord = includesAny(text, [
-      "componente",
-      "actividad",
-      "ejercicio",
-      "quiz",
-      "cuestionario",
-      "pregunta abierta",
-      "codigo",
-      "teoria",
-    ]);
-
-    if (hasEditVerb) {
-      return {
-        mode: MODE_EDIT,
-        componentType: "",
-        confidence: "high",
-      };
-    }
-
-    if (hasComponentWord && (hasCreateVerb || componentType)) {
-      return {
-        mode: MODE_CREATE,
-        componentType: componentType,
-        confidence: componentType ? "high" : "medium",
-      };
-    }
-
-    if (hasUnitWord) {
-      return {
-        mode: MODE_UNIT,
-        componentType: "",
-        confidence: "high",
-      };
-    }
-
-    if (componentType && hasCreateVerb) {
-      return {
-        mode: MODE_CREATE,
-        componentType: componentType,
-        confidence: "medium",
-      };
-    }
-
-    return {
-      mode: MODE_UNIT,
-      componentType: "",
-      confidence: "low",
-    };
-  }
-
   window.IAAssistant.Studio.ChatbarIA = {
     init: function (root) {
       var currentRoot = root || window.IAAssistant.Studio.Dom.getRoot();
@@ -475,11 +293,11 @@
       }
 
       function renderDetectedIntent() {
-        currentIntent = detectPromptIntent(getCleanPrompt(textarea));
+        currentIntent = detectIntent(getCleanPrompt(textarea));
 
         intentLabel.textContent = getIntentLabel(currentIntent);
         intentElement.className = getIntentClass(currentIntent);
-        intentElement.title = intentLabel.textContent;
+        intentElement.title = currentIntent.reason || intentLabel.textContent;
         resizeTextarea(textarea);
       }
 
@@ -614,7 +432,7 @@
 
       function generateProposal() {
         var prompt = getCleanPrompt(textarea);
-        var intent = detectPromptIntent(prompt);
+        var intent = detectIntent(prompt);
 
         currentIntent = intent;
         renderDetectedIntent();

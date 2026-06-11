@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     "use strict";
 
     window.IAAssistant = window.IAAssistant || {};
@@ -69,4 +69,57 @@
         getUnit: getUnit,
         getComponents: getComponents
     };
+
+    // Answers module: mantiene respuestas del alumno en memoria (solo frontend)
+    (function () {
+        var answersMap = Object.create(null);
+
+        function normalizeAnswer(ans) {
+            if (!ans || typeof ans !== 'object') return null;
+            var out = {
+                componentId: String(ans.componentId || ans.componentId === 0 ? ans.componentId : (ans.componentId || '')),
+                tipo: ans.tipo || '',
+                value: ans.value,
+                metadata: ans.metadata || {}
+            };
+            return out;
+        }
+
+        function setAnswer(componentId, answerPayload) {
+            if (!componentId) return false;
+            var payload = normalizeAnswer(answerPayload) || { componentId: componentId, tipo: (answerPayload && answerPayload.tipo) || '', value: (answerPayload && answerPayload.value) || null, metadata: (answerPayload && answerPayload.metadata) || {} };
+            payload.componentId = componentId;
+            answersMap[String(componentId)] = clone(payload);
+            return true;
+        }
+
+        function getAnswer(componentId) {
+            if (!componentId) return null;
+            var found = answersMap[String(componentId)];
+            return found ? clone(found) : null;
+        }
+
+        function getAllAnswers() {
+            return Object.keys(answersMap).map(function (k) { return clone(answersMap[k]); });
+        }
+
+        function clearAnswer(componentId) {
+            if (componentId) {
+                delete answersMap[String(componentId)];
+            }
+        }
+
+        function hasAnswers() {
+            return Object.keys(answersMap).length > 0;
+        }
+
+        window.IAAssistant.Student.Answers = {
+            setAnswer: setAnswer,
+            getAnswer: getAnswer,
+            getAllAnswers: getAllAnswers,
+            clearAnswer: clearAnswer,
+            hasAnswers: hasAnswers
+        };
+    }());
+
 }());

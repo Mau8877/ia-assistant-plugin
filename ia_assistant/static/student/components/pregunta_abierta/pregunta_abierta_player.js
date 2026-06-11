@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     "use strict";
 
     window.IAAssistant = window.IAAssistant || {};
@@ -41,6 +41,26 @@
             "ia-assistant-student-open-question__note",
             "Tu respuesta no se guarda todavia en esta vista previa."
         ));
+
+        // prefill if frontend answer exists
+        try {
+            var existing = window.IAAssistant.Student.Answers && window.IAAssistant.Student.Answers.getAnswer(component.id);
+            if (existing && typeof existing.value === 'string') {
+                textarea.value = existing.value;
+            }
+        } catch (e) {}
+
+        // save on input locally
+        textarea.addEventListener('input', function () {
+            if (window.IAAssistant && window.IAAssistant.Student && window.IAAssistant.Student.Answers) {
+                window.IAAssistant.Student.Answers.setAnswer(component.id, {
+                    componentId: component.id,
+                    tipo: 'pregunta_abierta',
+                    value: textarea.value,
+                    metadata: {}
+                });
+            }
+        });
 
         container.appendChild(wrapper);
     }

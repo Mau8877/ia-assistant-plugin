@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
     "use strict";
 
     window.IAAssistant = window.IAAssistant || {};
@@ -84,7 +84,8 @@
             teoria: components.TeoriaPlayer,
             quiz_multiple: components.QuizMultiplePlayer,
             pregunta_abierta: components.PreguntaAbiertaPlayer,
-            codigo: components.CodigoPlayer
+            codigo: components.CodigoPlayer,
+            revision: components.RevisionPlayer
         };
         var player = playerByType[component.tipo];
 
@@ -131,6 +132,17 @@
         return card;
     }
 
+    function unitHasAuditable(unit) {
+        var auditTypes = ["quiz_multiple", "pregunta_abierta", "codigo"];
+        return Array.isArray(unit.componentes) && unit.componentes.some(function (c) {
+            return auditTypes.indexOf(c.tipo) >= 0;
+        });
+    }
+
+    function hasRevisionComponent(unit) {
+        return Array.isArray(unit.componentes) && unit.componentes.some(function (c) { return c.tipo === 'revision'; });
+    }
+
     function render(root) {
         var Dom = window.IAAssistant.Student.Dom;
         var State = window.IAAssistant.Student.State;
@@ -153,7 +165,21 @@
             return;
         }
 
-        unit.componentes.forEach(function (component, index) {
+        // Prepare list to render; append synthetic revision if needed
+        var componentsToRender = unit.componentes.slice();
+        var auditable = unitHasAuditable(unit);
+        var hasRev = hasRevisionComponent(unit);
+
+        if (auditable && !hasRev) {
+            componentsToRender.push({
+                id: '__revision_auto__',
+                tipo: 'revision',
+                nombre: 'Revisión',
+                data: {}
+            });
+        }
+
+        componentsToRender.forEach(function (component, index) {
             container.appendChild(renderCard(component, index));
         });
     }

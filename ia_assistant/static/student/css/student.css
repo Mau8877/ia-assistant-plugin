@@ -680,6 +680,23 @@
   margin-top: var(--ia-assistant-space-sm);
   font-size: 0.95rem;
 }
+.ia-assistant-student-save-status {
+  color: var(--ia-assistant-color-muted);
+  font-size: 0.9rem;
+  margin: var(--ia-assistant-space-xs) 0 var(--ia-assistant-space-sm) 0;
+}
+.ia-assistant-student-save-status--pending {
+  color: #92400e;
+}
+.ia-assistant-student-save-status--saving {
+  color: #1d4ed8;
+}
+.ia-assistant-student-save-status--saved {
+  color: #166534;
+}
+.ia-assistant-student-save-status--error {
+  color: #991b1b;
+}
 .ia-assistant-student-revision__controls {
   display: flex;
   justify-content: flex-end;

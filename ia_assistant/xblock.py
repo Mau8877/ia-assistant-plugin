@@ -1,7 +1,7 @@
 import json
 
 from xblock.core import XBlock
-from xblock.fields import Scope, String
+from xblock.fields import Dict, Scope, String
 from web_fragments.fragment import Fragment
 
 from .services.ai_errors import AIError, ai_error_to_payload
@@ -44,6 +44,12 @@ class IAAssistantXBlock(XBlock):
         help="JSON final de la unidad.",
     )
 
+    student_answers = Dict(
+        default={},
+        scope=Scope.user_state,
+        help="Respuestas guardadas por el alumno para esta unidad.",
+    )
+
     sdk_view_mode = String(
         default="student",
         scope=Scope.settings,
@@ -60,8 +66,12 @@ class IAAssistantXBlock(XBlock):
         En XBlock SDK, el escenario Studio usa sdk_view_mode='studio'
         porque Workbench renderiza student_view por defecto.
         """
-        if self._is_sdk_studio_mode():
-            return self.studio_view(context)
+
+        # TEMPORAL SDK TEST:
+        # Forzar vista Student usando la misma instancia del escenario Studio.
+        # NO dejar esto en commit.
+        # if self._is_sdk_studio_mode():
+        #     return self.studio_view(context)
 
         initial_unit, load_warning = self._get_initial_unit()
         fragment = Fragment(read_static_text(STUDENT_HTML_PATH))
@@ -71,6 +81,11 @@ class IAAssistantXBlock(XBlock):
             "IAAssistantStudent",
             {
                 "initial_unit": initial_unit,
+                "initial_student_answers": (
+                    self.student_answers
+                    if isinstance(self.student_answers, dict)
+                    else {}
+                ),
                 "load_warning": load_warning,
             },
         )
@@ -91,11 +106,11 @@ class IAAssistantXBlock(XBlock):
         initialize_data["generate_teacher_unit_url"] = self._handler_url(
             "generate_teacher_unit"
         )
-        initialize_data["generate_teacher_component_create_url"] = self._handler_url(
-            "generate_teacher_component_create"
+        initialize_data["generate_teacher_component_create_url"] = (
+            self._handler_url("generate_teacher_component_create")
         )
-        initialize_data["generate_teacher_component_edit_url"] = self._handler_url(
-            "generate_teacher_component_edit"
+        initialize_data["generate_teacher_component_edit_url"] = (
+            self._handler_url("generate_teacher_component_edit")
         )
         fragment.initialize_js(
             "IAAssistantStudio",
@@ -187,8 +202,8 @@ class IAAssistantXBlock(XBlock):
             return False
 
         if (
-            component_type == "teoria" and
-            component_data.get("formato") != "markdown"
+            component_type == "teoria"
+            and component_data.get("formato") != "markdown"
         ):
             return False
 
@@ -236,7 +251,9 @@ class IAAssistantXBlock(XBlock):
         if isinstance(contexto, dict):
             return contexto
 
-        fallback_key = "unit_context" if preferred_key == "contexto" else "contexto"
+        fallback_key = (
+            "unit_context" if preferred_key == "contexto" else "contexto"
+        )
         contexto = payload.get(fallback_key)
 
         if isinstance(contexto, dict):
@@ -262,6 +279,12 @@ class IAAssistantXBlock(XBlock):
         Escenarios para probar el XBlock en XBlock SDK.
         """
         return [
+            (
+                "IA Assistant - Student SDK",
+                """
+                <ia_assistant sdk_view_mode="student"/>
+                """,
+            ),
             (
                 "IA Assistant - Studio SDK",
                 """
@@ -304,6 +327,149 @@ class IAAssistantXBlock(XBlock):
         }
 
     @XBlock.json_handler
+    def save_student_answers(self, data, suffix=""):
+        payload = self._extract_handler_payload(data)
+        answers = payload.get("answers")
+
+        if not isinstance(answers, dict):
+            return {
+                "ok": False,
+                "success": False,
+                "error": "El campo 'answers' debe ser un diccionario.",
+            }
+
+        unit, _ = self._get_initial_unit()
+        componentes = unit.get("componentes") if isinstance(unit, dict) else []
+        allowed_types = {"quiz_multiple", "pregunta_abierta", "codigo"}
+        component_map = {
+            component.get("id"): component
+            for component in componentes
+            if isinstance(component, dict)
+            and component.get("tipo") in allowed_types
+        }
+
+        normalized_answers = {}
+
+        for component_id, answer in answers.items():
+            if component_id not in component_map:
+                return {
+                    "ok": False,
+                    "success": False,
+                    "error": "Componente no valido: %s" % str(component_id),
+                }
+
+            if not isinstance(answer, dict):
+                return {
+                    "ok": False,
+                    "success": False,
+                    "error": "La respuesta para %s debe ser un objeto."
+                    % str(component_id),
+                }
+
+            component = component_map[component_id]
+            component_type = component.get("tipo")
+            answer_type = answer.get("tipo") or component_type
+
+            if answer_type != component_type:
+                return {
+                    "ok": False,
+                    "success": False,
+                    "error": "Tipo de respuesta invalido para %s."
+                    % str(component_id),
+                }
+
+            metadata = answer.get("metadata") or {}
+            if not isinstance(metadata, dict):
+                return {
+                    "ok": False,
+                    "success": False,
+                    "error": "metadata debe ser un diccionario para %s."
+                    % str(component_id),
+                }
+
+            value = answer.get("value")
+            normalized_value = None
+
+            if component_type == "quiz_multiple":
+                if (
+                    value is None
+                    or value == ""
+                    or (isinstance(value, list) and len(value) == 0)
+                ):
+                    normalized_value = value
+                elif isinstance(value, (str, int, float)):
+                    normalized_value = str(value)
+                elif isinstance(value, list):
+                    normalized_value = [str(v) for v in value]
+                else:
+                    return {
+                        "ok": False,
+                        "success": False,
+                        "error": "Valor de quiz_multiple invalido para %s."
+                        % str(component_id),
+                    }
+            elif component_type == "pregunta_abierta":
+                if value is None:
+                    normalized_value = ""
+                elif not isinstance(value, str):
+                    return {
+                        "ok": False,
+                        "success": False,
+                        "error": "Valor de pregunta_abierta debe ser texto para %s."
+                        % str(component_id),
+                    }
+                elif len(value) > 8000:
+                    return {
+                        "ok": False,
+                        "success": False,
+                        "error": "La respuesta para %s es demasiado larga."
+                        % str(component_id),
+                    }
+                else:
+                    normalized_value = value
+            elif component_type == "codigo":
+                if value is None:
+                    normalized_value = ""
+                elif not isinstance(value, str):
+                    return {
+                        "ok": False,
+                        "success": False,
+                        "error": "Valor de codigo debe ser texto para %s."
+                        % str(component_id),
+                    }
+                elif len(value) > 20000:
+                    return {
+                        "ok": False,
+                        "success": False,
+                        "error": "El codigo para %s es demasiado largo."
+                        % str(component_id),
+                    }
+                else:
+                    normalized_value = value
+            else:
+                return {
+                    "ok": False,
+                    "success": False,
+                    "error": "Tipo de componente no soportado: %s."
+                    % str(component_id),
+                }
+
+            normalized_answers[component_id] = {
+                "componentId": component_id,
+                "tipo": component_type,
+                "value": normalized_value,
+                "metadata": metadata,
+            }
+
+        self.student_answers = normalized_answers
+
+        return {
+            "ok": True,
+            "success": True,
+            "saved_count": len(normalized_answers),
+        }
+
+    @XBlock.json_handler
     def generate_teacher_unit(self, data, suffix=""):
         """Genera una unidad completa a partir del prompt docente."""
         payload = self._extract_handler_payload(data)
@@ -326,6 +492,7 @@ class IAAssistantXBlock(XBlock):
         from .services.component_service import (
             generate_component_create_from_teacher_prompt,
         )
+
         prompt_docente = payload.get("prompt_docente")
         target_component_type = payload.get("target_component_type")
         unit_context = self._build_context_payload(
@@ -351,6 +518,7 @@ class IAAssistantXBlock(XBlock):
         from .services.component_service import (
             generate_component_edit_from_teacher_prompt,
         )
+
         prompt_docente = payload.get("prompt_docente")
         active_component = payload.get("active_component")
         unit_context = self._build_context_payload(

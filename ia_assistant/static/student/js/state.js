@@ -160,6 +160,36 @@
       });
     }
 
+    function getAllAnswersMap() {
+      var out = Object.create(null);
+      Object.keys(answersMap).forEach(function (key) {
+        out[key] = clone(answersMap[key]);
+      });
+      return out;
+    }
+
+    function loadAnswers(initialAnswers) {
+      answersMap = Object.create(null);
+      if (!isObject(initialAnswers)) {
+        return getAllAnswersMap();
+      }
+
+      Object.keys(initialAnswers).forEach(function (componentId) {
+        var rawAnswer = initialAnswers[componentId];
+        if (!isObject(rawAnswer)) {
+          return;
+        }
+        var normalized = normalizeAnswer(rawAnswer);
+        if (!normalized) {
+          return;
+        }
+        normalized.componentId = String(componentId);
+        answersMap[String(componentId)] = normalized;
+      });
+
+      return getAllAnswersMap();
+    }
+
     function clearAnswer(componentId) {
       if (componentId) {
         delete answersMap[String(componentId)];
@@ -175,6 +205,8 @@
       setAnswer: setAnswer,
       getAnswer: getAnswer,
       getAllAnswers: getAllAnswers,
+      getAllAnswersMap: getAllAnswersMap,
+      loadAnswers: loadAnswers,
       clearAnswer: clearAnswer,
       hasAnswers: hasAnswers,
     };

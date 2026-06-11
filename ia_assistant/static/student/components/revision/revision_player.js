@@ -365,7 +365,7 @@
     var infoNote = createElement(
       "p",
       "ia-assistant-student-revision__note",
-      "Esta revisión resume tus respuestas en esta sesión. La evaluación con IA se conectará en una siguiente fase.",
+      "Esta sección resume tus respuestas y permite solicitar retroalimentación con IA.",
     );
     container.appendChild(infoNote);
 
@@ -398,9 +398,10 @@
 
     // Click handler
     reviewButton.addEventListener("click", function () {
-      // Disable button while processing
+      // Disable button while processing and prevent duplicate requests
       reviewButton.disabled = true;
-      reviewStatus.textContent = "Solicitando revisión...";
+      reviewButton.textContent = "Solicitando...";
+      reviewStatus.textContent = "";
       reviewResultContainer.innerHTML = "";
 
       var AutoSave = window.IAAssistant.Student.AutoSave;
@@ -418,21 +419,33 @@
 
         // Call backend
         if (!api || typeof api.requestReview !== "function") {
-          reviewStatus.textContent = "No se pudo solicitar la revisión";
+          reviewStatus.textContent = "No se pudo generar la revisión. Intenta nuevamente en unos momentos.";
           reviewButton.disabled = false;
+          reviewButton.textContent = "Solicitar revisión";
           return;
         }
 
+        // prevent duplicate requests: button already disabled at click start
         api.requestReview(runtime, element, [], function (result) {
           reviewButton.disabled = false;
+          reviewButton.textContent = "Solicitar revisión";
           if (!result || !result.ok) {
-            reviewStatus.textContent = "No se pudo solicitar la revisión";
-            reviewResultContainer.textContent =
-              (result && result.error) || "Error al solicitar revisión.";
+            reviewStatus.textContent = "No se pudo generar la revisión. Intenta nuevamente en unos momentos.";
+            reviewResultContainer.textContent = (result && result.error) || "No se pudo generar la revisión. Intenta nuevamente en unos momentos.";
             return;
           }
 
-          reviewStatus.textContent = "Revisión lista";
+          // show different confirmation based on status
+          var rev = result.review || {};
+          if (rev.status === "ai") {
+            reviewStatus.textContent = "Revisión generada con IA.";
+          } else if (rev.status === "mock") {
+            reviewStatus.textContent = "Revisión de prueba: la IA todavía no está conectada.";
+          } else {
+            reviewStatus.textContent = "Revisión lista";
+          }
+
+          // Render mock review in a polished card
 
           // Render mock review in a polished card
           var rev = result.review || {};
@@ -440,13 +453,11 @@
           var reviewCard = createElement("section", "ia-assistant-student-review-result");
           var header = createElement("div", "ia-assistant-student-review-result__header");
           header.appendChild(createElement("h3", "", "Resultado de revisión"));
-          header.appendChild(
-            createElement(
-              "p",
-              "",
-              "Revisión de prueba: la IA todavía no está conectada.",
-            ),
-          );
+
+          var subtitleText = "Revisión generada con IA.";
+          if (rev.status === "mock") subtitleText = "Revisión de prueba: la IA todavía no está conectada.";
+
+          header.appendChild(createElement("p", "", subtitleText));
           reviewCard.appendChild(header);
 
           // resumen general destacado
@@ -464,6 +475,22 @@
             "div",
             "ia-assistant-student-review-result__grid",
           );
+
+          // Show general recommendations if provided (max 4)
+          if (Array.isArray(rev.recomendaciones) && rev.recomendaciones.length) {
+            var recSection = createElement(
+              "div",
+              "ia-assistant-student-review-result__recommendations",
+            );
+            recSection.appendChild(createElement("h4", "", "Recomendaciones generales"));
+            var recList = createElement("ul", "ia-assistant-student-review-result__recommendations-list", "");
+            rev.recomendaciones.slice(0, 4).forEach(function (r) {
+              var li = createElement("li", "", r);
+              recList.appendChild(li);
+            });
+            recSection.appendChild(recList);
+            reviewCard.appendChild(recSection);
+          }
 
           var componentMap = getComponentMap();
           (Array.isArray(rev.componentes) ? rev.componentes : []).forEach(
@@ -504,40 +531,25 @@
               h.appendChild(createElement("h4", "ia-assistant-revision-card__title", titleText));
 
               // state badge
-              var state = (item.estado || "").toLowerCase();
-              var stateClass = "ia-assistant-badge--unknown";
-              switch (state) {
-                case "pendiente":
-                  stateClass = "ia-assistant-badge--pending";
-                  break;
-                case "respondido":
-                  stateClass = "ia-assistant-badge--responded";
-                  break;
-                case "respondido sin comprobar":
-                case "pendiente-check":
-                case "respondido sin comprobar":
-                  stateClass = "ia-assistant-badge--pending-check";
-                  break;
-                case "correcto":
-                case "bien":
-                  stateClass = "ia-assistant-badge--success";
-                  break;
-                case "revisar":
-                case "revisión":
-                case "revisar":
-                  stateClass = "ia-assistant-badge--error";
-                  break;
-                case "codigo escrito":
-                  stateClass = "ia-assistant-badge--code";
-                  break;
-                default:
-                  stateClass = "ia-assistant-badge--responded";
-              }
+              var rawState = (item.estado || "").toString();
+              var stateKey = rawState.toLowerCase();
+
+              // Map backend states to human labels and badge classes
+              var stateMap = {
+                "sin_respuesta": { label: "Sin respuesta", cls: "ia-assistant-badge--pending" },
+                "bien": { label: "Bien", cls: "ia-assistant-badge--success" },
+                "parcial": { label: "Parcial", cls: "ia-assistant-badge--parcial" },
+                "revisar": { label: "Revisar", cls: "ia-assistant-badge--error" },
+                "pendiente": { label: "Pendiente", cls: "ia-assistant-badge--pending" },
+                "respondido": { label: "Respondido", cls: "ia-assistant-badge--responded" },
+              };
+
+              var mapped = stateMap[stateKey] || { label: rawState || "", cls: "ia-assistant-badge--responded" };
 
               var stateBadge = createElement(
                 "span",
-                "ia-assistant-badge " + stateClass,
-                (item.estado || "").toString(),
+                "ia-assistant-badge " + mapped.cls,
+                mapped.label,
               );
 
               compBlock.appendChild(h);

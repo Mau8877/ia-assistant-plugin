@@ -53,7 +53,7 @@ class IAAssistantXBlock(XBlock):
     student_review_result = Dict(
         default={},
         scope=Scope.user_state,
-        help="Resultado de revisión IA por alumno."
+        help="Resultado de revisión IA por alumno.",
     )
 
     sdk_view_mode = String(
@@ -76,8 +76,8 @@ class IAAssistantXBlock(XBlock):
         # TEMPORAL SDK TEST:
         # Forzar vista Student usando la misma instancia del escenario Studio.
         # NO dejar esto en commit.
-        # if self._is_sdk_studio_mode():
-        #     return self.studio_view(context)
+        if self._is_sdk_studio_mode():
+            return self.studio_view(context)
 
         initial_unit, load_warning = self._get_initial_unit()
         fragment = Fragment(read_static_text(STUDENT_HTML_PATH))
@@ -493,7 +493,9 @@ class IAAssistantXBlock(XBlock):
                 "error": "Unidad no valida.",
             }
 
-        componentes = unit.get("componentes", []) if isinstance(unit, dict) else []
+        componentes = (
+            unit.get("componentes", []) if isinstance(unit, dict) else []
+        )
         allowed_types = {"quiz_multiple", "pregunta_abierta", "codigo"}
 
         # Construir mapa de componentes auditables desde unidad_json (no confiar en frontend)
@@ -503,86 +505,79 @@ class IAAssistantXBlock(XBlock):
                 continue
             cid = comp.get("id")
             ctype = comp.get("tipo")
-            if not self._is_non_empty_string(cid) or not self._is_non_empty_string(ctype):
+            if not self._is_non_empty_string(
+                cid
+            ) or not self._is_non_empty_string(ctype):
                 continue
             if ctype in allowed_types:
                 component_map[cid] = comp
 
         # Si frontend pidió ids, validarlos contra unidad_json.
         # Nota: una lista vacía o ausencia de component_ids significa "revisar todos".
-        if component_ids is not None and isinstance(component_ids, list) and len(component_ids) > 0:
+        if (
+            component_ids is not None
+            and isinstance(component_ids, list)
+            and len(component_ids) > 0
+        ):
             requested = [cid for cid in component_ids if cid in component_map]
-            componentes_a_revisar = {cid: component_map[cid] for cid in requested}
+            componentes_a_revisar = {
+                cid: component_map[cid] for cid in requested
+            }
         else:
             # component_ids ausente o vacío => revisar todos los auditables
             componentes_a_revisar = component_map
 
         if not componentes_a_revisar:
             # Añadir debug mínimo para facilitar diagnóstico en entorno de desarrollo
-            component_types = [c.get("tipo") for c in componentes if isinstance(c, dict)]
+            component_types = [
+                c.get("tipo") for c in componentes if isinstance(c, dict)
+            ]
             unidad_raw = getattr(self, "unidad_json", None)
-            unidad_empty = not bool(unidad_raw) or str(unidad_raw).strip() in ("", "{}")
+            unidad_empty = not bool(unidad_raw) or str(unidad_raw).strip() in (
+                "",
+                "{}",
+            )
             return {
                 "ok": False,
                 "success": False,
                 "error": "No hay componentes auditables para revisar.",
                 "debug": {
-                    "unit_title": unit.get("titulo") if isinstance(unit, dict) else "",
+                    "unit_title": (
+                        unit.get("titulo") if isinstance(unit, dict) else ""
+                    ),
                     "component_count": len(componentes),
                     "component_types": component_types,
                     "unidad_json_empty": unidad_empty,
                 },
             }
 
-        # Preparar revisión MOCK basándose en respuestas guardadas (sin IA)
-        answers = self.student_answers if isinstance(self.student_answers, dict) else {}
+        # Llamar al servicio real de revisión de estudiante (OpenRouter)
+        answers = (
+            self.student_answers
+            if isinstance(self.student_answers, dict)
+            else {}
+        )
 
-        componentes_review = []
-        for cid, comp in componentes_a_revisar.items():
-            ctype = comp.get("tipo")
-            estado = "pendiente"
-            comentario = "Sin respuesta guardada."
-            sugerencia = ""
+        from .services.student_review_service import generate_student_review
 
-            saved = answers.get(cid)
-            if isinstance(saved, dict):
-                val = saved.get("value")
-                has_value = False
-                if ctype == "quiz_multiple":
-                    if val is None or val == "" or (isinstance(val, list) and len(val) == 0):
-                        has_value = False
-                    else:
-                        has_value = True
-                elif ctype == "codigo":
-                    has_value = isinstance(val, str) and bool(val.strip())
-                else:  # pregunta_abierta u otros
-                    has_value = isinstance(val, str) and bool(val.strip())
+        result = generate_student_review(
+            unit, answers, component_ids=list(componentes_a_revisar.keys())
+        )
 
-                if has_value:
-                    estado = "respondido"
-                    comentario = "Respuesta encontrada."
-                else:
-                    estado = "pendiente"
-                    comentario = "Respuesta vacía."
+        # Si el servicio devolvió un error IA, result tendrá ok False y keys de error
+        if not isinstance(result, dict) or not result.get("ok"):
+            # Convertir a payload manejable por frontend
+            if isinstance(result, dict):
+                return result
+            return {
+                "ok": False,
+                "success": False,
+                "error": "No se pudo generar la revisión de IA.",
+            }
 
-            componentes_review.append(
-                {
-                    "componentId": cid,
-                    "tipo": ctype,
-                    "estado": estado,
-                    "comentario": comentario,
-                    "sugerencia": sugerencia,
-                }
-            )
+        review = result.get("review") or {}
 
-        review = {
-            "status": "mock",
-            "resumen_general": "La revisión IA todavía no está conectada. Se validaron las respuestas guardadas.",
-            "componentes": componentes_review,
-            "recomendaciones": [],
-        }
-
-        # Guardar resultado temporal en user_state
+        # Guardar resultado en user_state
         self.student_review_result = review
 
         return {"ok": True, "success": True, "review": review}

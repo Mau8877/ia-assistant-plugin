@@ -48,6 +48,18 @@
     return "";
   }
 
+  function getComponentMap() {
+    var State = window.IAAssistant.Student.State;
+    var components = (State && typeof State.getComponents === "function") ? State.getComponents() : [];
+    var map = {};
+    if (Array.isArray(components)) {
+      components.forEach(function (c) {
+        if (c && c.id) map[c.id] = c;
+      });
+    }
+    return map;
+  }
+
   function getQuizOptionMap(component) {
     var data = component && component.data ? component.data : {};
     var options = Array.isArray(data.opciones) ? data.opciones : [];
@@ -259,7 +271,8 @@
         var promptLabel = createElement(
           "p",
           "ia-assistant-revision-card__prompt",
-          (component.tipo === "codigo" ? "Consigna: " : "Pregunta: ") + promptText,
+          (component.tipo === "codigo" ? "Consigna: " : "Pregunta: ") +
+            promptText,
         );
         body.appendChild(promptLabel);
       }
@@ -271,7 +284,13 @@
             "ia-assistant-revision-card__code-preview",
             getCodePreview(answer.value),
           );
-          body.appendChild(createElement("p", "ia-assistant-revision-card__label", "Tu respuesta:"));
+          body.appendChild(
+            createElement(
+              "p",
+              "ia-assistant-revision-card__label",
+              "Tu respuesta:",
+            ),
+          );
           body.appendChild(codePreview);
           var lang =
             answer && answer.metadata && answer.metadata.lenguaje
@@ -349,6 +368,268 @@
       "Esta revisión resume tus respuestas en esta sesión. La evaluación con IA se conectará en una siguiente fase.",
     );
     container.appendChild(infoNote);
+
+    // Review controls
+    var reviewControls = createElement(
+      "div",
+      "ia-assistant-student-revision__review-controls",
+    );
+    var reviewButton = createElement(
+      "button",
+      "ia-assistant-student-revision__request",
+      "Solicitar revisión",
+    );
+    reviewButton.type = "button";
+    var reviewStatus = createElement(
+      "span",
+      "ia-assistant-student-revision__status",
+      "",
+    );
+    reviewStatus.style.marginLeft = "10px";
+    reviewControls.appendChild(reviewButton);
+    reviewControls.appendChild(reviewStatus);
+    container.appendChild(reviewControls);
+
+    var reviewResultContainer = createElement(
+      "div",
+      "ia-assistant-student-revision__result",
+    );
+    container.appendChild(reviewResultContainer);
+
+    // Click handler
+    reviewButton.addEventListener("click", function () {
+      // Disable button while processing
+      reviewButton.disabled = true;
+      reviewStatus.textContent = "Solicitando revisión...";
+      reviewResultContainer.innerHTML = "";
+
+      var AutoSave = window.IAAssistant.Student.AutoSave;
+      var api = window.IAAssistant.Student.Api;
+
+      function proceedRequest() {
+        // Try to obtain runtime/element from AutoSave
+        var runtime = null;
+        var element = null;
+        if (AutoSave && typeof AutoSave.getRuntimeElement === "function") {
+          var re = AutoSave.getRuntimeElement() || {};
+          runtime = re.runtime;
+          element = re.element;
+        }
+
+        // Call backend
+        if (!api || typeof api.requestReview !== "function") {
+          reviewStatus.textContent = "No se pudo solicitar la revisión";
+          reviewButton.disabled = false;
+          return;
+        }
+
+        api.requestReview(runtime, element, [], function (result) {
+          reviewButton.disabled = false;
+          if (!result || !result.ok) {
+            reviewStatus.textContent = "No se pudo solicitar la revisión";
+            reviewResultContainer.textContent =
+              (result && result.error) || "Error al solicitar revisión.";
+            return;
+          }
+
+          reviewStatus.textContent = "Revisión lista";
+
+          // Render mock review in a polished card
+          var rev = result.review || {};
+
+          var reviewCard = createElement("section", "ia-assistant-student-review-result");
+          var header = createElement("div", "ia-assistant-student-review-result__header");
+          header.appendChild(createElement("h3", "", "Resultado de revisión"));
+          header.appendChild(
+            createElement(
+              "p",
+              "",
+              "Revisión de prueba: la IA todavía no está conectada.",
+            ),
+          );
+          reviewCard.appendChild(header);
+
+          // resumen general destacado
+          if (rev.resumen_general) {
+            reviewCard.appendChild(
+              createElement(
+                "div",
+                "ia-assistant-student-review-result__summary",
+                rev.resumen_general,
+              ),
+            );
+          }
+
+          var grid = createElement(
+            "div",
+            "ia-assistant-student-review-result__grid",
+          );
+
+          var componentMap = getComponentMap();
+          (Array.isArray(rev.componentes) ? rev.componentes : []).forEach(
+            function (item) {
+              var compBlock = createElement(
+                "div",
+                "ia-assistant-student-review-result__component",
+              );
+
+              var comp = componentMap[item.componentId] || null;
+
+              var typeLabel = getFriendlyTypeLabel(item.tipo);
+              var titleText = item.componentId;
+              var promptText = "";
+
+              if (comp) {
+                typeLabel = getFriendlyTypeLabel(comp.tipo || item.tipo);
+                var data = comp.data || {};
+                if (comp.nombre && comp.nombre !== comp.id) titleText = comp.nombre;
+                else if (data.titulo) titleText = data.titulo;
+                else if (data.pregunta) titleText = data.pregunta;
+                else if (data.enunciado) titleText = data.enunciado;
+                else titleText = comp.id || item.componentId;
+
+                if (comp.tipo === "quiz_multiple") {
+                  promptText = data.pregunta || "";
+                } else if (comp.tipo === "pregunta_abierta") {
+                  promptText = data.enunciado || data.pregunta || "";
+                } else if (comp.tipo === "codigo") {
+                  promptText = data.enunciado || "";
+                }
+              }
+
+              // header line: type badge + title + state badge
+              var h = createElement("div", "", "");
+              var typeSpan = createElement("span", "ia-assistant-revision-card__type", typeLabel);
+              h.appendChild(typeSpan);
+              h.appendChild(createElement("h4", "ia-assistant-revision-card__title", titleText));
+
+              // state badge
+              var state = (item.estado || "").toLowerCase();
+              var stateClass = "ia-assistant-badge--unknown";
+              switch (state) {
+                case "pendiente":
+                  stateClass = "ia-assistant-badge--pending";
+                  break;
+                case "respondido":
+                  stateClass = "ia-assistant-badge--responded";
+                  break;
+                case "respondido sin comprobar":
+                case "pendiente-check":
+                case "respondido sin comprobar":
+                  stateClass = "ia-assistant-badge--pending-check";
+                  break;
+                case "correcto":
+                case "bien":
+                  stateClass = "ia-assistant-badge--success";
+                  break;
+                case "revisar":
+                case "revisión":
+                case "revisar":
+                  stateClass = "ia-assistant-badge--error";
+                  break;
+                case "codigo escrito":
+                  stateClass = "ia-assistant-badge--code";
+                  break;
+                default:
+                  stateClass = "ia-assistant-badge--responded";
+              }
+
+              var stateBadge = createElement(
+                "span",
+                "ia-assistant-badge " + stateClass,
+                (item.estado || "").toString(),
+              );
+
+              compBlock.appendChild(h);
+              compBlock.appendChild(stateBadge);
+
+              if (promptText) {
+                compBlock.appendChild(
+                  createElement(
+                    "div",
+                    "ia-assistant-student-review-result__label",
+                    comp && comp.tipo === "codigo" ? "Consigna" : "Pregunta",
+                  ),
+                );
+                compBlock.appendChild(
+                  createElement(
+                    "p",
+                    "ia-assistant-student-review-result__text",
+                    promptText,
+                  ),
+                );
+              }
+
+              if (item.comentario) {
+                compBlock.appendChild(
+                  createElement(
+                    "div",
+                    "ia-assistant-student-review-result__label",
+                    "Comentario",
+                  ),
+                );
+                compBlock.appendChild(
+                  createElement(
+                    "p",
+                    "ia-assistant-student-review-result__text",
+                    item.comentario,
+                  ),
+                );
+              }
+              if (item.sugerencia) {
+                compBlock.appendChild(
+                  createElement(
+                    "div",
+                    "ia-assistant-student-review-result__label",
+                    "Sugerencia",
+                  ),
+                );
+                compBlock.appendChild(
+                  createElement(
+                    "p",
+                    "ia-assistant-student-review-result__text",
+                    item.sugerencia,
+                  ),
+                );
+              }
+
+              grid.appendChild(compBlock);
+            },
+          );
+
+          reviewCard.appendChild(grid);
+          reviewResultContainer.appendChild(reviewCard);
+        });
+      }
+
+      // If flushPendingSave exists, call it; otherwise if saveNow exists call it.
+      try {
+        if (AutoSave && typeof AutoSave.flushPendingSave === "function") {
+          var maybe = AutoSave.flushPendingSave();
+          if (maybe && typeof maybe.then === "function") {
+            maybe
+              .then(function () {
+                proceedRequest();
+              })
+              .catch(function () {
+                proceedRequest();
+              });
+          } else {
+            // flushPendingSave may be synchronous
+            proceedRequest();
+          }
+          return;
+        }
+
+        if (AutoSave && typeof AutoSave.saveNow === "function") {
+          try {
+            AutoSave.saveNow();
+          } catch (e) {}
+        }
+      } catch (e) {}
+
+      proceedRequest();
+    });
 
     return container;
   }

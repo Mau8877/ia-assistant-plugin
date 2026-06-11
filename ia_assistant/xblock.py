@@ -50,6 +50,12 @@ class IAAssistantXBlock(XBlock):
         help="Respuestas guardadas por el alumno para esta unidad.",
     )
 
+    student_review_result = Dict(
+        default={},
+        scope=Scope.user_state,
+        help="Resultado de revisión IA por alumno."
+    )
+
     sdk_view_mode = String(
         default="student",
         scope=Scope.settings,
@@ -468,6 +474,118 @@ class IAAssistantXBlock(XBlock):
             "success": True,
             "saved_count": len(normalized_answers),
         }
+
+    @XBlock.json_handler
+    def request_student_review(self, data, suffix=""):
+        """Valida unidad y respuestas del alumno, detecta componentes auditables y
+        devuelve una revisión MOCK temporal sin llamar a IA ni ejecutar código.
+        Opcional: payload puede incluir "component_ids" (lista) para filtrar.
+        """
+        payload = self._extract_handler_payload(data)
+        component_ids = payload.get("component_ids")
+
+        # Cargar unidad validada
+        unit, load_warning = self._get_initial_unit()
+        if not isinstance(unit, dict) or not self._is_valid_unit(unit):
+            return {
+                "ok": False,
+                "success": False,
+                "error": "Unidad no valida.",
+            }
+
+        componentes = unit.get("componentes", []) if isinstance(unit, dict) else []
+        allowed_types = {"quiz_multiple", "pregunta_abierta", "codigo"}
+
+        # Construir mapa de componentes auditables desde unidad_json (no confiar en frontend)
+        component_map = {}
+        for comp in componentes:
+            if not isinstance(comp, dict):
+                continue
+            cid = comp.get("id")
+            ctype = comp.get("tipo")
+            if not self._is_non_empty_string(cid) or not self._is_non_empty_string(ctype):
+                continue
+            if ctype in allowed_types:
+                component_map[cid] = comp
+
+        # Si frontend pidió ids, validarlos contra unidad_json.
+        # Nota: una lista vacía o ausencia de component_ids significa "revisar todos".
+        if component_ids is not None and isinstance(component_ids, list) and len(component_ids) > 0:
+            requested = [cid for cid in component_ids if cid in component_map]
+            componentes_a_revisar = {cid: component_map[cid] for cid in requested}
+        else:
+            # component_ids ausente o vacío => revisar todos los auditables
+            componentes_a_revisar = component_map
+
+        if not componentes_a_revisar:
+            # Añadir debug mínimo para facilitar diagnóstico en entorno de desarrollo
+            component_types = [c.get("tipo") for c in componentes if isinstance(c, dict)]
+            unidad_raw = getattr(self, "unidad_json", None)
+            unidad_empty = not bool(unidad_raw) or str(unidad_raw).strip() in ("", "{}")
+            return {
+                "ok": False,
+                "success": False,
+                "error": "No hay componentes auditables para revisar.",
+                "debug": {
+                    "unit_title": unit.get("titulo") if isinstance(unit, dict) else "",
+                    "component_count": len(componentes),
+                    "component_types": component_types,
+                    "unidad_json_empty": unidad_empty,
+                },
+            }
+
+        # Preparar revisión MOCK basándose en respuestas guardadas (sin IA)
+        answers = self.student_answers if isinstance(self.student_answers, dict) else {}
+
+        componentes_review = []
+        for cid, comp in componentes_a_revisar.items():
+            ctype = comp.get("tipo")
+            estado = "pendiente"
+            comentario = "Sin respuesta guardada."
+            sugerencia = ""
+
+            saved = answers.get(cid)
+            if isinstance(saved, dict):
+                val = saved.get("value")
+                has_value = False
+                if ctype == "quiz_multiple":
+                    if val is None or val == "" or (isinstance(val, list) and len(val) == 0):
+                        has_value = False
+                    else:
+                        has_value = True
+                elif ctype == "codigo":
+                    has_value = isinstance(val, str) and bool(val.strip())
+                else:  # pregunta_abierta u otros
+                    has_value = isinstance(val, str) and bool(val.strip())
+
+                if has_value:
+                    estado = "respondido"
+                    comentario = "Respuesta encontrada."
+                else:
+                    estado = "pendiente"
+                    comentario = "Respuesta vacía."
+
+            componentes_review.append(
+                {
+                    "componentId": cid,
+                    "tipo": ctype,
+                    "estado": estado,
+                    "comentario": comentario,
+                    "sugerencia": sugerencia,
+                }
+            )
+
+        review = {
+            "status": "mock",
+            "resumen_general": "La revisión IA todavía no está conectada. Se validaron las respuestas guardadas.",
+            "componentes": componentes_review,
+            "recomendaciones": [],
+        }
+
+        # Guardar resultado temporal en user_state
+        self.student_review_result = review
+
+        return {"ok": True, "success": True, "review": review}
 
     @XBlock.json_handler
     def generate_teacher_unit(self, data, suffix=""):

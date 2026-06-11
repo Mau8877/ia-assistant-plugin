@@ -163,5 +163,9 @@
   window.IAAssistant.Student.AutoSave = {
     init: init,
     saveNow: saveNow,
+    flushPendingSave: flushPendingSave,
+    getRuntimeElement: function () {
+      return { runtime: runtimeRef, element: elementRef };
+    },
   };
 })();

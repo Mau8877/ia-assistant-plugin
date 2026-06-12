@@ -75,7 +75,6 @@ class IAAssistantXBlock(XBlock):
 
         # TEMPORAL SDK TEST:
         # Forzar vista Student usando la misma instancia del escenario Studio.
-        # NO dejar esto en commit.
         if self._is_sdk_studio_mode():
             return self.studio_view(context)
 

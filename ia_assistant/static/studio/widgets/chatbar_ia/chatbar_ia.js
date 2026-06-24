@@ -19,7 +19,7 @@
 
     if (!Detector || typeof Detector.detect !== "function") {
       return {
-        mode: "unit",
+        mode: MODE_IDLE,
         componentType: "",
         confidence: "low",
         scores: { unit: 0, create: 0, edit: 0 },
@@ -340,6 +340,16 @@
             "Escribe una indicación antes de generar.",
             "warning",
           );
+          return false;
+        }
+
+        if (!intent || intent.mode === MODE_IDLE) {
+          setStatus(
+            statusElement,
+            "No se pudo detectar la intención del prompt. Intenta reformular la solicitud.",
+            "warning",
+          );
+          renderDetectedIntent();
           return false;
         }
 

@@ -186,6 +186,12 @@
             ));
         }
 
+        wrapper.appendChild(createElement(
+            "p",
+            "ia-assistant-student-code__note",
+            "Este editor no ejecuta el código. Tu respuesta se guarda como texto y será revisada de forma orientativa."
+        ));
+
         textarea.className = "ia-assistant-student-code__textarea";
         textarea.value = baseCode;
         textarea.placeholder = baseCode ?

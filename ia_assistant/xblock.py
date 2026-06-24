@@ -1,4 +1,5 @@
 import json
+import hashlib
 
 from xblock.core import XBlock
 from xblock.fields import Dict, Scope, String
@@ -75,8 +76,8 @@ class IAAssistantXBlock(XBlock):
 
         # TEMPORAL SDK TEST:
         # Forzar vista Student usando la misma instancia del escenario Studio.
-        if self._is_sdk_studio_mode():
-            return self.studio_view(context)
+        #if self._is_sdk_studio_mode():
+            #return self.studio_view(context)
 
         initial_unit, load_warning = self._get_initial_unit()
         fragment = Fragment(read_static_text(STUDENT_HTML_PATH))
@@ -89,6 +90,11 @@ class IAAssistantXBlock(XBlock):
                 "initial_student_answers": (
                     self.student_answers
                     if isinstance(self.student_answers, dict)
+                    else {}
+                ),
+                "initial_student_review_result": (
+                    self.student_review_result
+                    if isinstance(self.student_review_result, dict)
                     else {}
                 ),
                 "load_warning": load_warning,
@@ -265,6 +271,54 @@ class IAAssistantXBlock(XBlock):
             return contexto
 
         return {}
+
+    @staticmethod
+    def _build_answers_signature_payload(answers):
+        if not isinstance(answers, dict):
+            return ""
+
+        normalized = {}
+
+        for component_id in sorted(answers.keys()):
+            answer = answers.get(component_id)
+            if not isinstance(answer, dict):
+                continue
+
+            component_type = str(answer.get("tipo") or "")
+            value = answer.get("value")
+
+            if component_type == "quiz_multiple":
+                if isinstance(value, list):
+                    normalized_value = sorted([str(item) for item in value])
+                elif value in (None, ""):
+                    normalized_value = []
+                else:
+                    normalized_value = [str(value)]
+            elif value is None:
+                normalized_value = ""
+            else:
+                normalized_value = str(value)
+
+            normalized[str(component_id)] = {
+                "tipo": component_type,
+                "value": normalized_value,
+            }
+
+        return json.dumps(
+            normalized,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+
+    @classmethod
+    def _build_answers_signature(cls, answers):
+        payload = cls._build_answers_signature_payload(answers)
+
+        if not payload:
+            return ""
+
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     def _handle_ai_error(self, error):
         if isinstance(error, AIError):
@@ -575,6 +629,19 @@ class IAAssistantXBlock(XBlock):
             }
 
         review = result.get("review") or {}
+
+        if isinstance(review, dict):
+            review = dict(review)
+            review_meta = review.get("_ia_assistant")
+            if not isinstance(review_meta, dict):
+                review_meta = {}
+            review_meta["frontend_answers_signature"] = (
+                self._build_answers_signature_payload(answers)
+            )
+            review_meta["answers_signature"] = self._build_answers_signature(
+                answers
+            )
+            review["_ia_assistant"] = review_meta
 
         # Guardar resultado en user_state
         self.student_review_result = review

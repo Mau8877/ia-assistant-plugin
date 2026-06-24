@@ -11,6 +11,7 @@
   var elementRef = null;
   var rootRef = null;
   var statusElement = null;
+  var activeSavePromise = null;
 
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
@@ -73,8 +74,14 @@
   }
 
   function saveNow() {
-    if (isSaving) {
-      return;
+    if (isSaving && activeSavePromise) {
+      return activeSavePromise.then(function () {
+        if (formatPayload(getAnswers()) !== lastSavedPayload) {
+          return saveNow();
+        }
+
+        return { ok: true, success: true, skipped: true };
+      });
     }
 
     var answers = getAnswers();
@@ -82,34 +89,52 @@
 
     if (payloadString === lastSavedPayload) {
       setSaveStatus("Guardado", "saved");
-      return;
+      return Promise.resolve({ ok: true, success: true, skipped: true });
     }
 
     if (!runtimeRef || !elementRef || !window.IAAssistant.Student.Api) {
-      setSaveStatus("No se pudo guardar", "error");
-      return;
+      var missingApiResult = {
+        ok: false,
+        success: false,
+        error: "No se pudo guardar",
+      };
+      setSaveStatus(missingApiResult.error, "error");
+      return Promise.reject(missingApiResult);
     }
 
     isSaving = true;
     setSaveStatus("Guardando...", "saving");
 
-    window.IAAssistant.Student.Api.saveAnswers(
-      runtimeRef,
-      elementRef,
-      answers,
-      function (result) {
-        isSaving = false;
+    activeSavePromise = new Promise(function (resolve, reject) {
+      window.IAAssistant.Student.Api.saveAnswers(
+        runtimeRef,
+        elementRef,
+        clone(answers),
+        function (result) {
+          isSaving = false;
+          activeSavePromise = null;
 
-        if (result && result.ok) {
-          lastSavedPayload = payloadString;
-          setSaveStatus("Guardado", "saved");
-          return;
-        }
+          if (result && result.ok) {
+            lastSavedPayload = payloadString;
+            setSaveStatus("Guardado", "saved");
+            resolve(result);
+            return;
+          }
 
-        var errorMessage = (result && result.error) || "No se pudo guardar";
-        setSaveStatus(errorMessage, "error");
-      },
-    );
+          var errorMessage = (result && result.error) || "No se pudo guardar";
+          setSaveStatus(errorMessage, "error");
+          reject(
+            result || {
+              ok: false,
+              success: false,
+              error: errorMessage,
+            },
+          );
+        },
+      );
+    });
+
+    return activeSavePromise;
   }
 
   function scheduleSave() {
@@ -118,7 +143,10 @@
     }
 
     setSaveStatus("Cambios pendientes", "pending");
-    saveTimer = setTimeout(saveNow, 1000);
+    saveTimer = setTimeout(function () {
+      saveTimer = null;
+      saveNow().catch(function () {});
+    }, 1000);
   }
 
   function handleAnswerChange() {
@@ -129,8 +157,9 @@
     if (saveTimer) {
       clearTimeout(saveTimer);
       saveTimer = null;
-      saveNow();
     }
+
+    return saveNow();
   }
 
   function init(runtime, element, root) {
@@ -155,7 +184,7 @@
         handleAnswerChange,
       );
       window.addEventListener("beforeunload", function () {
-        flushPendingSave();
+        flushPendingSave().catch(function () {});
       });
     }
   }

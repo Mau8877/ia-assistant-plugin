@@ -39,7 +39,7 @@
         wrapper.appendChild(createElement(
             "p",
             "ia-assistant-student-open-question__note",
-            "Tu respuesta no se guarda todavia en esta vista previa."
+            "Tu respuesta se guarda automáticamente."
         ));
 
         // prefill if frontend answer exists

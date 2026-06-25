@@ -164,6 +164,138 @@
       </section>
     </div>
 
+    <div
+      class="ia-assistant-chatbar-preview"
+      data-ia-assistant-chatbar-preview
+      hidden
+    >
+      <div
+        class="ia-assistant-chatbar-preview__backdrop"
+        data-ia-assistant-chatbar-preview-close
+      ></div>
+      <section
+        class="ia-assistant-chatbar-preview__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ia-assistant-chatbar-preview-title"
+      >
+        <header class="ia-assistant-chatbar-preview__header">
+          <div>
+            <p class="ia-assistant-chatbar-preview__eyebrow">Propuesta IA</p>
+            <h3
+              class="ia-assistant-chatbar-preview__title"
+              id="ia-assistant-chatbar-preview-title"
+              data-ia-assistant-chatbar-preview-title
+            >
+              Vista previa de propuesta
+            </h3>
+            <p
+              class="ia-assistant-chatbar-preview__subtitle"
+              data-ia-assistant-chatbar-preview-subtitle
+            >
+              Revisa esta propuesta antes de aplicar cambios en Studio.
+            </p>
+          </div>
+          <button
+            class="ia-assistant-chatbar-preview__close"
+            type="button"
+            aria-label="Descartar propuesta"
+            title="Descartar propuesta"
+            data-ia-assistant-chatbar-preview-close
+          >
+            <span
+              class="ia-assistant-chatbar-preview__icon-close-label"
+              aria-hidden="true"
+              >×</span
+            >
+          </button>
+        </header>
+
+        <div
+          class="ia-assistant-chatbar-preview__body"
+          data-ia-assistant-chatbar-preview-body
+        ></div>
+
+        <footer class="ia-assistant-chatbar-preview__actions">
+          <button
+            class="ia-assistant-chatbar-preview__apply"
+            type="button"
+            data-ia-assistant-chatbar-preview-apply
+          >
+            Aplicar
+          </button>
+          <button
+            class="ia-assistant-chatbar-preview__discard"
+            type="button"
+            data-ia-assistant-chatbar-preview-discard
+          >
+            Descartar propuesta
+          </button>
+        </footer>
+      </section>
+    </div>
+
+    <div
+      class="ia-assistant-chatbar-confirm"
+      data-ia-assistant-chatbar-confirm
+      hidden
+    >
+      <div
+        class="ia-assistant-chatbar-confirm__backdrop"
+        data-ia-assistant-chatbar-confirm-close
+      ></div>
+      <section
+        class="ia-assistant-chatbar-confirm__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ia-assistant-chatbar-confirm-title"
+      >
+        <header class="ia-assistant-chatbar-confirm__header">
+          <div>
+            <p class="ia-assistant-chatbar-confirm__eyebrow">Confirmar aplicacion</p>
+            <h3
+              class="ia-assistant-chatbar-confirm__title"
+              id="ia-assistant-chatbar-confirm-title"
+              data-ia-assistant-chatbar-confirm-title
+            >
+              Confirmar propuesta
+            </h3>
+          </div>
+          <button
+            class="ia-assistant-chatbar-confirm__close"
+            type="button"
+            aria-label="Cancelar aplicacion"
+            title="Cancelar aplicacion"
+            data-ia-assistant-chatbar-confirm-close
+          >
+            Cancelar
+          </button>
+        </header>
+
+        <div
+          class="ia-assistant-chatbar-confirm__body"
+          data-ia-assistant-chatbar-confirm-body
+        ></div>
+
+        <footer class="ia-assistant-chatbar-confirm__actions">
+          <button
+            class="ia-assistant-chatbar-confirm__cancel"
+            type="button"
+            data-ia-assistant-chatbar-confirm-cancel
+          >
+            Cancelar
+          </button>
+          <button
+            class="ia-assistant-chatbar-confirm__apply"
+            type="button"
+            data-ia-assistant-chatbar-confirm-apply
+          >
+            Si, aplicar propuesta
+          </button>
+        </footer>
+      </section>
+    </div>
+
     <section
       class="ia-assistant-component-tabs"
       aria-label="Tabs de componentes"
@@ -225,27 +357,6 @@
         data-ia-assistant-chatbar-status
         hidden
       ></p>
-
-      <div
-        class="ia-assistant-chatbar__proposal-actions"
-        data-ia-assistant-chatbar-proposal-actions
-        hidden
-      >
-        <button
-          class="ia-assistant-chatbar__apply"
-          type="button"
-          data-ia-assistant-chatbar-apply
-        >
-          Aplicar
-        </button>
-        <button
-          class="ia-assistant-chatbar__discard"
-          type="button"
-          data-ia-assistant-chatbar-discard
-        >
-          Descartar
-        </button>
-      </div>
     </div>
   </form>
 </section>

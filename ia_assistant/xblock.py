@@ -16,6 +16,7 @@ from .resources_manifest import (
 )
 from .schema import COMPONENT_TYPES, UNIT_SCHEMA_VERSION, get_default_unit
 from .utils.resources import read_static_text
+from .validators import validate_and_normalize_studio_unit
 
 
 class IAAssistantXBlock(XBlock):
@@ -357,33 +358,60 @@ class IAAssistantXBlock(XBlock):
         """
         Guarda la unidad de Studio en unidad_json.
         """
-        payload = data or {}
+        payload = self._extract_handler_payload(data)
         unit = payload.get("unit")
 
         if unit is None and "unidad_json" in payload:
             try:
                 unit = json.loads(payload.get("unidad_json") or "{}")
             except (TypeError, ValueError):
-                unit = None
+                return {
+                    "ok": False,
+                    "success": False,
+                    "error": "No se pudo interpretar unidad_json.",
+                    "errors": [
+                        {
+                            "code": "invalid_unit_json",
+                            "message": (
+                                "No se pudo interpretar unidad_json como JSON válido."
+                            ),
+                            "field": "unidad_json",
+                        }
+                    ],
+                    "warnings": [],
+                }
 
-        if not self._is_valid_unit(unit):
+        validation_payload = validate_and_normalize_studio_unit(unit)
+
+        if not validation_payload.get("ok"):
             return {
                 "ok": False,
                 "success": False,
-                "error": "La unidad no tiene un formato valido.",
+                "error": validation_payload.get(
+                    "error", "La unidad no tiene un formato valido."
+                ),
+                "errors": validation_payload.get("errors", []),
+                "warnings": validation_payload.get("warnings", []),
             }
+
+        normalized_unit = validation_payload["unit"]
 
         if "prompt_docente" in payload:
             self.prompt_docente = payload.get("prompt_docente") or ""
 
-        self.unidad_json = json.dumps(unit, ensure_ascii=False)
+        self.unidad_json = json.dumps(normalized_unit, ensure_ascii=False)
 
-        return {
+        response = {
             "ok": True,
             "success": True,
             "message": "Unidad guardada correctamente.",
-            "unit": unit,
+            "unit": normalized_unit,
         }
+
+        if validation_payload.get("warnings"):
+            response["warnings"] = validation_payload["warnings"]
+
+        return response
 
     @XBlock.json_handler
     def save_student_answers(self, data, suffix=""):

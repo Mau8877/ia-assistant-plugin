@@ -8,6 +8,7 @@ from .schema import (
     UNIT_SCHEMA_VERSION,
     get_component_definition,
     get_default_data,
+    get_default_puntaje,
     is_authorable_component,
     is_system_component,
 )
@@ -216,6 +217,59 @@ def _build_studio_validation_error(error_message, errors, warnings=None):
         "errors": errors,
         "warnings": warnings,
     }
+
+
+def _validate_component_puntaje(component, component_ref, errors):
+    component_type = component_ref["type"]
+    component_name = component_ref["name"]
+    default_puntaje = get_default_puntaje(component_type)
+
+    if default_puntaje is None:
+        default_puntaje = 0
+
+    if "puntaje" not in component:
+        return default_puntaje
+
+    puntaje = component.get("puntaje")
+
+    if isinstance(puntaje, bool) or not isinstance(puntaje, int):
+        _append_error(
+            errors,
+            "invalid_component_score_type",
+            "El componente '{}' debe tener un puntaje entero.".format(
+                component_name
+            ),
+            component_id=component_ref["id"],
+            component_type=component_type,
+            field="puntaje",
+        )
+        return None
+
+    if puntaje < 0:
+        _append_error(
+            errors,
+            "invalid_component_score_value",
+            "El componente '{}' debe tener un puntaje mayor o igual a 0.".format(
+                component_name
+            ),
+            component_id=component_ref["id"],
+            component_type=component_type,
+            field="puntaje",
+        )
+        return None
+
+    if component_type == "teoria" and puntaje != 0:
+        _append_error(
+            errors,
+            "invalid_teoria_score",
+            "La teoría '{}' debe tener puntaje 0.".format(component_name),
+            component_id=component_ref["id"],
+            component_type=component_type,
+            field="puntaje",
+        )
+        return None
+
+    return puntaje
 
 
 def _validate_studio_teoria_data(data, component_ref, warnings):
@@ -607,6 +661,7 @@ def validate_studio_component(component, seen_ids, type_counts):
     normalized = {}
     component_definition = None
     normalized_data = None
+    normalized_puntaje = None
 
     if not isinstance(component, dict):
         return {
@@ -732,6 +787,12 @@ def validate_studio_component(component, seen_ids, type_counts):
         )
         data = None
 
+    normalized_puntaje = _validate_component_puntaje(
+        component,
+        component_ref,
+        errors,
+    )
+
     if errors:
         return {
             "ok": False,
@@ -774,6 +835,7 @@ def validate_studio_component(component, seen_ids, type_counts):
     normalized["id"] = component_id
     normalized["tipo"] = component_type
     normalized["nombre"] = component.get("nombre")
+    normalized["puntaje"] = normalized_puntaje
     normalized["data"] = normalized_data
 
     return {

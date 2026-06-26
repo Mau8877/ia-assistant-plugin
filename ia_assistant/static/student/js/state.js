@@ -346,19 +346,33 @@
       return !!currentReview;
     }
 
+    function hasComparableSignature() {
+      return !!(
+        currentReview &&
+        typeof reviewedAnswersSignature === "string" &&
+        reviewedAnswersSignature
+      );
+    }
+
     function isStale() {
-      if (!currentReview || !reviewedAnswersSignature) {
+      if (!hasComparableSignature()) {
         return false;
       }
 
       return reviewedAnswersSignature !== getCurrentAnswersSignature();
     }
 
+    function isCurrent() {
+      return hasReview() && hasComparableSignature() && !isStale();
+    }
+
     function getStatus() {
       return {
         review: getReview(),
         hasReview: hasReview(),
+        hasComparableSignature: hasComparableSignature(),
         isStale: isStale(),
+        isCurrent: isCurrent(),
         reviewedAnswersSignature: reviewedAnswersSignature,
       };
     }

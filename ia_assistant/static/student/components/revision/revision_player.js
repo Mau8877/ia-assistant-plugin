@@ -183,7 +183,7 @@
     return answer.metadata.isCorrect ? "Correcto" : "Incorrecto";
   }
 
-  function determineQuizState(component, answer) {
+  function determineQuizState(component, answer, showReviewDetails) {
     var selectedIds = getQuizSelectedIds(answer);
     var correctIds = getQuizCorrectIds(component);
     var summary = getSelectedQuizText(component, answer);
@@ -193,6 +193,15 @@
       return {
         state: "Pendiente",
         summary: "",
+        feedbackItems: [],
+        correctnessText: "",
+      };
+    }
+
+    if (!showReviewDetails) {
+      return {
+        state: "Respondido",
+        summary: summary,
         feedbackItems: [],
         correctnessText: "",
       };
@@ -230,11 +239,11 @@
     };
   }
 
-  function determineStateAndSummary(component, answer) {
+  function determineStateAndSummary(component, answer, showReviewDetails) {
     var tipo = component.tipo;
 
     if (tipo === "quiz_multiple") {
-      return determineQuizState(component, answer);
+      return determineQuizState(component, answer, showReviewDetails);
     }
 
     if (tipo === "pregunta_abierta") {
@@ -332,7 +341,7 @@
     });
   }
 
-  function renderComponentCard(component, answer, info) {
+  function renderComponentCard(component, answer, info, showReviewDetails) {
     var card = createElement("article", "ia-assistant-revision-card");
     var head = createElement("div", "ia-assistant-revision-card__head");
     var left = createElement("div", "ia-assistant-revision-card__left");
@@ -419,7 +428,11 @@
       );
     }
 
-    if (component.tipo === "quiz_multiple" && info.correctnessText) {
+    if (
+      showReviewDetails &&
+      component.tipo === "quiz_multiple" &&
+      info.correctnessText
+    ) {
       body.appendChild(
         createElement(
           "p",
@@ -441,10 +454,22 @@
   function getReviewStatus() {
     var ReviewState = window.IAAssistant.Student.ReviewState;
     if (!ReviewState || typeof ReviewState.getStatus !== "function") {
-      return { review: null, hasReview: false, isStale: false };
+      return {
+        review: null,
+        hasReview: false,
+        isStale: false,
+        reviewedAnswersSignature: "",
+      };
     }
 
     return ReviewState.getStatus();
+  }
+
+  function shouldShowReviewDetails(reviewState) {
+    return !!(
+      reviewState &&
+      reviewState.isCurrent === true
+    );
   }
 
   function createAiStateBadge(rawState) {
@@ -674,6 +699,8 @@
       return container;
     }
 
+    var currentReviewState = getReviewStatus();
+    var showReviewDetails = shouldShowReviewDetails(currentReviewState);
     var respondedCount = 0;
     var pendingCount = 0;
     var quizCorrectCount = 0;
@@ -691,7 +718,11 @@
         answer = null;
       }
 
-      var info = determineStateAndSummary(component, answer);
+      var info = determineStateAndSummary(
+        component,
+        answer,
+        showReviewDetails,
+      );
 
       if (info.state === "Pendiente") {
         pendingCount += 1;
@@ -707,7 +738,9 @@
         quizIncorrectCount += 1;
       }
 
-      cardsWrapper.appendChild(renderComponentCard(component, answer, info));
+      cardsWrapper.appendChild(
+        renderComponentCard(component, answer, info, showReviewDetails),
+      );
     });
 
     var top = createElement("div", "ia-assistant-student-revision__top");
@@ -722,7 +755,9 @@
       createElement(
         "p",
         "ia-assistant-student-revision__subtitle",
-        "La revisión con IA es orientativa y busca ayudarte a mejorar tus respuestas.",
+        showReviewDetails
+          ? "La revisión con IA es orientativa y busca ayudarte a mejorar tus respuestas."
+          : "Revisa tu resumen antes de enviar. La retroalimentación con IA aparecerá después de solicitar la revisión.",
       ),
     );
     top.appendChild(
@@ -742,10 +777,16 @@
     var metrics = createElement("div", "ia-assistant-student-revision__metrics");
     metrics.appendChild(renderMetric("Respondidas", respondedCount, "responded"));
     metrics.appendChild(renderMetric("Pendientes", pendingCount, "pending"));
-    metrics.appendChild(renderMetric("Quiz correctos", quizCorrectCount, "success"));
-    metrics.appendChild(
-      renderMetric("Quiz por revisar", quizIncorrectCount, "warning"),
-    );
+
+    if (showReviewDetails) {
+      metrics.appendChild(
+        renderMetric("Quiz correctos", quizCorrectCount, "success"),
+      );
+      metrics.appendChild(
+        renderMetric("Quiz por revisar", quizIncorrectCount, "warning"),
+      );
+    }
+
     container.appendChild(metrics);
 
     container.appendChild(cardsWrapper);
@@ -753,7 +794,9 @@
       createElement(
         "p",
         "ia-assistant-student-revision__note",
-        "Tus respuestas se guardan automáticamente antes de solicitar retroalimentación con IA.",
+        showReviewDetails
+          ? "Tus respuestas se guardan automáticamente antes de solicitar retroalimentación con IA."
+          : "Tus respuestas se guardan automáticamente antes de enviar y solicitar la revisión con IA.",
       ),
     );
 
@@ -769,21 +812,52 @@
     var reviewButton = createElement(
       "button",
       "ia-assistant-student-revision__request",
-      "Solicitar revisión",
+      "Enviar respuestas y solicitar revisión",
     );
     var reviewResultContainer = createElement(
       "div",
       "ia-assistant-student-revision__result",
     );
-    var currentReviewState = getReviewStatus();
-
     reviewButton.type = "button";
     reviewControls.appendChild(reviewButton);
     reviewControls.appendChild(reviewStatus);
     container.appendChild(reviewControls);
 
-    if (currentReviewState.hasReview) {
+    if (showReviewDetails) {
       renderStoredReview(reviewResultContainer, currentReviewState);
+    } else if (
+      currentReviewState.hasReview &&
+      !currentReviewState.hasComparableSignature
+    ) {
+      reviewResultContainer.appendChild(
+        createElement(
+          "div",
+          "ia-assistant-student-review-result__warning",
+          "Hay una revision previa, pero no puede verificarse contra tus respuestas actuales. Envia tus respuestas para actualizarla.",
+        ),
+      );
+      reviewResultContainer.appendChild(
+        createElement(
+          "div",
+          "ia-assistant-student-review-result__empty",
+          "La evaluacion anterior no se muestra porque no tiene una firma comparable.",
+        ),
+      );
+    } else if (currentReviewState.hasReview && currentReviewState.isStale) {
+      reviewResultContainer.appendChild(
+        createElement(
+          "div",
+          "ia-assistant-student-review-result__warning",
+          "La revisión anterior quedó desactualizada porque cambiaste respuestas. Envía nuevamente para ver resultados actualizados.",
+        ),
+      );
+      reviewResultContainer.appendChild(
+        createElement(
+          "div",
+          "ia-assistant-student-review-result__empty",
+          "La evaluación anterior no se muestra porque ya no corresponde a tus respuestas actuales.",
+        ),
+      );
     } else {
       reviewResultContainer.appendChild(
         createElement(
@@ -806,7 +880,7 @@
 
       function restoreButton() {
         reviewButton.disabled = false;
-        reviewButton.textContent = "Solicitar revisión";
+        reviewButton.textContent = "Enviar respuestas y solicitar revisión";
       }
 
       function proceedRequest() {

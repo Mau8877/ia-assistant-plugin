@@ -110,6 +110,14 @@
   margin-bottom: var(--ia-assistant-space-xs);
 }
 
+.ia-assistant-student-card__title-row {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ia-assistant-space-sm);
+  justify-content: space-between;
+}
+
 .ia-assistant-student-card__number,
 .ia-assistant-student-card__badge {
   align-items: center;
@@ -133,9 +141,26 @@
 }
 
 .ia-assistant-student-card__title {
+  flex: 1 1 260px;
   font-size: 20px;
   line-height: 1.25;
   margin: 0;
+}
+
+.ia-assistant-student-card__score {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid var(--ia-assistant-color-border);
+  border-radius: 999px;
+  color: var(--ia-assistant-color-muted);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  min-height: 28px;
+  padding: 0 var(--ia-assistant-space-sm);
+  white-space: nowrap;
 }
 
 .ia-assistant-student-card__body {
@@ -521,6 +546,10 @@
   .ia-assistant-student-card__header,
   .ia-assistant-student-card__body {
     padding: var(--ia-assistant-space-md);
+  }
+
+  .ia-assistant-student-card__score {
+    white-space: normal;
   }
 
   .ia-assistant-student-quiz__result,

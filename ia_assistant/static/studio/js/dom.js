@@ -59,6 +59,16 @@
             return currentRoot.querySelector("[data-ia-assistant-unit-title]");
         },
 
+        getUnitScoreSummary: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector("[data-ia-assistant-unit-score]");
+        },
+
         getJsonToggleButton: function (root) {
             var currentRoot = root || this.getRoot();
 

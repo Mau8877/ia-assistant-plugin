@@ -88,7 +88,8 @@
     min-height: 88px;
 }
 
-.ia-assistant-pregunta-abierta-editor__textarea:focus {
+.ia-assistant-pregunta-abierta-editor__textarea:focus,
+.ia-assistant-pregunta-abierta-editor .ia-assistant-score-field__input:focus {
     border-color: var(--ia-assistant-component-pregunta-accent);
     box-shadow: 0 0 0 3px var(--ia-assistant-component-pregunta-soft);
     outline: 1px solid transparent;

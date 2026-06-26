@@ -58,6 +58,68 @@
     margin: 0;
 }
 
+.ia-assistant-builder-card__score {
+    color: var(--ia-assistant-color-text);
+    font-size: var(--ia-assistant-font-size-sm);
+    font-weight: 600;
+    line-height: 1.45;
+    margin: 0;
+}
+
+.ia-assistant-score-field {
+    align-items: flex-start;
+}
+
+.ia-assistant-score-field__label {
+    color: var(--ia-assistant-color-text);
+    font-size: var(--ia-assistant-font-size-base);
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.ia-assistant-score-field__controls {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--ia-assistant-space-sm);
+    max-width: 100%;
+}
+
+.ia-assistant-score-field__input {
+    background: var(--ia-assistant-color-surface);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    box-sizing: border-box;
+    color: var(--ia-assistant-color-text);
+    font: inherit;
+    font-weight: 700;
+    line-height: 1.5;
+    min-height: 40px;
+    padding: 0 var(--ia-assistant-space-sm);
+    transition: border-color var(--ia-assistant-transition-fast),
+        box-shadow var(--ia-assistant-transition-fast);
+    width: 96px;
+}
+
+.ia-assistant-score-field__input:focus {
+    outline: 1px solid transparent;
+    outline-offset: 1px;
+}
+
+.ia-assistant-score-field__suffix {
+    color: var(--ia-assistant-color-muted);
+    flex: 0 0 auto;
+    font-size: var(--ia-assistant-font-size-sm);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.ia-assistant-score-field__help {
+    color: var(--ia-assistant-color-muted);
+    font-size: var(--ia-assistant-font-size-sm);
+    line-height: 1.45;
+    margin: 0;
+}
+
 .ia-assistant-builder-card__title-input {
     background: var(--ia-assistant-color-surface);
     border: 1px solid var(--ia-assistant-color-border);

@@ -315,6 +315,7 @@
 }
 
 .ia-assistant-codigo-editor__input:focus,
+.ia-assistant-codigo-editor .ia-assistant-score-field__input:focus,
 .ia-assistant-codigo-editor__language-trigger:focus,
 .ia-assistant-codigo-editor__template-button:focus,
 .ia-assistant-codigo-editor__textarea:focus {

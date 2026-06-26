@@ -28,6 +28,46 @@
     return Boolean(window.IAAssistant.Registry.get(componentType));
   }
 
+  function hasValidComponentScore(component) {
+    if (!Object.prototype.hasOwnProperty.call(component, "puntaje")) {
+      return true;
+    }
+
+    if (
+      typeof component.puntaje !== "number" ||
+      !Number.isInteger(component.puntaje) ||
+      component.puntaje < 0
+    ) {
+      return false;
+    }
+
+    if (component.tipo === "teoria" && component.puntaje !== 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  function getNormalizedComponentScore(component) {
+    if (!component || typeof component !== "object") {
+      return 0;
+    }
+
+    if (component.tipo === "teoria") {
+      return 0;
+    }
+
+    if (
+      typeof component.puntaje === "number" &&
+      Number.isInteger(component.puntaje) &&
+      component.puntaje >= 0
+    ) {
+      return component.puntaje;
+    }
+
+    return 0;
+  }
+
   function isValidComponent(component) {
     if (!isPlainObject(component)) {
       return false;
@@ -53,6 +93,10 @@
     }
 
     if (component.tipo === "teoria" && component.data.formato !== "markdown") {
+      return false;
+    }
+
+    if (!hasValidComponentScore(component)) {
       return false;
     }
 
@@ -186,6 +230,7 @@
         id: componentId,
         tipo: componentDefinition.type,
         nombre: componentId,
+        puntaje: 0,
         data: componentDefinition.createDefaultData(),
       };
 
@@ -292,8 +337,29 @@
       return cloneData(component);
     },
 
+    updateComponentMeta: function (componentId, patch) {
+      var component = findComponent(componentId);
+      var metaPatch = patch && typeof patch === "object" ? patch : {};
+
+      if (!component) {
+        return null;
+      }
+
+      Object.keys(metaPatch).forEach(function (key) {
+        component[key] = metaPatch[key];
+      });
+
+      return cloneData(component);
+    },
+
     getComponents: function () {
       return cloneData(currentUnit.componentes);
+    },
+
+    getUnitTotalScore: function () {
+      return currentUnit.componentes.reduce(function (total, component) {
+        return total + getNormalizedComponentScore(component);
+      }, 0);
     },
 
     getActiveComponent: function () {

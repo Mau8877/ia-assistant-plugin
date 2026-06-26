@@ -121,7 +121,23 @@
         renderActiveEditor(editorRoot, component);
     }
 
+    function renderUnitScoreSummary(root) {
+        var scoreSummary = window.IAAssistant.Studio.Dom.getUnitScoreSummary(root);
+        var totalScore = window.IAAssistant.Studio.State.getUnitTotalScore();
+
+        if (!scoreSummary) {
+            return;
+        }
+
+        scoreSummary.textContent =
+            "Puntaje total de la unidad: " + String(totalScore);
+    }
+
     window.IAAssistant.Studio.Renderer = {
+        renderUnitScoreSummary: function (root) {
+            renderUnitScoreSummary(root || window.IAAssistant.Studio.Dom.getRoot());
+        },
+
         render: function () {
             var root = window.IAAssistant.Studio.Dom.getRoot();
             var editorRoot;
@@ -132,6 +148,7 @@
             }
 
             window.IAAssistant.Studio.ComponentTabs.render(root);
+            renderUnitScoreSummary(root);
 
             editorRoot = window.IAAssistant.Studio.Dom.getComponentEditor(root);
 

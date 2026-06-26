@@ -593,6 +593,13 @@
   color: var(--ia-assistant-color-strong);
   flex: 1 1 100%;
 }
+.ia-assistant-student-revision__score-total {
+  margin: 0;
+  color: var(--ia-assistant-color-primary);
+  font-size: 0.95rem;
+  font-weight: 800;
+  flex: 1 1 100%;
+}
 .ia-assistant-student-revision__metrics {
   display: grid;
   gap: var(--ia-assistant-space-sm);
@@ -669,6 +676,12 @@
   font-size: 15px;
   font-weight: 700;
   line-height: 1.4;
+}
+.ia-assistant-revision-card__score {
+  margin: 4px 0 0;
+  color: var(--ia-assistant-color-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 .ia-assistant-revision-card__body {
   margin-top: var(--ia-assistant-space-xxs);

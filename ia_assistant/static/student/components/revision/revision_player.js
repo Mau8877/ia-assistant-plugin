@@ -58,6 +58,19 @@
     return "";
   }
 
+  function getComponentScore(component) {
+    if (
+      component &&
+      typeof component.puntaje === "number" &&
+      Number.isInteger(component.puntaje) &&
+      component.puntaje > 0
+    ) {
+      return component.puntaje;
+    }
+
+    return 0;
+  }
+
   function getComponentMap() {
     var State = window.IAAssistant.Student.State;
     var components =
@@ -363,6 +376,16 @@
         getComponentTitle(component),
       ),
     );
+
+    if (getComponentScore(component) > 0) {
+      left.appendChild(
+        createElement(
+          "p",
+          "ia-assistant-revision-card__score",
+          "Puntaje maximo: " + String(getComponentScore(component)) + " pts",
+        ),
+      );
+    }
 
     right.appendChild(
       createElement(
@@ -703,6 +726,7 @@
     var showReviewDetails = shouldShowReviewDetails(currentReviewState);
     var respondedCount = 0;
     var pendingCount = 0;
+    var puntajeMaximoTotal = 0;
     var quizCorrectCount = 0;
     var quizIncorrectCount = 0;
     var cardsWrapper = createElement(
@@ -729,6 +753,8 @@
       } else {
         respondedCount += 1;
       }
+
+      puntajeMaximoTotal += getComponentScore(component);
 
       if (component.tipo === "quiz_multiple" && info.state === "Correcto") {
         quizCorrectCount += 1;
@@ -772,6 +798,15 @@
           String(pendingCount),
       ),
     );
+    if (puntajeMaximoTotal > 0) {
+      top.appendChild(
+        createElement(
+          "p",
+          "ia-assistant-student-revision__score-total",
+          "Puntaje maximo total: " + String(puntajeMaximoTotal) + " pts",
+        ),
+      );
+    }
     container.appendChild(top);
 
     var metrics = createElement("div", "ia-assistant-student-revision__metrics");

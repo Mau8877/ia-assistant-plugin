@@ -9,11 +9,18 @@ UNIT_SCHEMA_TEXT = """{
   "componentes": []
 }""" % UNIT_SCHEMA_VERSION
 
+SCORE_RULES_TEXT = (
+    'Usa "puntaje" solo como campo top-level entero >= 0. '
+    'Si el docente no especifica puntaje, usa "puntaje": 0. '
+    '"teoria" siempre debe tener "puntaje": 0.'
+)
+
 COMPONENT_SCHEMA_TEXTS = {
     "teoria": """{
   "id": "teoria_1",
   "tipo": "teoria",
   "nombre": "string",
+  "puntaje": 0,
   "data": {
     "titulo": "string",
     "formato": "markdown",
@@ -24,6 +31,7 @@ COMPONENT_SCHEMA_TEXTS = {
   "id": "quiz_multiple_1",
   "tipo": "quiz_multiple",
   "nombre": "string",
+  "puntaje": 0,
   "data": {
     "pregunta": "string",
     "opciones": [
@@ -40,6 +48,7 @@ COMPONENT_SCHEMA_TEXTS = {
   "id": "pregunta_abierta_1",
   "tipo": "pregunta_abierta",
   "nombre": "string",
+  "puntaje": 0,
   "data": {
     "enunciado": "string",
     "rubrica": "string"
@@ -49,6 +58,7 @@ COMPONENT_SCHEMA_TEXTS = {
   "id": "codigo_1",
   "tipo": "codigo",
   "nombre": "string",
+  "puntaje": 0,
   "data": {
     "enunciado": "string",
     "lenguaje": "string",

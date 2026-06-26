@@ -538,6 +538,19 @@
     return createElement("span", className, text);
   }
 
+  function getComponentScore(component) {
+    if (
+      component &&
+      typeof component.puntaje === "number" &&
+      Number.isInteger(component.puntaje) &&
+      component.puntaje >= 0
+    ) {
+      return component.puntaje;
+    }
+
+    return 0;
+  }
+
   function getComponentImportantFields(component) {
     var data = component && component.data ? component.data : {};
 
@@ -829,6 +842,10 @@
     if (component && component.nombre && component.nombre !== getComponentTitle(component)) {
       meta.appendChild(createTag(component.nombre, "name"));
     }
+
+    meta.appendChild(
+      createTag("Puntaje maximo: " + String(getComponentScore(component)), "score")
+    );
 
     header.appendChild(titleGroup);
     header.appendChild(meta);

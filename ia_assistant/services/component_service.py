@@ -88,6 +88,7 @@ def generate_component_edit_from_teacher_prompt(
             generated_component,
             expected_type=expected_type,
             expected_id=expected_id,
+            teacher_prompt=prompt_docente,
         )
 
         if not validation_payload.get("ok"):
@@ -134,6 +135,7 @@ def generate_component_create_from_teacher_prompt(
             generated_component,
             expected_type=expected_type,
             existing_components=existing_components,
+            teacher_prompt=prompt_docente,
         )
 
         if not validation_payload.get("ok"):

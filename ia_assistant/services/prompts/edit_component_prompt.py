@@ -6,7 +6,7 @@ from .common import (
     build_theory_context_text,
     dump_json_context,
 )
-from .component_schemas import get_component_schema_text
+from .component_schemas import SCORE_RULES_TEXT, get_component_schema_text
 
 
 def build_edit_component_system_prompt(component_type):
@@ -30,6 +30,7 @@ def build_edit_component_system_prompt(component_type):
         "Conserva tildes, signos de apertura, puntuación y texto original de los campos no modificados.",
         "No reescribas el componente completo si solo se pidió una mejora localizada.",
         "Devuelve solo una nueva version del componente activo.",
+        SCORE_RULES_TEXT,
         "Schema esperado para el componente:",
         get_component_schema_text(component_type),
     ]

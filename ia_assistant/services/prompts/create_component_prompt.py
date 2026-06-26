@@ -6,7 +6,7 @@ from .common import (
     build_theory_context_text,
     build_unit_summary_text,
 )
-from .component_schemas import get_component_schema_text
+from .component_schemas import SCORE_RULES_TEXT, get_component_schema_text
 
 
 def build_create_component_system_prompt(component_type):
@@ -23,6 +23,7 @@ def build_create_component_system_prompt(component_type):
         "Si hay teoria existente, usala como fuente principal.",
         "No reutilices ids de componentes existentes.",
         "El tipo debe ser exactamente {}.".format(component_type),
+        SCORE_RULES_TEXT,
         "Schema esperado para el componente:",
         get_component_schema_text(component_type),
     ]

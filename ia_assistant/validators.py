@@ -1,6 +1,7 @@
 """Validation helpers for IA Assistant unit payloads."""
 
 import re
+import unicodedata
 from copy import deepcopy
 
 from .schema import (
@@ -36,6 +37,16 @@ DANGEROUS_SELF_CLOSING_RE = re.compile(
     r"<(script|iframe|object|embed)\b[^>]*\/?>",
     re.IGNORECASE,
 )
+SCORE_REQUEST_PATTERNS = (
+    re.compile(r"\bpuntaje\b", re.IGNORECASE),
+    re.compile(r"\bpuntos\b", re.IGNORECASE),
+    re.compile(r"\bpto\b", re.IGNORECASE),
+    re.compile(r"\bpts\b", re.IGNORECASE),
+    re.compile(r"\bvale\b", re.IGNORECASE),
+    re.compile(r"\bvalor\b", re.IGNORECASE),
+    re.compile(r"\bcalificacion\b", re.IGNORECASE),
+    re.compile(r"\bnota\b", re.IGNORECASE),
+)
 
 
 def is_valid_component_type(component_type):
@@ -63,6 +74,28 @@ def _as_string(value):
         return value
 
     return str(value)
+
+
+def _strip_accents(text):
+    normalized = unicodedata.normalize("NFKD", _as_string(text))
+    return "".join(
+        character
+        for character in normalized
+        if not unicodedata.combining(character)
+    )
+
+
+def teacher_prompt_requests_score(prompt_docente):
+    """Return whether the teacher prompt explicitly requests a score."""
+    normalized_prompt = _strip_accents(prompt_docente).lower()
+
+    if not normalized_prompt.strip():
+        return False
+
+    return any(
+        pattern.search(normalized_prompt)
+        for pattern in SCORE_REQUEST_PATTERNS
+    )
 
 
 def _append_warning(warnings, message, details=None):
@@ -942,12 +975,74 @@ def _normalize_component_name(component, component_type, type_index, warnings):
     return normalize_component_id(component_type, type_index)
 
 
+def _normalize_generated_component_puntaje(
+    component,
+    component_type,
+    component_name,
+    warnings,
+    score_requested,
+):
+    default_puntaje = get_default_puntaje(component_type)
+
+    if default_puntaje is None:
+        default_puntaje = 0
+
+    if not isinstance(component, dict) or "puntaje" not in component:
+        return default_puntaje
+
+    puntaje = component.get("puntaje")
+
+    if component_type == "teoria":
+        if puntaje != 0:
+            _append_warning(
+                warnings,
+                "Se forzo puntaje 0 para la teoría '{}'.".format(
+                    component_name
+                ),
+            )
+        return 0
+
+    if not score_requested:
+        if puntaje not in (0, None):
+            _append_warning(
+                warnings,
+                "Se ignoro el puntaje de '{}' porque el docente no pidio puntaje.".format(
+                    component_name
+                ),
+                {"puntaje": puntaje},
+            )
+        return 0
+
+    if isinstance(puntaje, bool) or not isinstance(puntaje, int):
+        _append_warning(
+            warnings,
+            "Se normalizo puntaje invalido a 0 para '{}'.".format(
+                component_name
+            ),
+            {"puntaje": puntaje},
+        )
+        return default_puntaje
+
+    if puntaje < 0:
+        _append_warning(
+            warnings,
+            "Se normalizo puntaje negativo a 0 para '{}'.".format(
+                component_name
+            ),
+            {"puntaje": puntaje},
+        )
+        return default_puntaje
+
+    return puntaje
+
+
 def _normalize_component_base(
     component,
     component_type,
     type_index,
     warnings,
     forced_id=None,
+    score_requested=False,
 ):
     component_id = forced_id or normalize_component_id(
         component_type,
@@ -962,6 +1057,13 @@ def _normalize_component_base(
             component_type,
             type_index,
             warnings,
+        ),
+        "puntaje": _normalize_generated_component_puntaje(
+            component,
+            component_type,
+            _component_display_name(component),
+            warnings,
+            score_requested,
         ),
     }
 
@@ -1109,6 +1211,7 @@ def _normalize_component(
     warnings,
     forced_id=None,
     initial_type_counts=None,
+    score_requested=False,
 ):
     if not isinstance(component, dict):
         _append_warning(
@@ -1152,6 +1255,7 @@ def _normalize_component(
         type_index,
         warnings,
         forced_id=forced_id,
+        score_requested=score_requested,
     )
 
     if component_type == "teoria":
@@ -1166,7 +1270,7 @@ def _normalize_component(
     return normalized
 
 
-def normalize_unit_contract(unit):
+def normalize_unit_contract(unit, score_requested=False):
     """Normalize a generated unit into the current authoring contract."""
     warnings = []
 
@@ -1201,6 +1305,7 @@ def normalize_unit_contract(unit):
             component,
             type_counts,
             warnings,
+            score_requested=score_requested,
         )
 
         if normalized_component:
@@ -1271,9 +1376,16 @@ def validate_and_normalize_generated_component(
     expected_type=None,
     expected_id=None,
     existing_components=None,
+    teacher_prompt=None,
+    score_requested=None,
 ):
     """Validate and normalize a single component generated by teacher AI."""
     warnings = []
+    requested_score = (
+        teacher_prompt_requests_score(teacher_prompt)
+        if score_requested is None
+        else bool(score_requested)
+    )
 
     if not isinstance(component, dict):
         return {
@@ -1334,6 +1446,7 @@ def validate_and_normalize_generated_component(
         warnings,
         forced_id=expected_id,
         initial_type_counts=initial_type_counts,
+        score_requested=requested_score,
     )
 
     if not normalized_component:
@@ -1351,8 +1464,18 @@ def validate_and_normalize_generated_component(
     }
 
 
-def validate_and_normalize_generated_unit(raw_unit):
+def validate_and_normalize_generated_unit(
+    raw_unit,
+    teacher_prompt=None,
+    score_requested=None,
+):
     """Validate and normalize a unit generated by teacher AI."""
+    requested_score = (
+        teacher_prompt_requests_score(teacher_prompt)
+        if score_requested is None
+        else bool(score_requested)
+    )
+
     if not isinstance(raw_unit, dict):
         return {
             "ok": False,
@@ -1369,4 +1492,7 @@ def validate_and_normalize_generated_unit(raw_unit):
             "details": [],
         }
 
-    return normalize_unit_contract(raw_unit)
+    return normalize_unit_contract(
+        raw_unit,
+        score_requested=requested_score,
+    )

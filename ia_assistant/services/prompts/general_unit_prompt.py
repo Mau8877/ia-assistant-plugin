@@ -6,7 +6,11 @@ from .common import (
     build_json_only_rules,
     clean_teacher_prompt,
 )
-from .component_schemas import UNIT_SCHEMA_TEXT, build_all_component_schemas_text
+from .component_schemas import (
+    SCORE_RULES_TEXT,
+    UNIT_SCHEMA_TEXT,
+    build_all_component_schemas_text,
+)
 from .codigo_prompt import build_codigo_rules
 from .pregunta_abierta_prompt import build_pregunta_abierta_rules
 from .quiz_multiple_prompt import build_quiz_multiple_rules
@@ -24,6 +28,7 @@ def build_general_unit_system_prompt():
         "Tipos permitidos de componentes:",
         build_allowed_types_text(),
         "Cada componente debe tener id, tipo, nombre y data.",
+        SCORE_RULES_TEXT,
         "Usa ids unicos con formato tipo_numero, por ejemplo teoria_1.",
         "Schemas de componentes:",
         build_all_component_schemas_text(),

@@ -77,7 +77,10 @@ def generate_unit_from_teacher_prompt(prompt_docente, contexto=None, client=None
         current_client = client or OpenRouterClient()
         raw_response = current_client.generate_text(system_prompt, user_prompt)
         generated_unit = parse_ai_json_response(raw_response)
-        validation_payload = validate_and_normalize_generated_unit(generated_unit)
+        validation_payload = validate_and_normalize_generated_unit(
+            generated_unit,
+            teacher_prompt=prompt_docente,
+        )
 
         if not validation_payload.get("ok"):
             raise AIValidationError(

@@ -1,4 +1,5 @@
 import json
+import math
 
 from .openrouter_client import OpenRouterClient
 from .ai_errors import (
@@ -31,6 +32,138 @@ def _truncate(value, limit):
     if len(s) <= limit:
         return s
     return s[:limit] + " [truncado]"
+
+
+def _get_component_max_score(component):
+    if not isinstance(component, dict):
+        return 0
+
+    score = component.get("puntaje")
+
+    if (
+        isinstance(score, int)
+        and not isinstance(score, bool)
+        and score > 0
+    ):
+        return score
+
+    return 0
+
+
+def _normalize_quiz_answer_ids(answer_value):
+    if answer_value is None or answer_value == "":
+        return []
+
+    if isinstance(answer_value, list):
+        return [str(value) for value in answer_value]
+
+    return [str(answer_value)]
+
+
+def _normalize_quiz_correct_ids(component_data):
+    correct_ids = component_data.get("respuestas_correctas")
+
+    if not isinstance(correct_ids, list):
+        return []
+
+    return [str(value) for value in correct_ids]
+
+
+def _round_half_up(value):
+    return int(math.floor(float(value) + 0.5))
+
+
+def _calculate_quiz_review_result(component, saved_answer):
+    data = component.get("data") if isinstance(component, dict) else {}
+    puntaje_maximo = _get_component_max_score(component)
+    selected_ids = _normalize_quiz_answer_ids(
+        saved_answer.get("value") if isinstance(saved_answer, dict) else None
+    )
+    correct_ids = _normalize_quiz_correct_ids(data)
+
+    if not selected_ids:
+        return {
+            "estado": "sin_respuesta",
+            "puntaje_obtenido": 0,
+            "puntaje_maximo": puntaje_maximo,
+        }
+
+    if not correct_ids:
+        return {
+            "estado": "revisar",
+            "puntaje_obtenido": 0,
+            "puntaje_maximo": puntaje_maximo,
+        }
+
+    selected_set = set(selected_ids)
+    correct_set = set(correct_ids)
+
+    if len(correct_set) == 1:
+        is_correct = selected_set == correct_set
+        return {
+            "estado": "bien" if is_correct else "revisar",
+            "puntaje_obtenido": puntaje_maximo if is_correct else 0,
+            "puntaje_maximo": puntaje_maximo,
+        }
+
+    aciertos = len(selected_set & correct_set)
+    errores = len(selected_set - correct_set)
+    proporcion = float(aciertos - errores) / float(len(correct_set))
+
+    if proporcion < 0:
+        proporcion = 0.0
+
+    if proporcion > 1:
+        proporcion = 1.0
+
+    puntaje_obtenido = _round_half_up(puntaje_maximo * proporcion)
+
+    if puntaje_obtenido >= puntaje_maximo and not errores:
+        estado = "bien"
+    elif puntaje_obtenido > 0:
+        estado = "parcial"
+    else:
+        estado = "revisar"
+
+    return {
+        "estado": estado,
+        "puntaje_obtenido": puntaje_obtenido,
+        "puntaje_maximo": puntaje_maximo,
+    }
+
+
+def _attach_review_scores(validated_review, comp_map, student_answers):
+    components = validated_review.get("componentes", [])
+    total_obtenido = 0
+    total_maximo = 0
+
+    for item in components:
+        component_id = item.get("componentId")
+        component = comp_map.get(component_id) or {}
+        component_type = item.get("tipo")
+        saved_answer = (
+            student_answers.get(component_id)
+            if isinstance(student_answers, dict)
+            else None
+        )
+        puntaje_maximo = _get_component_max_score(component)
+        puntaje_obtenido = 0
+
+        if component_type == "quiz_multiple":
+            quiz_result = _calculate_quiz_review_result(component, saved_answer)
+            item["estado"] = quiz_result["estado"]
+            puntaje_obtenido = quiz_result["puntaje_obtenido"]
+            puntaje_maximo = quiz_result["puntaje_maximo"]
+
+        item["puntaje_obtenido"] = puntaje_obtenido
+        item["puntaje_maximo"] = puntaje_maximo
+
+        total_obtenido += puntaje_obtenido
+        total_maximo += puntaje_maximo
+
+    validated_review["puntaje_total_obtenido"] = total_obtenido
+    validated_review["puntaje_total_maximo"] = total_maximo
+    return validated_review
 
 
 def _prepare_components_for_ai(unit, student_answers, component_ids=None):
@@ -91,6 +224,7 @@ def _prepare_components_for_ai(unit, student_answers, component_ids=None):
             "componentId": cid,
             "tipo": comp.get("tipo"),
             "nombre": comp.get("nombre") or "",
+            "puntaje_maximo": _get_component_max_score(comp),
             "pregunta": pregunta,
             "enunciado": enunciado,
             "titulo": titulo,
@@ -260,6 +394,9 @@ def generate_student_review(
         parsed = parse_ai_json_response(raw_response)
 
         validated = _validate_ai_payload(parsed, comp_map)
+        validated = _attach_review_scores(
+            validated, comp_map, student_answers
+        )
 
         return {"ok": True, "success": True, "review": validated}
     except Exception as error:

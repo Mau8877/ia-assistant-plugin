@@ -500,6 +500,51 @@ class StudentReviewScoringTests(unittest.TestCase):
         self.assertEqual(component["puntaje_maximo"], 7)
         self.assertTrue(review["_ia_assistant"]["warnings"])
 
+    def test_open_question_invalid_non_integer_ai_scores_default_to_zero(self):
+        invalid_scores = [True, None, 2.5]
+
+        for invalid_score in invalid_scores:
+            with self.subTest(invalid_score=invalid_score):
+                unit = {
+                    "version": 1,
+                    "titulo": "Unidad",
+                    "componentes": [build_open_question_component(3)],
+                }
+                answers = {
+                    "pregunta_1": {
+                        "componentId": "pregunta_1",
+                        "tipo": "pregunta_abierta",
+                        "value": "Respuesta",
+                        "metadata": {},
+                    }
+                }
+                ai_payload = {
+                    "status": "ai",
+                    "resumen_general": "Resumen",
+                    "componentes": [
+                        {
+                            "componentId": "pregunta_1",
+                            "tipo": "pregunta_abierta",
+                            "estado": "parcial",
+                            "comentario": "Comentario",
+                            "sugerencia": "Sugerencia",
+                            "puntaje_obtenido": invalid_score,
+                            "puntaje_maximo": 3,
+                        }
+                    ],
+                    "recomendaciones": [],
+                }
+
+                result = generate_student_review(
+                    unit, answers, client=FakeClient(ai_payload)
+                )
+                review = result["review"]
+                component = review["componentes"][0]
+
+                self.assertEqual(component["puntaje_obtenido"], 0)
+                self.assertEqual(component["puntaje_maximo"], 3)
+                self.assertTrue(review["_ia_assistant"]["warnings"])
+
     def test_quiz_ignores_ai_score_and_keeps_backend_score(self):
         unit = {
             "version": 1,
@@ -539,6 +584,56 @@ class StudentReviewScoringTests(unittest.TestCase):
         self.assertEqual(component["estado"], "revisar")
         self.assertEqual(component["puntaje_obtenido"], 0)
         self.assertEqual(component["puntaje_maximo"], 5)
+
+    def test_backend_recalculates_totals_and_ignores_ai_totals(self):
+        unit = {
+            "version": 1,
+            "titulo": "Unidad",
+            "componentes": [
+                build_quiz_component(5, ["a"]),
+                build_open_question_component(3),
+            ],
+        }
+        answers = {
+            "quiz_1": {
+                "componentId": "quiz_1",
+                "tipo": "quiz_multiple",
+                "value": "a",
+                "metadata": {},
+            },
+            "pregunta_1": {
+                "componentId": "pregunta_1",
+                "tipo": "pregunta_abierta",
+                "value": "Respuesta",
+                "metadata": {},
+            },
+        }
+        ai_payload = {
+            "status": "ai",
+            "resumen_general": "Resumen",
+            "puntaje_total_obtenido": 999,
+            "puntaje_total_maximo": 999,
+            "componentes": [
+                {
+                    "componentId": "pregunta_1",
+                    "tipo": "pregunta_abierta",
+                    "estado": "parcial",
+                    "comentario": "Comentario",
+                    "sugerencia": "Sugerencia",
+                    "puntaje_obtenido": 2,
+                    "puntaje_maximo": 3,
+                }
+            ],
+            "recomendaciones": [],
+        }
+
+        result = generate_student_review(
+            unit, answers, client=FakeClient(ai_payload)
+        )
+        review = result["review"]
+
+        self.assertEqual(review["puntaje_total_obtenido"], 7)
+        self.assertEqual(review["puntaje_total_maximo"], 8)
 
 
 if __name__ == "__main__":

@@ -522,6 +522,14 @@
     );
   }
 
+  function hasComparablePreviousReview(reviewState) {
+    return !!(
+      reviewState &&
+      reviewState.hasReview === true &&
+      reviewState.hasComparableSignature === true
+    );
+  }
+
   function createAiStateBadge(rawState) {
     var stateKey = String(rawState || "").toLowerCase();
     var stateMap = {
@@ -654,10 +662,6 @@
         var promptText = comp ? getComponentPrompt(comp) : "";
         var puntajeObtenido = getValidReviewScore(item.puntaje_obtenido);
         var puntajeMaximo = getValidReviewScore(item.puntaje_maximo);
-        var puntajeNormalizado = normalizeReviewScoreTo100(
-          puntajeObtenido,
-          puntajeMaximo
-        );
         var blockHeader = createElement(
           "div",
           "ia-assistant-student-review-result__component-head",
@@ -680,15 +684,16 @@
         blockHeader.appendChild(createAiStateBadge(item.estado));
         block.appendChild(blockHeader);
 
-        if (puntajeNormalizado !== null) {
+        if (hasValidReviewScorePair(puntajeObtenido, puntajeMaximo)) {
           block.appendChild(
             createElement(
               "div",
               "ia-assistant-student-review-result__component-score",
-              "Calificacion del componente: " +
-                String(puntajeNormalizado) +
+              "Calificacion: " +
+                String(puntajeObtenido) +
                 " / " +
-                "100",
+                String(puntajeMaximo) +
+                " pts",
             )
           );
         }
@@ -929,25 +934,7 @@
 
     if (showReviewDetails) {
       renderStoredReview(reviewResultContainer, currentReviewState);
-    } else if (
-      currentReviewState.hasReview &&
-      !currentReviewState.hasComparableSignature
-    ) {
-      reviewResultContainer.appendChild(
-        createElement(
-          "div",
-          "ia-assistant-student-review-result__warning",
-          "Hay una revision previa, pero no puede verificarse contra tus respuestas actuales. Envia tus respuestas para actualizarla.",
-        ),
-      );
-      reviewResultContainer.appendChild(
-        createElement(
-          "div",
-          "ia-assistant-student-review-result__empty",
-          "La evaluacion anterior no se muestra porque no tiene una firma comparable.",
-        ),
-      );
-    } else if (currentReviewState.hasReview && currentReviewState.isStale) {
+    } else if (hasComparablePreviousReview(currentReviewState) && currentReviewState.isStale) {
       reviewResultContainer.appendChild(
         createElement(
           "div",

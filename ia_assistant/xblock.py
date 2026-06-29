@@ -1,5 +1,6 @@
 import json
 import hashlib
+from numbers import Number
 
 from xblock.core import XBlock
 from xblock.fields import Dict, Scope, String
@@ -27,6 +28,8 @@ class IAAssistantXBlock(XBlock):
     puede ser importado por el SDK y expone vistas separadas para Studio y
     Student sin implementar todavia la interfaz final.
     """
+
+    has_score = True
 
     display_name = String(
         default="IA Assistant",
@@ -320,6 +323,59 @@ class IAAssistantXBlock(XBlock):
             return ""
 
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+    @staticmethod
+    def _is_valid_grade_number(value):
+        return isinstance(value, Number) and not isinstance(value, bool)
+
+    def _publish_grade_from_review(self, review):
+        if not isinstance(review, dict):
+            return None
+
+        review_meta = review.get("_ia_assistant")
+        if not isinstance(review_meta, dict):
+            review_meta = {}
+            review["_ia_assistant"] = review_meta
+
+        review_meta.pop("grade_publish_error", None)
+        review_meta["grade_published"] = False
+
+        value = review.get("puntaje_total_obtenido")
+        max_value = review.get("puntaje_total_maximo")
+
+        if (
+            not self._is_valid_grade_number(value)
+            or not self._is_valid_grade_number(max_value)
+            or max_value <= 0
+            or value < 0
+            or value > max_value
+        ):
+            return None
+
+        review_meta["grade_value"] = value
+        review_meta["grade_max_value"] = max_value
+
+        try:
+            self.runtime.publish(
+                self,
+                "grade",
+                {
+                    "value": value,
+                    "max_value": max_value,
+                },
+            )
+        except Exception as error:
+            review_meta["grade_publish_error"] = (
+                str(error).strip()
+                or "No se pudo publicar la calificacion oficial."
+            )
+            return (
+                "La revision se genero correctamente, pero no se pudo "
+                "publicar la calificacion oficial."
+            )
+
+        review_meta["grade_published"] = True
+        return None
 
     def _handle_ai_error(self, error):
         if isinstance(error, AIError):
@@ -674,7 +730,14 @@ class IAAssistantXBlock(XBlock):
         # Guardar resultado en user_state
         self.student_review_result = review
 
-        return {"ok": True, "success": True, "review": review}
+        grade_warning = self._publish_grade_from_review(review)
+        self.student_review_result = review
+
+        response = {"ok": True, "success": True, "review": review}
+        if grade_warning:
+            response["warnings"] = [{"message": grade_warning}]
+
+        return response
 
     @XBlock.json_handler
     def generate_teacher_unit(self, data, suffix=""):

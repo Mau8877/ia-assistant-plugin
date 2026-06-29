@@ -874,6 +874,16 @@
   color: var(--ia-assistant-color-muted);
   font-size: 0.95rem;
 }
+.ia-assistant-student-review-result__score-total {
+  background: #eff6ff;
+  border: 1px solid rgba(29, 78, 216, 0.18);
+  border-radius: var(--ia-assistant-radius-sm);
+  color: var(--ia-assistant-color-primary);
+  font-size: 0.95rem;
+  font-weight: 800;
+  margin-bottom: var(--ia-assistant-space-sm);
+  padding: var(--ia-assistant-space-sm) var(--ia-assistant-space-md);
+}
 .ia-assistant-student-review-result__summary {
   background: var(--ia-assistant-color-background);
   border: 1px solid var(--ia-assistant-color-border);
@@ -923,6 +933,12 @@
 }
 .ia-assistant-student-review-result__component .ia-assistant-badge {
   margin-left: 0;
+}
+.ia-assistant-student-review-result__component-score {
+  color: var(--ia-assistant-color-primary);
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin: 0 0 var(--ia-assistant-space-sm);
 }
 .ia-assistant-student-review-result__label {
   display: block;

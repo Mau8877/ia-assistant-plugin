@@ -71,6 +71,33 @@
     return 0;
   }
 
+  function getValidReviewScore(value) {
+    if (
+      typeof value === "number" &&
+      Number.isInteger(value) &&
+      value >= 0
+    ) {
+      return value;
+    }
+
+    return null;
+  }
+
+  function hasValidReviewScorePair(obtenido, maximo) {
+    var safeObtenido = getValidReviewScore(obtenido);
+    var safeMaximo = getValidReviewScore(maximo);
+
+    return safeObtenido !== null && safeMaximo !== null && safeMaximo > 0;
+  }
+
+  function normalizeReviewScoreTo100(obtenido, maximo) {
+    if (!hasValidReviewScorePair(obtenido, maximo)) {
+      return null;
+    }
+
+    return Math.round((obtenido / maximo) * 100);
+  }
+
   function getComponentMap() {
     var State = window.IAAssistant.Student.State;
     var components =
@@ -538,10 +565,33 @@
       review && review.status === "ai"
         ? "Retroalimentación IA disponible."
         : "Retroalimentación disponible.";
+    var totalObtenido = getValidReviewScore(
+      review && review.puntaje_total_obtenido
+    );
+    var totalMaximo = getValidReviewScore(
+      review && review.puntaje_total_maximo
+    );
+    var totalNormalizado = normalizeReviewScoreTo100(
+      totalObtenido,
+      totalMaximo
+    );
 
     header.appendChild(createElement("h3", "", "Resultado de revisión"));
     header.appendChild(createElement("p", "", statusText));
     resultCard.appendChild(header);
+
+    if (totalNormalizado !== null) {
+      resultCard.appendChild(
+        createElement(
+          "div",
+          "ia-assistant-student-review-result__score-total",
+          "Calificacion interna: " +
+            String(totalNormalizado) +
+            " / " +
+            "100",
+        )
+      );
+    }
 
     if (reviewState.isStale) {
       resultCard.appendChild(
@@ -602,6 +652,12 @@
         );
         var titleText = comp ? getComponentTitle(comp) : item.componentId;
         var promptText = comp ? getComponentPrompt(comp) : "";
+        var puntajeObtenido = getValidReviewScore(item.puntaje_obtenido);
+        var puntajeMaximo = getValidReviewScore(item.puntaje_maximo);
+        var puntajeNormalizado = normalizeReviewScoreTo100(
+          puntajeObtenido,
+          puntajeMaximo
+        );
         var blockHeader = createElement(
           "div",
           "ia-assistant-student-review-result__component-head",
@@ -623,6 +679,19 @@
         );
         blockHeader.appendChild(createAiStateBadge(item.estado));
         block.appendChild(blockHeader);
+
+        if (puntajeNormalizado !== null) {
+          block.appendChild(
+            createElement(
+              "div",
+              "ia-assistant-student-review-result__component-score",
+              "Calificacion del componente: " +
+                String(puntajeNormalizado) +
+                " / " +
+                "100",
+            )
+          );
+        }
 
         if (promptText) {
           block.appendChild(

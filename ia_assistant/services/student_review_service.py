@@ -34,6 +34,15 @@ def _truncate(value, limit):
     return s[:limit] + " [truncado]"
 
 
+def _append_internal_warning(warnings, message, details=None):
+    warning = {"message": message}
+
+    if isinstance(details, dict) and details:
+        warning["details"] = details
+
+    warnings.append(warning)
+
+
 def _get_component_max_score(component):
     if not isinstance(component, dict):
         return 0
@@ -147,13 +156,19 @@ def _attach_review_scores(validated_review, comp_map, student_answers):
             else None
         )
         puntaje_maximo = _get_component_max_score(component)
-        puntaje_obtenido = 0
+        puntaje_obtenido = item.get("puntaje_obtenido", 0)
 
         if component_type == "quiz_multiple":
             quiz_result = _calculate_quiz_review_result(component, saved_answer)
             item["estado"] = quiz_result["estado"]
             puntaje_obtenido = quiz_result["puntaje_obtenido"]
             puntaje_maximo = quiz_result["puntaje_maximo"]
+        elif component_type in ("pregunta_abierta", "codigo"):
+            puntaje_obtenido = item.get("puntaje_obtenido", 0)
+            puntaje_maximo = _get_component_max_score(component)
+        else:
+            puntaje_obtenido = 0
+            puntaje_maximo = 0
 
         item["puntaje_obtenido"] = puntaje_obtenido
         item["puntaje_maximo"] = puntaje_maximo
@@ -164,6 +179,87 @@ def _attach_review_scores(validated_review, comp_map, student_answers):
     validated_review["puntaje_total_obtenido"] = total_obtenido
     validated_review["puntaje_total_maximo"] = total_maximo
     return validated_review
+
+
+def _normalize_ai_component_score(raw_component, component, warnings):
+    component_id = raw_component.get("componentId")
+    component_type = raw_component.get("tipo")
+    puntaje_maximo = _get_component_max_score(component)
+    raw_maximo = raw_component.get("puntaje_maximo")
+    raw_obtenido = raw_component.get("puntaje_obtenido")
+
+    if component_type not in ("pregunta_abierta", "codigo"):
+        return {"puntaje_obtenido": 0, "puntaje_maximo": puntaje_maximo}
+
+    if puntaje_maximo <= 0:
+        if raw_obtenido not in (None, 0):
+            _append_internal_warning(
+                warnings,
+                "Se ignoro puntaje IA porque el componente no tiene puntaje maximo.",
+                {
+                    "componentId": component_id,
+                    "tipo": component_type,
+                    "puntaje_obtenido": raw_obtenido,
+                },
+            )
+        return {"puntaje_obtenido": 0, "puntaje_maximo": 0}
+
+    if raw_maximo not in (None, puntaje_maximo):
+        _append_internal_warning(
+            warnings,
+            "Se ajusto puntaje_maximo al valor definido por el docente.",
+            {
+                "componentId": component_id,
+                "tipo": component_type,
+                "puntaje_maximo_ia": raw_maximo,
+                "puntaje_maximo_backend": puntaje_maximo,
+            },
+        )
+
+    if isinstance(raw_obtenido, bool) or not isinstance(raw_obtenido, int):
+        _append_internal_warning(
+            warnings,
+            "Se normalizo puntaje_obtenido invalido a 0.",
+            {
+                "componentId": component_id,
+                "tipo": component_type,
+                "puntaje_obtenido": raw_obtenido,
+            },
+        )
+        return {"puntaje_obtenido": 0, "puntaje_maximo": puntaje_maximo}
+
+    if raw_obtenido < 0:
+        _append_internal_warning(
+            warnings,
+            "Se normalizo puntaje_obtenido negativo a 0.",
+            {
+                "componentId": component_id,
+                "tipo": component_type,
+                "puntaje_obtenido": raw_obtenido,
+            },
+        )
+        return {"puntaje_obtenido": 0, "puntaje_maximo": puntaje_maximo}
+
+    if raw_obtenido > puntaje_maximo:
+        _append_internal_warning(
+            warnings,
+            "Se ajusto puntaje_obtenido al puntaje maximo permitido.",
+            {
+                "componentId": component_id,
+                "tipo": component_type,
+                "puntaje_obtenido": raw_obtenido,
+                "puntaje_maximo": puntaje_maximo,
+            },
+        )
+        return {
+            "puntaje_obtenido": puntaje_maximo,
+            "puntaje_maximo": puntaje_maximo,
+        }
+
+    return {
+        "puntaje_obtenido": raw_obtenido,
+        "puntaje_maximo": puntaje_maximo,
+    }
 
 
 def _prepare_components_for_ai(unit, student_answers, component_ids=None):
@@ -310,6 +406,7 @@ def _validate_ai_payload(payload, comp_map):
         )
 
     validated_components = []
+    warnings = []
     for comp in componentes:
         if not isinstance(comp, dict):
             raise AIInvalidResponseError(
@@ -321,6 +418,7 @@ def _validate_ai_payload(payload, comp_map):
         estado = comp.get("estado")
         comentario = comp.get("comentario") or ""
         sugerencia = comp.get("sugerencia") or ""
+        component = comp_map.get(cid) or {}
 
         if cid not in comp_map:
             raise AIInvalidResponseError(
@@ -335,6 +433,10 @@ def _validate_ai_payload(payload, comp_map):
                 f"estado invalido: {estado}", code="invalid_estado"
             )
 
+        normalized_score = _normalize_ai_component_score(
+            comp, component, warnings
+        )
+
         validated_components.append(
             {
                 "componentId": cid,
@@ -342,12 +444,29 @@ def _validate_ai_payload(payload, comp_map):
                 "estado": estado,
                 "comentario": _truncate(comentario, MAX_COMMENT_CHARS),
                 "sugerencia": _truncate(sugerencia, MAX_SUGGESTION_CHARS),
+                "puntaje_obtenido": normalized_score["puntaje_obtenido"],
+                "puntaje_maximo": normalized_score["puntaje_maximo"],
             }
         )
 
     # ensure all auditables present: add missing with sin_respuesta
     for cid, comp in comp_map.items():
         if cid not in [c["componentId"] for c in validated_components]:
+            component = comp_map.get(cid) or {}
+            puntaje_maximo = _get_component_max_score(component)
+            if (
+                component.get("tipo") in ("pregunta_abierta", "codigo")
+                and puntaje_maximo > 0
+            ):
+                _append_internal_warning(
+                    warnings,
+                    "La IA omitio puntaje_obtenido y se normalizo a 0.",
+                    {
+                        "componentId": cid,
+                        "tipo": component.get("tipo"),
+                        "puntaje_maximo": puntaje_maximo,
+                    },
+                )
             validated_components.append(
                 {
                     "componentId": cid,
@@ -355,6 +474,8 @@ def _validate_ai_payload(payload, comp_map):
                     "estado": "sin_respuesta",
                     "comentario": "",
                     "sugerencia": "",
+                    "puntaje_obtenido": 0,
+                    "puntaje_maximo": puntaje_maximo,
                 }
             )
 
@@ -373,6 +494,9 @@ def _validate_ai_payload(payload, comp_map):
         "componentes": validated_components,
         "recomendaciones": [str(r) for r in recomendaciones][:MAX_RECOMMENDATIONS],
     }
+
+    if warnings:
+        validated["_ia_assistant"] = {"warnings": warnings}
 
     return validated
 

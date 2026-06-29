@@ -77,8 +77,8 @@ class IAAssistantXBlock(XBlock):
 
         # TEMPORAL SDK TEST:
         # Forzar vista Student usando la misma instancia del escenario Studio.
-        #if self._is_sdk_studio_mode():
-            #return self.studio_view(context)
+        # if self._is_sdk_studio_mode():
+        # return self.studio_view(context)
 
         initial_unit, load_warning = self._get_initial_unit()
         fragment = Fragment(read_static_text(STUDENT_HTML_PATH))

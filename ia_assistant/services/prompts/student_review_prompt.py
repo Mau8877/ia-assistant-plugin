@@ -13,6 +13,8 @@ def build_student_review_system_prompt():
         "Si existe una rúbrica o criterio explícito en el componente, úsalo como referencia principal para la evaluación.",
         "Si no existe rúbrica explícita, evalúa según la consigna y buenas prácticas del tema y deja constancia de ello.",
         "No inventes rúbricas ni atribuyas criterios al docente que no estén presentes en el componente.",
+        "Para pregunta_abierta y codigo con puntaje_maximo mayor que 0, devuelve puntaje_obtenido como entero entre 0 y puntaje_maximo.",
+        "No asignes puntaje a teoria ni revision. El puntaje de quiz_multiple lo calcula el backend y no debes decidirlo tú.",
         "No ejecutes ningún código. No simules ejecución. Para código, haz análisis estático del texto proporcionado.",
         "Cuando el alumno se equivoque, explica brevemente qué está mal, por qué, y ofrece una respuesta orientativa o ejemplo breve.",
         "Devuelve SOLO JSON valido, sin texto fuera del JSON, sin markdown, sin fences.",
@@ -55,7 +57,7 @@ def build_student_review_user_prompt(unit, components_for_ai):
     lines.append("INSTRUCCIONES DE SALIDA:")
     lines.append("Devuelve SOLO un objeto JSON con la siguiente estructura:")
     lines.append(
-        '{"status": "ai", "resumen_general": "...", "componentes": [{"componentId": "...", "tipo": "...", "estado": "bien|parcial|revisar|sin_respuesta", "comentario": "...", "sugerencia": "..."}], "recomendaciones": ["..."] }'
+        '{"status": "ai", "resumen_general": "...", "componentes": [{"componentId": "...", "tipo": "...", "estado": "bien|parcial|revisar|sin_respuesta", "comentario": "...", "sugerencia": "...", "puntaje_obtenido": 0, "puntaje_maximo": 0}], "recomendaciones": ["..."] }'
     )
     lines.append("")
     lines.append("Estados permitidos: bien, parcial, revisar, sin_respuesta.")
@@ -64,6 +66,10 @@ def build_student_review_user_prompt(unit, components_for_ai):
         "Reglas de evaluación: si el componente incluye 'criterio', 'criterios', 'rubrica' o 'instrucciones', utilízalos como guía principal y explícita en el comentario cómo se aplica el criterio.")
     lines.append(
         "Si no hay rúbrica, evalúa según la consigna y buenas prácticas, y deja claro que usas criterios generales.")
+    lines.append(
+        "Si el componente es pregunta_abierta o codigo y tiene puntaje_maximo > 0, incluye puntaje_obtenido y puntaje_maximo con valores enteros.")
+    lines.append(
+        "Si el componente es quiz_multiple, puedes omitir puntaje_obtenido y puntaje_maximo; el backend calculará ese puntaje.")
     lines.append("")
     lines.append("Longitudes: comentario máximo ~500 caracteres; sugerencia máximo ~650 caracteres; recomendaciones máximo 4 items.")
     lines.append("")

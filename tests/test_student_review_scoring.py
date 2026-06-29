@@ -39,6 +39,34 @@ def build_quiz_component(
     }
 
 
+def build_open_question_component(puntaje, component_id="pregunta_1"):
+    return {
+        "id": component_id,
+        "tipo": "pregunta_abierta",
+        "nombre": "Pregunta",
+        "puntaje": puntaje,
+        "data": {
+            "enunciado": "Explica",
+            "rubrica": "Criterio base",
+        },
+    }
+
+
+def build_code_component(puntaje, component_id="codigo_1"):
+    return {
+        "id": component_id,
+        "tipo": "codigo",
+        "nombre": "Codigo",
+        "puntaje": puntaje,
+        "data": {
+            "enunciado": "Resuelve",
+            "lenguaje": "python",
+            "instrucciones": "Sigue las instrucciones",
+            "codigo_base": "",
+        },
+    }
+
+
 class StudentReviewScoringTests(unittest.TestCase):
     def test_prepare_components_for_ai_includes_puntaje_maximo(self):
         unit = {
@@ -215,25 +243,8 @@ class StudentReviewScoringTests(unittest.TestCase):
             "titulo": "Unidad",
             "componentes": [
                 build_quiz_component(5, ["a"]),
-                {
-                    "id": "pregunta_1",
-                    "tipo": "pregunta_abierta",
-                    "nombre": "Pregunta",
-                    "puntaje": 3,
-                    "data": {"enunciado": "Explica", "rubrica": "Criterio"},
-                },
-                {
-                    "id": "codigo_1",
-                    "tipo": "codigo",
-                    "nombre": "Codigo",
-                    "puntaje": 7,
-                    "data": {
-                        "enunciado": "Resuelve",
-                        "lenguaje": "python",
-                        "instrucciones": "Sigue",
-                        "codigo_base": "",
-                    },
-                },
+                build_open_question_component(3),
+                build_code_component(7),
             ],
         }
         answers = {
@@ -266,6 +277,8 @@ class StudentReviewScoringTests(unittest.TestCase):
                     "estado": "parcial",
                     "comentario": "Comentario",
                     "sugerencia": "Sugerencia",
+                    "puntaje_obtenido": 2,
+                    "puntaje_maximo": 3,
                 },
                 {
                     "componentId": "codigo_1",
@@ -273,6 +286,8 @@ class StudentReviewScoringTests(unittest.TestCase):
                     "estado": "bien",
                     "comentario": "Comentario",
                     "sugerencia": "Sugerencia",
+                    "puntaje_obtenido": 4,
+                    "puntaje_maximo": 7,
                 },
             ],
             "recomendaciones": [],
@@ -287,12 +302,243 @@ class StudentReviewScoringTests(unittest.TestCase):
             for component in review["componentes"]
         }
 
-        self.assertEqual(review["puntaje_total_obtenido"], 5)
+        self.assertEqual(review["puntaje_total_obtenido"], 11)
         self.assertEqual(review["puntaje_total_maximo"], 15)
-        self.assertEqual(component_map["pregunta_1"]["puntaje_obtenido"], 0)
+        self.assertEqual(component_map["pregunta_1"]["puntaje_obtenido"], 2)
         self.assertEqual(component_map["pregunta_1"]["puntaje_maximo"], 3)
-        self.assertEqual(component_map["codigo_1"]["puntaje_obtenido"], 0)
+        self.assertEqual(component_map["codigo_1"]["puntaje_obtenido"], 4)
         self.assertEqual(component_map["codigo_1"]["puntaje_maximo"], 7)
+
+    def test_open_question_uses_valid_ai_score(self):
+        unit = {
+            "version": 1,
+            "titulo": "Unidad",
+            "componentes": [build_open_question_component(3)],
+        }
+        answers = {
+            "pregunta_1": {
+                "componentId": "pregunta_1",
+                "tipo": "pregunta_abierta",
+                "value": "Respuesta",
+                "metadata": {},
+            }
+        }
+        ai_payload = {
+            "status": "ai",
+            "resumen_general": "Resumen",
+            "componentes": [
+                {
+                    "componentId": "pregunta_1",
+                    "tipo": "pregunta_abierta",
+                    "estado": "parcial",
+                    "comentario": "Comentario",
+                    "sugerencia": "Sugerencia",
+                    "puntaje_obtenido": 2,
+                    "puntaje_maximo": 3,
+                }
+            ],
+            "recomendaciones": [],
+        }
+
+        result = generate_student_review(
+            unit, answers, client=FakeClient(ai_payload)
+        )
+        component = result["review"]["componentes"][0]
+
+        self.assertEqual(component["puntaje_obtenido"], 2)
+        self.assertEqual(component["puntaje_maximo"], 3)
+
+    def test_open_question_missing_ai_score_defaults_to_zero_with_warning(self):
+        unit = {
+            "version": 1,
+            "titulo": "Unidad",
+            "componentes": [build_open_question_component(3)],
+        }
+        answers = {
+            "pregunta_1": {
+                "componentId": "pregunta_1",
+                "tipo": "pregunta_abierta",
+                "value": "Respuesta",
+                "metadata": {},
+            }
+        }
+        ai_payload = {
+            "status": "ai",
+            "resumen_general": "Resumen",
+            "componentes": [],
+            "recomendaciones": [],
+        }
+
+        result = generate_student_review(
+            unit, answers, client=FakeClient(ai_payload)
+        )
+        review = result["review"]
+        component = review["componentes"][0]
+
+        self.assertEqual(component["puntaje_obtenido"], 0)
+        self.assertEqual(component["puntaje_maximo"], 3)
+        self.assertTrue(review["_ia_assistant"]["warnings"])
+
+    def test_open_question_out_of_range_ai_score_is_clamped(self):
+        unit = {
+            "version": 1,
+            "titulo": "Unidad",
+            "componentes": [build_open_question_component(3)],
+        }
+        answers = {
+            "pregunta_1": {
+                "componentId": "pregunta_1",
+                "tipo": "pregunta_abierta",
+                "value": "Respuesta",
+                "metadata": {},
+            }
+        }
+        ai_payload = {
+            "status": "ai",
+            "resumen_general": "Resumen",
+            "componentes": [
+                {
+                    "componentId": "pregunta_1",
+                    "tipo": "pregunta_abierta",
+                    "estado": "bien",
+                    "comentario": "Comentario",
+                    "sugerencia": "Sugerencia",
+                    "puntaje_obtenido": 10,
+                    "puntaje_maximo": 10,
+                }
+            ],
+            "recomendaciones": [],
+        }
+
+        result = generate_student_review(
+            unit, answers, client=FakeClient(ai_payload)
+        )
+        review = result["review"]
+        component = review["componentes"][0]
+
+        self.assertEqual(component["puntaje_obtenido"], 3)
+        self.assertEqual(component["puntaje_maximo"], 3)
+        self.assertTrue(review["_ia_assistant"]["warnings"])
+
+    def test_code_uses_valid_ai_score(self):
+        unit = {
+            "version": 1,
+            "titulo": "Unidad",
+            "componentes": [build_code_component(7)],
+        }
+        answers = {
+            "codigo_1": {
+                "componentId": "codigo_1",
+                "tipo": "codigo",
+                "value": "print('hola')",
+                "metadata": {},
+            }
+        }
+        ai_payload = {
+            "status": "ai",
+            "resumen_general": "Resumen",
+            "componentes": [
+                {
+                    "componentId": "codigo_1",
+                    "tipo": "codigo",
+                    "estado": "parcial",
+                    "comentario": "Comentario",
+                    "sugerencia": "Sugerencia",
+                    "puntaje_obtenido": 5,
+                    "puntaje_maximo": 7,
+                }
+            ],
+            "recomendaciones": [],
+        }
+
+        result = generate_student_review(
+            unit, answers, client=FakeClient(ai_payload)
+        )
+        component = result["review"]["componentes"][0]
+
+        self.assertEqual(component["puntaje_obtenido"], 5)
+        self.assertEqual(component["puntaje_maximo"], 7)
+
+    def test_code_invalid_ai_score_defaults_to_zero(self):
+        unit = {
+            "version": 1,
+            "titulo": "Unidad",
+            "componentes": [build_code_component(7)],
+        }
+        answers = {
+            "codigo_1": {
+                "componentId": "codigo_1",
+                "tipo": "codigo",
+                "value": "print('hola')",
+                "metadata": {},
+            }
+        }
+        ai_payload = {
+            "status": "ai",
+            "resumen_general": "Resumen",
+            "componentes": [
+                {
+                    "componentId": "codigo_1",
+                    "tipo": "codigo",
+                    "estado": "revisar",
+                    "comentario": "Comentario",
+                    "sugerencia": "Sugerencia",
+                    "puntaje_obtenido": "5",
+                    "puntaje_maximo": 7,
+                }
+            ],
+            "recomendaciones": [],
+        }
+
+        result = generate_student_review(
+            unit, answers, client=FakeClient(ai_payload)
+        )
+        review = result["review"]
+        component = review["componentes"][0]
+
+        self.assertEqual(component["puntaje_obtenido"], 0)
+        self.assertEqual(component["puntaje_maximo"], 7)
+        self.assertTrue(review["_ia_assistant"]["warnings"])
+
+    def test_quiz_ignores_ai_score_and_keeps_backend_score(self):
+        unit = {
+            "version": 1,
+            "titulo": "Unidad",
+            "componentes": [build_quiz_component(5, ["a"])],
+        }
+        answers = {
+            "quiz_1": {
+                "componentId": "quiz_1",
+                "tipo": "quiz_multiple",
+                "value": "b",
+                "metadata": {},
+            }
+        }
+        ai_payload = {
+            "status": "ai",
+            "resumen_general": "Resumen",
+            "componentes": [
+                {
+                    "componentId": "quiz_1",
+                    "tipo": "quiz_multiple",
+                    "estado": "bien",
+                    "comentario": "Comentario",
+                    "sugerencia": "Sugerencia",
+                    "puntaje_obtenido": 5,
+                    "puntaje_maximo": 5,
+                }
+            ],
+            "recomendaciones": [],
+        }
+
+        result = generate_student_review(
+            unit, answers, client=FakeClient(ai_payload)
+        )
+        component = result["review"]["componentes"][0]
+
+        self.assertEqual(component["estado"], "revisar")
+        self.assertEqual(component["puntaje_obtenido"], 0)
+        self.assertEqual(component["puntaje_maximo"], 5)
 
 
 if __name__ == "__main__":

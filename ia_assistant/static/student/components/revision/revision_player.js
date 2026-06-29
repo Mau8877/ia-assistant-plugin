@@ -558,8 +558,22 @@
     );
   }
 
+  function getReviewMeta(review) {
+    if (
+      review &&
+      review._ia_assistant &&
+      typeof review._ia_assistant === "object" &&
+      !Array.isArray(review._ia_assistant)
+    ) {
+      return review._ia_assistant;
+    }
+
+    return {};
+  }
+
   function renderStoredReview(container, reviewState) {
     var review = reviewState.review;
+    var reviewMeta = getReviewMeta(review);
     var componentMap = getComponentMap();
     var resultCard = createElement(
       "section",
@@ -599,6 +613,64 @@
             "100",
         )
       );
+    }
+
+    if (
+      reviewMeta.grade_published === true &&
+      hasValidReviewScorePair(
+        reviewMeta.grade_value,
+        reviewMeta.grade_max_value
+      )
+    ) {
+      var gradeSuccess = createElement(
+        "div",
+        "ia-assistant-student-review-result__lms-status ia-assistant-student-review-result__lms-status--success",
+      );
+
+      gradeSuccess.appendChild(
+        createElement(
+          "p",
+          "ia-assistant-student-review-result__lms-title",
+          "Calificacion registrada en el LMS.",
+        ),
+      );
+      gradeSuccess.appendChild(
+        createElement(
+          "p",
+          "ia-assistant-student-review-result__lms-text",
+          "Puntaje enviado: " +
+            String(reviewMeta.grade_value) +
+            " / " +
+            String(reviewMeta.grade_max_value) +
+            " pts.",
+        ),
+      );
+      resultCard.appendChild(gradeSuccess);
+    } else if (
+      reviewMeta.grade_published === false &&
+      typeof reviewMeta.grade_publish_error === "string" &&
+      reviewMeta.grade_publish_error
+    ) {
+      var gradeWarning = createElement(
+        "div",
+        "ia-assistant-student-review-result__lms-status ia-assistant-student-review-result__lms-status--warning",
+      );
+
+      gradeWarning.appendChild(
+        createElement(
+          "p",
+          "ia-assistant-student-review-result__lms-title",
+          "La revision se genero, pero la calificacion no pudo registrarse en el LMS.",
+        ),
+      );
+      gradeWarning.appendChild(
+        createElement(
+          "p",
+          "ia-assistant-student-review-result__lms-text",
+          "Vuelve a enviar la revision o consulta al docente.",
+        ),
+      );
+      resultCard.appendChild(gradeWarning);
     }
 
     if (reviewState.isStale) {

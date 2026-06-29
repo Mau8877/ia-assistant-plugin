@@ -902,6 +902,32 @@
   margin-bottom: var(--ia-assistant-space-sm);
   padding: var(--ia-assistant-space-sm) var(--ia-assistant-space-md);
 }
+.ia-assistant-student-review-result__lms-status {
+  border-radius: var(--ia-assistant-radius-sm);
+  margin-bottom: var(--ia-assistant-space-sm);
+  padding: var(--ia-assistant-space-sm) var(--ia-assistant-space-md);
+}
+.ia-assistant-student-review-result__lms-status--success {
+  background: #ecfdf5;
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  color: #166534;
+}
+.ia-assistant-student-review-result__lms-status--warning {
+  background: #fff7ed;
+  border: 1px solid rgba(234, 88, 12, 0.2);
+  color: #9a3412;
+}
+.ia-assistant-student-review-result__lms-title,
+.ia-assistant-student-review-result__lms-text {
+  margin: 0;
+}
+.ia-assistant-student-review-result__lms-title {
+  font-weight: 800;
+}
+.ia-assistant-student-review-result__lms-text {
+  font-size: 0.95rem;
+  margin-top: 4px;
+}
 
 /* Grid of component result cards */
 .ia-assistant-student-review-result__grid {

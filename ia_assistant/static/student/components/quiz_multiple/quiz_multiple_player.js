@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     "use strict";
 
     window.IAAssistant = window.IAAssistant || {};
@@ -19,50 +19,6 @@
         return element;
     }
 
-    function contains(list, value) {
-        return list.indexOf(value) >= 0;
-    }
-
-    function getSelectedOptionIdsFromGroup(groupName) {
-        var selected = [];
-        var selector = 'input[name="' + groupName + '"]:checked';
-        var inputs = document.querySelectorAll(selector);
-        Array.prototype.forEach.call(inputs, function (input) {
-            selected.push(input.value);
-        });
-        return selected;
-    }
-
-    function setsMatch(selectedIds, correctIds) {
-        var selectedMap = {};
-
-        if (selectedIds.length !== correctIds.length) {
-            return false;
-        }
-
-        selectedIds.forEach(function (id) {
-            selectedMap[id] = true;
-        });
-
-        return correctIds.every(function (id) {
-            return selectedMap[id];
-        });
-    }
-
-    function getSelectionDetails(selectedIds, correctIds) {
-        return {
-            selectedCorrectIds: selectedIds.filter(function (id) {
-                return contains(correctIds, id);
-            }),
-            selectedWrongIds: selectedIds.filter(function (id) {
-                return !contains(correctIds, id);
-            }),
-            missingCorrectIds: correctIds.filter(function (id) {
-                return !contains(selectedIds, id);
-            })
-        };
-    }
-
     function getOptionId(option, index) {
         return String(option.id || "opcion_" + String(index + 1));
     }
@@ -71,143 +27,79 @@
         return String(value).replace(/[^a-zA-Z0-9_-]/g, "_");
     }
 
-    function getOptionMap(options) {
-        var optionMap = {};
+    function getSelectedOptionIdsFromForm(form, groupName) {
+        var selected = [];
+        var selector = 'input[name="' + groupName + '"]:checked';
+        var inputs = form.querySelectorAll(selector);
 
-        options.forEach(function (option, index) {
-            var currentOption = option || {};
-
-            optionMap[getOptionId(currentOption, index)] = currentOption;
+        Array.prototype.forEach.call(inputs, function (input) {
+            selected.push(String(input.value));
         });
 
-        return optionMap;
+        return selected;
     }
 
-    function createSummary(message, className) {
-        return createElement(
-            "p",
-            "ia-assistant-student-quiz__summary " + className,
-            message
-        );
-    }
+    function getStoredSelection(componentId) {
+        try {
+            var Answers = window.IAAssistant.Student.Answers;
+            var existing = Answers && Answers.getAnswer
+                ? Answers.getAnswer(componentId)
+                : null;
 
-    function createFeedbackItem(option, statusClass, statusText) {
-        var item = createElement(
-            "article",
-            "ia-assistant-student-quiz__feedback-item " + statusClass
-        );
-        var optionText = createElement(
-            "p",
-            "ia-assistant-student-quiz__feedback-option",
-            option.texto || "Opcion sin texto."
-        );
-        var status = createElement(
-            "p",
-            "ia-assistant-student-quiz__feedback-status",
-            statusText
-        );
+            if (!existing) {
+                return [];
+            }
 
-        item.appendChild(optionText);
-        item.appendChild(status);
+            if (Array.isArray(existing.value)) {
+                return existing.value.map(function (value) {
+                    return String(value);
+                });
+            }
 
-        if (option.feedback) {
-            item.appendChild(createElement(
-                "p",
-                "ia-assistant-student-quiz__feedback-text",
-                option.feedback
-            ));
+            if (
+                typeof existing.value === "undefined" ||
+                existing.value === null ||
+                existing.value === ""
+            ) {
+                return [];
+            }
+
+            return [String(existing.value)];
+        } catch (error) {
+            return [];
         }
-
-        return item;
     }
 
-    function renderDetailSection(title, optionIds, optionMap, statusClass, statusText, container) {
-        var section;
-        var list;
+    function persistSelection(componentId, selectedIds) {
+        var Answers = window.IAAssistant.Student.Answers;
 
-        if (!optionIds.length) {
+        if (!Answers || typeof Answers.setAnswer !== "function") {
             return;
         }
 
-        section = createElement(
-            "section",
-            "ia-assistant-student-quiz__detail-section ia-assistant-student-quiz__detail-section--" + statusClass
-        );
-        list = createElement("div", "ia-assistant-student-quiz__feedback-list");
-
-        section.appendChild(createElement("h4", "ia-assistant-student-quiz__detail-title", title));
-        optionIds.forEach(function (id) {
-            list.appendChild(createFeedbackItem(
-                optionMap[id] || {},
-                "ia-assistant-student-quiz__feedback-item--" + statusClass,
-                statusText
-            ));
+        Answers.setAnswer(componentId, {
+            componentId: componentId,
+            tipo: "quiz_multiple",
+            value: selectedIds.length <= 1 ? (selectedIds[0] || "") : selectedIds,
+            metadata: {},
         });
-        section.appendChild(list);
-        container.appendChild(section);
     }
 
-    function renderMultipleDetails(details, optionMap, result) {
-        renderDetailSection(
-            "Correctas seleccionadas",
-            details.selectedCorrectIds,
-            optionMap,
-            "success",
-            "Correcta seleccionada",
-            result
+    function updateSavedState(messageElement, selectedIds) {
+        var hasSelection = Array.isArray(selectedIds) && selectedIds.length > 0;
+
+        messageElement.className = "ia-assistant-student-quiz__saved";
+        messageElement.classList.add(
+            hasSelection
+                ? "ia-assistant-student-quiz__saved--ok"
+                : "ia-assistant-student-quiz__saved--idle",
         );
-        renderDetailSection(
-            "Correctas faltantes",
-            details.missingCorrectIds,
-            optionMap,
-            "warning",
-            "Correcta faltante",
-            result
-        );
-        renderDetailSection(
-            "Incorrectas seleccionadas",
-            details.selectedWrongIds,
-            optionMap,
-            "error",
-            "No era correcta",
-            result
-        );
+        messageElement.textContent = hasSelection
+            ? "Respuesta guardada automáticamente. Revisa el resultado final en Revision."
+            : "Selecciona una respuesta. Tu elección se guardará automáticamente.";
     }
 
-    function renderSingleDetails(selectedIds, correctIds, optionMap, isCorrect, result) {
-        renderDetailSection(
-            "Opcion seleccionada",
-            selectedIds,
-            optionMap,
-            isCorrect ? "success" : "error",
-            isCorrect ? "Correcta seleccionada" : "No era correcta",
-            result
-        );
-
-        if (!isCorrect) {
-            renderDetailSection(
-                "Respuesta correcta",
-                correctIds,
-                optionMap,
-                "warning",
-                "Respuesta correcta",
-                result
-            );
-        }
-    }
-
-    function renderSelectedOnly(selectedIds, optionMap, result) {
-        renderDetailSection(
-            "Opciones seleccionadas",
-            selectedIds,
-            optionMap,
-            "warning",
-            "Opcion seleccionada",
-            result
-        );
-    }
-
-    function renderOption(option, inputType, groupName, index, componentId) {
+    function renderOption(option, inputType, groupName, index, componentId, selectedIds) {
         var optionId = getOptionId(option, index);
         var fieldId = groupName + "_" + getSafeFieldId(optionId);
         var label = createElement("label", "ia-assistant-student-quiz__option");
@@ -218,38 +110,13 @@
         input.name = groupName;
         input.value = optionId;
         input.id = fieldId;
+        input.checked = selectedIds.indexOf(optionId) >= 0;
 
         text.textContent = option.texto || "Opcion sin texto.";
 
         label.setAttribute("for", fieldId);
         label.appendChild(input);
         label.appendChild(text);
-
-        // reflect existing answer if present
-        try {
-            var existing = window.IAAssistant.Student.Answers && window.IAAssistant.Student.Answers.getAnswer(componentId);
-            if (existing && existing.value) {
-                var val = existing.value;
-                if (Array.isArray(val) && val.indexOf(optionId) >= 0) input.checked = true;
-                if (!Array.isArray(val) && String(val) === String(optionId)) input.checked = true;
-            }
-        } catch (e) {
-            // ignore
-        }
-
-        input.addEventListener('change', function () {
-            // gather selection for this group
-            var selected = getSelectedOptionIdsFromGroup(groupName);
-            var payload = {
-                componentId: componentId,
-                tipo: 'quiz_multiple',
-                value: selected.length === 1 ? selected[0] : selected,
-                metadata: { checked: false }
-            };
-            if (window.IAAssistant && window.IAAssistant.Student && window.IAAssistant.Student.Answers) {
-                window.IAAssistant.Student.Answers.setAnswer(componentId, payload);
-            }
-        });
 
         return label;
     }
@@ -258,160 +125,72 @@
         var data = component.data || {};
         var question = data.pregunta || "";
         var options = Array.isArray(data.opciones) ? data.opciones : [];
-        var optionMap = getOptionMap(options);
-        var correctIds = Array.isArray(data.respuestas_correctas) ?
-            data.respuestas_correctas.map(function (id) {
-                return String(id);
-            }) :
-            [];
+        var correctIds = Array.isArray(data.respuestas_correctas)
+            ? data.respuestas_correctas
+            : [];
+        var selectedIds = getStoredSelection(component.id);
         var inputType = correctIds.length > 1 ? "checkbox" : "radio";
         var quiz = createElement("section", "ia-assistant-student-quiz");
         var questionElement = createElement(
             "p",
             "ia-assistant-student-quiz__question",
-            question || "Pregunta sin enunciado."
+            question || "Pregunta sin enunciado.",
         );
         var form = createElement("form", "ia-assistant-student-quiz__form");
         var optionsContainer = createElement("div", "ia-assistant-student-quiz__options");
-        var checkButton = createElement("button", "ia-assistant-student-quiz__check", "Comprobar");
-        var result = createElement("div", "ia-assistant-student-quiz__result");
+        var savedState = createElement("p", "ia-assistant-student-quiz__saved");
+        var helper = createElement(
+            "p",
+            "ia-assistant-student-quiz__helper",
+            "El quiz registra tu selección. El resultado final y el feedback se muestran en Revision.",
+        );
         var groupName = "ia_assistant_quiz_" + getSafeFieldId(component.id || String(Date.now()));
 
         form.addEventListener("submit", function (event) {
-            var selectedIds;
-            var selectionDetails;
-            var isCorrect;
-
             event.preventDefault();
-            result.className = "ia-assistant-student-quiz__result";
-            result.textContent = "";
-
-            selectedIds = getSelectedOptionIdsFromGroup(groupName);
-
-            if (!selectedIds.length) {
-                result.classList.add("ia-assistant-student-quiz__result--warning");
-                result.appendChild(createSummary(
-                    "Selecciona al menos una opcion antes de comprobar.",
-                    "ia-assistant-student-quiz__summary--warning"
-                ));
-                return;
-            }
-
-            selectionDetails = getSelectionDetails(selectedIds, correctIds);
-
-            if (!correctIds.length) {
-                result.classList.add("ia-assistant-student-quiz__result--warning");
-                result.appendChild(createSummary(
-                    "Este quiz no tiene respuesta correcta configurada.",
-                    "ia-assistant-student-quiz__summary--warning"
-                ));
-                renderSelectedOnly(selectedIds, optionMap, result);
-
-                // persist answer partially
-                if (window.IAAssistant && window.IAAssistant.Student && window.IAAssistant.Student.Answers) {
-                    window.IAAssistant.Student.Answers.setAnswer(component.id, {
-                        componentId: component.id,
-                        tipo: 'quiz_multiple',
-                        value: selectedIds.length === 1 ? selectedIds[0] : selectedIds,
-                        metadata: { checked: true }
-                    });
-                }
-
-                return;
-            }
-
-            isCorrect = inputType === "radio" ?
-                contains(correctIds, selectedIds[0]) :
-                setsMatch(selectedIds, correctIds);
-
-            if (correctIds.length > 1) {
-                result.classList.add(
-                    isCorrect ?
-                        "ia-assistant-student-quiz__result--success" :
-                        "ia-assistant-student-quiz__result--warning"
-                );
-                result.appendChild(createSummary(
-                    "Tu seleccion: " +
-                        String(selectionDetails.selectedCorrectIds.length) +
-                        "/" +
-                        String(correctIds.length) +
-                        " respuestas correctas",
-                    isCorrect ?
-                        "ia-assistant-student-quiz__summary--success" :
-                        "ia-assistant-student-quiz__summary--warning"
-                ));
-                result.appendChild(createSummary(
-                    isCorrect ?
-                        "Respuesta correcta. Seleccionaste todas las opciones correctas." :
-                        "Respuesta incompleta o incorrecta. Revisa los detalles.",
-                    isCorrect ?
-                        "ia-assistant-student-quiz__summary--success" :
-                        "ia-assistant-student-quiz__summary--warning"
-                ));
-                renderMultipleDetails(selectionDetails, optionMap, result);
-
-                // persist checked state
-                if (window.IAAssistant && window.IAAssistant.Student && window.IAAssistant.Student.Answers) {
-                    window.IAAssistant.Student.Answers.setAnswer(component.id, {
-                        componentId: component.id,
-                        tipo: 'quiz_multiple',
-                        value: selectedIds.length === 1 ? selectedIds[0] : selectedIds,
-                        metadata: { checked: true, isCorrect: !!isCorrect }
-                    });
-                }
-
-                return;
-            }
-
-            result.classList.add(
-                isCorrect ?
-                    "ia-assistant-student-quiz__result--success" :
-                    "ia-assistant-student-quiz__result--error"
-            );
-            result.appendChild(createSummary(
-                isCorrect ? "Respuesta correcta." : "Respuesta incorrecta.",
-                isCorrect ?
-                    "ia-assistant-student-quiz__summary--success" :
-                    "ia-assistant-student-quiz__summary--error"
-            ));
-            renderSingleDetails(selectedIds, correctIds, optionMap, isCorrect, result);
-
-            // persist checked state
-            if (window.IAAssistant && window.IAAssistant.Student && window.IAAssistant.Student.Answers) {
-                window.IAAssistant.Student.Answers.setAnswer(component.id, {
-                    componentId: component.id,
-                    tipo: 'quiz_multiple',
-                    value: selectedIds.length === 1 ? selectedIds[0] : selectedIds,
-                    metadata: { checked: true, isCorrect: !!isCorrect }
-                });
-            }
         });
 
-        quiz.appendChild(questionElement);
-
         if (!options.length) {
+            quiz.appendChild(questionElement);
             quiz.appendChild(createElement(
                 "p",
                 "ia-assistant-student-quiz__empty",
-                "Este quiz no tiene opciones configuradas."
+                "Este quiz no tiene opciones configuradas.",
             ));
             container.appendChild(quiz);
             return;
         }
 
         options.forEach(function (option, index) {
-            optionsContainer.appendChild(renderOption(option || {}, inputType, groupName, index, component.id));
+            optionsContainer.appendChild(
+                renderOption(
+                    option || {},
+                    inputType,
+                    groupName,
+                    index,
+                    component.id,
+                    selectedIds,
+                ),
+            );
         });
 
-        checkButton.type = "submit";
+        form.addEventListener("change", function () {
+            var selection = getSelectedOptionIdsFromForm(form, groupName);
+            persistSelection(component.id, selection);
+            updateSavedState(savedState, selection);
+        });
+
+        updateSavedState(savedState, selectedIds);
+
         form.appendChild(optionsContainer);
-        form.appendChild(checkButton);
-        form.appendChild(result);
+        form.appendChild(savedState);
+        quiz.appendChild(questionElement);
+        quiz.appendChild(helper);
         quiz.appendChild(form);
         container.appendChild(quiz);
     }
 
     window.IAAssistant.Student.Components.QuizMultiplePlayer = {
-        render: render
+        render: render,
     };
 }());

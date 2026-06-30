@@ -5,6 +5,43 @@
     window.IAAssistant.Studio = window.IAAssistant.Studio || {};
     window.IAAssistant.Studio.Components = window.IAAssistant.Studio.Components || {};
 
+    function getComponentScore(component) {
+        if (
+            component &&
+            typeof component.puntaje === "number" &&
+            Number.isInteger(component.puntaje) &&
+            component.puntaje >= 0
+        ) {
+            return component.puntaje;
+        }
+
+        return 0;
+    }
+
+    function refreshUnitScoreSummary() {
+        var renderer = window.IAAssistant.Studio.Renderer;
+
+        if (renderer && typeof renderer.renderUnitScoreSummary === "function") {
+            renderer.renderUnitScoreSummary();
+        }
+    }
+
+    function persistComponentScore(component, value) {
+        var normalizedScore = 0;
+
+        if (/^\d+$/.test(String(value || "").trim())) {
+            normalizedScore = parseInt(value, 10);
+        }
+
+        component.puntaje = normalizedScore;
+        window.IAAssistant.Studio.State.updateComponentMeta(component.id, {
+            puntaje: normalizedScore
+        });
+        refreshUnitScoreSummary();
+
+        return normalizedScore;
+    }
+
     function updateDataField(component, fieldName, value) {
         var patch = {};
 
@@ -94,6 +131,50 @@
         renderCodeStatus(statusRoot, component);
 
         return statusRoot;
+    }
+
+    function createScoreField(component) {
+        var field = document.createElement("div");
+        var labelText = document.createElement("span");
+        var controls = document.createElement("div");
+        var input = document.createElement("input");
+        var suffix = document.createElement("span");
+        var help = document.createElement("p");
+
+        field.className = "ia-assistant-codigo-editor__field ia-assistant-score-field";
+        labelText.className = "ia-assistant-score-field__label";
+        labelText.textContent = "Puntaje maximo";
+        controls.className = "ia-assistant-score-field__controls";
+        help.className = "ia-assistant-score-field__help";
+        help.textContent = "Puntaje maximo de este ejercicio de codigo.";
+        suffix.className = "ia-assistant-score-field__suffix";
+        suffix.textContent = "pts";
+
+        input.className = "ia-assistant-score-field__input";
+        input.type = "number";
+        input.min = "0";
+        input.step = "1";
+        input.inputMode = "numeric";
+        input.name = "ia_assistant_codigo_puntaje";
+        input.value = String(getComponentScore(component));
+        input.addEventListener("input", function () {
+            var rawValue = String(input.value || "").trim();
+
+            if (!rawValue || /^\d+$/.test(rawValue)) {
+                persistComponentScore(component, rawValue);
+            }
+        });
+        input.addEventListener("change", function () {
+            input.value = String(persistComponentScore(component, input.value));
+        });
+
+        field.appendChild(labelText);
+        controls.appendChild(input);
+        controls.appendChild(suffix);
+        field.appendChild(controls);
+        field.appendChild(help);
+
+        return field;
     }
 
     function getLineIndentation(value, cursorPosition) {
@@ -413,6 +494,7 @@
 
             editor.appendChild(createEditorHeader());
             editor.appendChild(statusRoot);
+            editor.appendChild(createScoreField(component));
             editor.appendChild(createTextareaField(
                 component,
                 "enunciado",

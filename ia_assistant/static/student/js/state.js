@@ -77,6 +77,61 @@
     getComponents: getComponents,
   };
 
+  function normalizeAnswerValueForSignature(answer) {
+    if (!answer || typeof answer !== "object") {
+      return null;
+    }
+
+    var tipo = answer.tipo || "";
+    var value = answer.value;
+
+    if (tipo === "quiz_multiple") {
+      if (Array.isArray(value)) {
+        return value
+          .map(function (item) {
+            return String(item);
+          })
+          .sort();
+      }
+
+      if (typeof value === "undefined" || value === null || value === "") {
+        return [];
+      }
+
+      return [String(value)];
+    }
+
+    if (typeof value === "undefined" || value === null) {
+      return "";
+    }
+
+    return String(value);
+  }
+
+  function buildAnswersSignature(answersMap) {
+    var normalized = {};
+
+    if (!isObject(answersMap)) {
+      return "";
+    }
+
+    Object.keys(answersMap)
+      .sort()
+      .forEach(function (componentId) {
+        var answer = answersMap[componentId];
+        if (!isObject(answer)) {
+          return;
+        }
+
+        normalized[String(componentId)] = {
+          tipo: String(answer.tipo || ""),
+          value: normalizeAnswerValueForSignature(answer),
+        };
+      });
+
+    return JSON.stringify(normalized);
+  }
+
   // Answers module: mantiene respuestas del alumno en memoria (solo frontend)
   (function () {
     var answersMap = Object.create(null);
@@ -209,6 +264,139 @@
       loadAnswers: loadAnswers,
       clearAnswer: clearAnswer,
       hasAnswers: hasAnswers,
+      buildSignature: function () {
+        return buildAnswersSignature(getAllAnswersMap());
+      },
+    };
+  })();
+
+  // Review state: mantiene la ultima revision IA hidratada o recien generada
+  (function () {
+    var currentReview = null;
+    var reviewedAnswersSignature = "";
+
+    function isObjectReview(value) {
+      return !!value && typeof value === "object" && !Array.isArray(value);
+    }
+
+    function extractMeta(review) {
+      if (!isObjectReview(review)) {
+        return {};
+      }
+
+      var meta = review._ia_assistant;
+      return isObjectReview(meta) ? meta : {};
+    }
+
+    function getCompatibleReviewSignature(review) {
+      var meta = extractMeta(review);
+
+      if (
+        typeof meta.frontend_answers_signature === "string" &&
+        meta.frontend_answers_signature
+      ) {
+        return meta.frontend_answers_signature;
+      }
+
+      return "";
+    }
+
+    function attachFrontendSignature(review, signature) {
+      var clonedReview = clone(review);
+      var meta = extractMeta(clonedReview);
+
+      meta.frontend_answers_signature = String(signature || "");
+      clonedReview._ia_assistant = meta;
+      return clonedReview;
+    }
+
+    function normalizeReview(review, options) {
+      options = options || {};
+
+      if (!isObjectReview(review)) {
+        currentReview = null;
+        reviewedAnswersSignature = "";
+        return null;
+      }
+
+      var signature =
+        typeof options.frontendSignature === "string"
+          ? options.frontendSignature
+          : getCompatibleReviewSignature(review);
+
+      currentReview = attachFrontendSignature(review, signature);
+      reviewedAnswersSignature = String(signature || "");
+      return getReview();
+    }
+
+    function getCurrentAnswersSignature() {
+      var Answers = window.IAAssistant.Student.Answers;
+      if (!Answers || typeof Answers.getAllAnswersMap !== "function") {
+        return "";
+      }
+
+      return buildAnswersSignature(Answers.getAllAnswersMap());
+    }
+
+    function getReview() {
+      return currentReview ? clone(currentReview) : null;
+    }
+
+    function hasReview() {
+      return !!currentReview;
+    }
+
+    function hasComparableSignature() {
+      return !!(
+        currentReview &&
+        typeof reviewedAnswersSignature === "string" &&
+        reviewedAnswersSignature
+      );
+    }
+
+    function isStale() {
+      if (!hasComparableSignature()) {
+        return false;
+      }
+
+      return reviewedAnswersSignature !== getCurrentAnswersSignature();
+    }
+
+    function isCurrent() {
+      return hasReview() && hasComparableSignature() && !isStale();
+    }
+
+    function getStatus() {
+      return {
+        review: getReview(),
+        hasReview: hasReview(),
+        hasComparableSignature: hasComparableSignature(),
+        isStale: isStale(),
+        isCurrent: isCurrent(),
+        reviewedAnswersSignature: reviewedAnswersSignature,
+      };
+    }
+
+    window.IAAssistant.Student.ReviewState = {
+      loadReview: function (review) {
+        return normalizeReview(review);
+      },
+      setReview: function (review, frontendSignature) {
+        var signature =
+          typeof frontendSignature === "string"
+            ? frontendSignature
+            : getCurrentAnswersSignature();
+
+        return normalizeReview(review, {
+          frontendSignature: signature,
+        });
+      },
+      clearReview: function () {
+        currentReview = null;
+        reviewedAnswersSignature = "";
+      },
+      getReview: getReview,
+      getStatus: getStatus,
     };
   })();
 })();

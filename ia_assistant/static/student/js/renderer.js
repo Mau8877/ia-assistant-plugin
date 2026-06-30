@@ -53,6 +53,29 @@
         return String(componentType || "desconocido").replace(/[^a-zA-Z0-9_-]/g, "_");
     }
 
+    function getComponentScore(component) {
+        if (
+            component &&
+            typeof component.puntaje === "number" &&
+            Number.isInteger(component.puntaje) &&
+            component.puntaje > 0
+        ) {
+            return component.puntaje;
+        }
+
+        return 0;
+    }
+
+    function shouldShowComponentScore(component) {
+        var score = getComponentScore(component);
+
+        if (!score) {
+            return false;
+        }
+
+        return component.tipo !== "teoria" && component.tipo !== "revision";
+    }
+
     function renderEmptyState(container) {
         var empty = createElement("section", "ia-assistant-student-empty");
         var title = createElement("h3", "ia-assistant-student-empty__title", "Unidad sin componentes");
@@ -115,15 +138,29 @@
         );
         var header = createElement("header", "ia-assistant-student-card__header");
         var meta = createElement("div", "ia-assistant-student-card__meta");
+        var titleRow = createElement("div", "ia-assistant-student-card__title-row");
         var number = createElement("span", "ia-assistant-student-card__number", String(index + 1));
         var badge = createElement("span", "ia-assistant-student-card__badge", getTypeLabel(component));
         var title = createElement("h3", "ia-assistant-student-card__title", getComponentTitle(component));
+        var score = null;
         var body = createElement("div", "ia-assistant-student-card__body");
 
         meta.appendChild(number);
         meta.appendChild(badge);
         header.appendChild(meta);
-        header.appendChild(title);
+
+        titleRow.appendChild(title);
+
+        if (shouldShowComponentScore(component)) {
+            score = createElement(
+                "span",
+                "ia-assistant-student-card__score",
+                "Puntaje maximo: " + String(getComponentScore(component)) + " pts"
+            );
+            titleRow.appendChild(score);
+        }
+
+        header.appendChild(titleRow);
         card.appendChild(header);
         card.appendChild(body);
 

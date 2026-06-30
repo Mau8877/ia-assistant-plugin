@@ -14,6 +14,92 @@
         return element;
     }
 
+    function getComponentScore(component) {
+        if (
+            component &&
+            typeof component.puntaje === "number" &&
+            Number.isInteger(component.puntaje) &&
+            component.puntaje >= 0
+        ) {
+            return component.puntaje;
+        }
+
+        return 0;
+    }
+
+    function refreshUnitScoreSummary() {
+        var renderer = window.IAAssistant.Studio.Renderer;
+
+        if (renderer && typeof renderer.renderUnitScoreSummary === "function") {
+            renderer.renderUnitScoreSummary();
+        }
+    }
+
+    function persistComponentScore(component, value) {
+        var normalizedScore = 0;
+
+        if (/^\d+$/.test(String(value || "").trim())) {
+            normalizedScore = parseInt(value, 10);
+        }
+
+        component.puntaje = normalizedScore;
+        window.IAAssistant.Studio.State.updateComponentMeta(component.id, {
+            puntaje: normalizedScore
+        });
+        refreshUnitScoreSummary();
+
+        return normalizedScore;
+    }
+
+    function createScoreSection(component) {
+        var section = document.createElement("section");
+        var fieldLabel = createTextElement(
+            "span",
+            "ia-assistant-score-field__label",
+            "Puntaje maximo"
+        );
+        var controls = document.createElement("div");
+        var input = document.createElement("input");
+        var suffix = createTextElement(
+            "span",
+            "ia-assistant-score-field__suffix",
+            "pts"
+        );
+        var help = createTextElement(
+            "p",
+            "ia-assistant-score-field__help",
+            "Puntaje maximo que aporta este quiz."
+        );
+
+        section.className = "ia-assistant-quiz-multiple-editor__question ia-assistant-score-field";
+        controls.className = "ia-assistant-score-field__controls";
+        input.className = "ia-assistant-score-field__input";
+        input.type = "number";
+        input.min = "0";
+        input.step = "1";
+        input.inputMode = "numeric";
+        input.name = "ia_assistant_quiz_multiple_puntaje";
+        input.value = String(getComponentScore(component));
+        input.addEventListener("input", function () {
+            var rawValue = String(input.value || "").trim();
+
+            if (!rawValue || /^\d+$/.test(rawValue)) {
+                persistComponentScore(component, rawValue);
+            }
+        });
+        input.addEventListener("change", function () {
+            input.value = String(persistComponentScore(component, input.value));
+        });
+
+        controls.appendChild(input);
+        controls.appendChild(suffix);
+        section.appendChild(fieldLabel);
+        section.appendChild(controls);
+        section.appendChild(help);
+
+        return section;
+    }
+
     function getComponentData(component) {
         if (!component.data || typeof component.data !== "object") {
             component.data = {};
@@ -555,6 +641,7 @@
             statusRoot.className = "ia-assistant-quiz-multiple-editor__status-list";
 
             editor.appendChild(createEditorHeader());
+            editor.appendChild(createScoreSection(component));
             editor.appendChild(createQuestionSection(component, function () {
                 renderStatus(statusRoot, component);
             }));

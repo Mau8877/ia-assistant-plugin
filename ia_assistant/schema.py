@@ -23,6 +23,7 @@ COMPONENT_DEFINITIONS = {
         "label": "Teoría",
         "allow_multiple": True,
         "authorable": True,
+        "default_puntaje": 0,
         "reviewable": False,
         "system": False,
         "student_visible": True,
@@ -42,6 +43,7 @@ COMPONENT_DEFINITIONS = {
         "label": "Quiz múltiple",
         "allow_multiple": True,
         "authorable": True,
+        "default_puntaje": 0,
         "reviewable": True,
         "system": False,
         "student_visible": True,
@@ -62,6 +64,7 @@ COMPONENT_DEFINITIONS = {
         "label": "Pregunta abierta",
         "allow_multiple": True,
         "authorable": True,
+        "default_puntaje": 0,
         "reviewable": True,
         "system": False,
         "student_visible": True,
@@ -79,6 +82,7 @@ COMPONENT_DEFINITIONS = {
         "label": "Código",
         "allow_multiple": True,
         "authorable": True,
+        "default_puntaje": 0,
         "reviewable": True,
         "system": False,
         "student_visible": True,
@@ -100,6 +104,7 @@ COMPONENT_DEFINITIONS = {
         "label": "Revisión",
         "allow_multiple": False,
         "authorable": False,
+        "default_puntaje": 0,
         "reviewable": False,
         "system": True,
         "student_visible": True,
@@ -164,6 +169,16 @@ def get_default_data(component_type):
         return None
 
     return deepcopy(component_definition["default_data"])
+
+
+def get_default_puntaje(component_type):
+    """Return the default top-level score for a component type."""
+    component_definition = COMPONENT_DEFINITIONS.get(component_type)
+
+    if not component_definition:
+        return None
+
+    return int(component_definition.get("default_puntaje", 0))
 
 
 def is_authorable_component(component_type):

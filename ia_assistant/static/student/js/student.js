@@ -29,6 +29,9 @@
         if (typeof Student.Answers === "object" && typeof Student.Answers.loadAnswers === "function") {
             Student.Answers.loadAnswers(args.initial_student_answers || {});
         }
+        if (typeof Student.ReviewState === "object" && typeof Student.ReviewState.loadReview === "function") {
+            Student.ReviewState.loadReview(args.initial_student_review_result || {});
+        }
 
         if (typeof Student.AutoSave === "object" && typeof Student.AutoSave.init === "function") {
             Student.AutoSave.init(runtime, element, root);

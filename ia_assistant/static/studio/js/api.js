@@ -51,26 +51,98 @@
         });
     }
 
+    function getPayloadErrors(payload) {
+        return payload && Array.isArray(payload.errors) ? payload.errors : [];
+    }
+
+    function getPayloadWarnings(payload) {
+        return payload && Array.isArray(payload.warnings) ? payload.warnings : [];
+    }
+
+    function getPayloadErrorMessage(payload) {
+        var errors = getPayloadErrors(payload);
+        var firstError = errors.length ? errors[0] : null;
+
+        if (
+            firstError &&
+            typeof firstError.message === "string" &&
+            firstError.message.trim()
+        ) {
+            return firstError.message.trim();
+        }
+
+        if (
+            payload &&
+            typeof payload.error === "string" &&
+            payload.error.trim()
+        ) {
+            return payload.error.trim();
+        }
+
+        return "No se pudo guardar la unidad.";
+    }
+
+    function createApiError(message, payload, status) {
+        var error = new Error(message || "No se pudo guardar la unidad.");
+
+        error.errors = getPayloadErrors(payload);
+        error.warnings = getPayloadWarnings(payload);
+        error.ok = payload && typeof payload.ok !== "undefined" ? payload.ok : undefined;
+        error.success = (
+            payload && typeof payload.success !== "undefined" ?
+                payload.success :
+                undefined
+        );
+        error.status = status;
+        error.payload = payload || null;
+
+        return error;
+    }
+
     function createHttpError(response) {
         return response.text().catch(function () {
             return "";
-        }).then(function () {
-            if (response.status === 403) {
-                throw new Error(
-                    "No se pudo guardar la unidad: CSRF token faltante o invalido."
+        }).then(function (responseText) {
+            var payload = null;
+
+            if (responseText) {
+                try {
+                    payload = JSON.parse(responseText);
+                } catch (error) {
+                    payload = null;
+                }
+            }
+
+            if (payload) {
+                throw createApiError(
+                    getPayloadErrorMessage(payload),
+                    payload,
+                    response.status
                 );
             }
 
-            throw new Error("No se pudo guardar la unidad.");
+            if (response.status === 403) {
+                throw createApiError(
+                    "No se pudo guardar la unidad: CSRF token faltante o invalido.",
+                    null,
+                    response.status
+                );
+            }
+
+            throw createApiError(
+                "No se pudo guardar la unidad.",
+                null,
+                response.status
+            );
         });
     }
 
     function ensureOkResponse(payload) {
         if (!payload || payload.ok === false || payload.success === false) {
-            throw new Error(
-                payload && payload.error ?
-                    payload.error :
-                    "No se pudo guardar la unidad."
+            throw createApiError(
+                getPayloadErrorMessage(payload),
+                payload,
+                null
             );
         }
 

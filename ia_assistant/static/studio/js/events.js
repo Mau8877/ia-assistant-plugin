@@ -19,10 +19,80 @@
     return JSON.stringify(window.IAAssistant.Studio.State.getUnit());
   }
 
-  function getErrorMessage(error) {
-    return error && error.message
-      ? error.message
-      : "No se pudo guardar la unidad.";
+  function getErrorDetails(error) {
+    return error && Array.isArray(error.errors) ? error.errors : [];
+  }
+
+  function getWarningDetails(response) {
+    return response && Array.isArray(response.warnings) ? response.warnings : [];
+  }
+
+  function getPrimaryErrorMessage(error) {
+    var errorDetails = getErrorDetails(error);
+    var firstError = errorDetails.length ? errorDetails[0] : null;
+
+    if (
+      firstError &&
+      typeof firstError.message === "string" &&
+      firstError.message.trim()
+    ) {
+      return firstError.message.trim();
+    }
+
+    if (error && typeof error.message === "string" && error.message.trim()) {
+      return error.message.trim();
+    }
+
+    return "No se pudo guardar la unidad.";
+  }
+
+  function formatErrorStatusMessage(error) {
+    var primaryMessage = getPrimaryErrorMessage(error);
+    var errorCount = getErrorDetails(error).length;
+
+    if (errorCount > 1) {
+      return (
+        primaryMessage + " Se encontraron " + String(errorCount) + " errores."
+      );
+    }
+
+    return primaryMessage;
+  }
+
+  function formatWarningSummary(count) {
+    if (count === 1) {
+      return "con 1 advertencia.";
+    }
+
+    return "con " + String(count) + " advertencias.";
+  }
+
+  function formatSuccessStatusMessage(response, fallbackMessage) {
+    var warningCount = getWarningDetails(response).length;
+
+    if (warningCount > 0) {
+      return "Unidad guardada correctamente, " + formatWarningSummary(warningCount);
+    }
+
+    if (
+      response &&
+      typeof response.message === "string" &&
+      response.message.trim()
+    ) {
+      return response.message.trim();
+    }
+
+    return fallbackMessage;
+  }
+
+  function formatAutosaveStatusMessage(response) {
+    var warningCount = getWarningDetails(response).length;
+
+    if (warningCount > 0) {
+      return "Autoguardado realizado " + formatWarningSummary(warningCount);
+    }
+
+    return "Autoguardado realizado.";
   }
 
   function hasLoadedContent() {
@@ -217,7 +287,10 @@
             self.setSaveButtonState(root, "success", "✓ Guardado");
             self.setSaveStatus(
               root,
-              response.message || "Unidad guardada correctamente.",
+              formatSuccessStatusMessage(
+                response,
+                "Unidad guardada correctamente."
+              ),
               "success",
               STATUS_CLEAR_MS,
             );
@@ -225,7 +298,7 @@
           } else {
             self.setSaveStatus(
               root,
-              "Autoguardado realizado.",
+              formatAutosaveStatusMessage(response),
               "success",
               STATUS_CLEAR_MS,
             );
@@ -234,7 +307,7 @@
           return response;
         })
         .catch(function (error) {
-          var errorMessage = getErrorMessage(error);
+          var errorMessage = formatErrorStatusMessage(error);
 
           if (saveOptions.showButtonFeedback) {
             self.setSaveButtonState(root, "error", "Error");

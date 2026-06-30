@@ -1,4 +1,6 @@
 import json
+import hashlib
+from numbers import Number
 
 from xblock.core import XBlock
 from xblock.fields import Dict, Scope, String
@@ -15,6 +17,7 @@ from .resources_manifest import (
 )
 from .schema import COMPONENT_TYPES, UNIT_SCHEMA_VERSION, get_default_unit
 from .utils.resources import read_static_text
+from .validators import validate_and_normalize_studio_unit
 
 
 class IAAssistantXBlock(XBlock):
@@ -25,6 +28,8 @@ class IAAssistantXBlock(XBlock):
     puede ser importado por el SDK y expone vistas separadas para Studio y
     Student sin implementar todavia la interfaz final.
     """
+
+    has_score = True
 
     display_name = String(
         default="IA Assistant",
@@ -75,7 +80,6 @@ class IAAssistantXBlock(XBlock):
 
         # TEMPORAL SDK TEST:
         # Forzar vista Student usando la misma instancia del escenario Studio.
-        # NO dejar esto en commit.
         if self._is_sdk_studio_mode():
             return self.studio_view(context)
 
@@ -90,6 +94,11 @@ class IAAssistantXBlock(XBlock):
                 "initial_student_answers": (
                     self.student_answers
                     if isinstance(self.student_answers, dict)
+                    else {}
+                ),
+                "initial_student_review_result": (
+                    self.student_review_result
+                    if isinstance(self.student_review_result, dict)
                     else {}
                 ),
                 "load_warning": load_warning,
@@ -267,6 +276,107 @@ class IAAssistantXBlock(XBlock):
 
         return {}
 
+    @staticmethod
+    def _build_answers_signature_payload(answers):
+        if not isinstance(answers, dict):
+            return ""
+
+        normalized = {}
+
+        for component_id in sorted(answers.keys()):
+            answer = answers.get(component_id)
+            if not isinstance(answer, dict):
+                continue
+
+            component_type = str(answer.get("tipo") or "")
+            value = answer.get("value")
+
+            if component_type == "quiz_multiple":
+                if isinstance(value, list):
+                    normalized_value = sorted([str(item) for item in value])
+                elif value in (None, ""):
+                    normalized_value = []
+                else:
+                    normalized_value = [str(value)]
+            elif value is None:
+                normalized_value = ""
+            else:
+                normalized_value = str(value)
+
+            normalized[str(component_id)] = {
+                "tipo": component_type,
+                "value": normalized_value,
+            }
+
+        return json.dumps(
+            normalized,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+
+    @classmethod
+    def _build_answers_signature(cls, answers):
+        payload = cls._build_answers_signature_payload(answers)
+
+        if not payload:
+            return ""
+
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+    @staticmethod
+    def _is_valid_grade_number(value):
+        return isinstance(value, Number) and not isinstance(value, bool)
+
+    def _publish_grade_from_review(self, review):
+        if not isinstance(review, dict):
+            return None
+
+        review_meta = review.get("_ia_assistant")
+        if not isinstance(review_meta, dict):
+            review_meta = {}
+            review["_ia_assistant"] = review_meta
+
+        review_meta.pop("grade_publish_error", None)
+        review_meta["grade_published"] = False
+
+        value = review.get("puntaje_total_obtenido")
+        max_value = review.get("puntaje_total_maximo")
+
+        if (
+            not self._is_valid_grade_number(value)
+            or not self._is_valid_grade_number(max_value)
+            or max_value <= 0
+            or value < 0
+            or value > max_value
+        ):
+            return None
+
+        review_meta["grade_value"] = value
+        review_meta["grade_max_value"] = max_value
+
+        try:
+            self.runtime.publish(
+                self,
+                "grade",
+                {
+                    "value": value,
+                    "max_value": max_value,
+                },
+            )
+        except Exception as error:
+            review_meta["grade_publish_error"] = (
+                str(error).strip()
+                or "No se pudo publicar la calificacion oficial."
+            )
+            return (
+                "La revision se genero correctamente, pero no se pudo "
+                "publicar la calificacion oficial."
+            )
+
+        review_meta["grade_published"] = True
+        return None
+
     def _handle_ai_error(self, error):
         if isinstance(error, AIError):
             return ai_error_to_payload(error)
@@ -304,33 +414,60 @@ class IAAssistantXBlock(XBlock):
         """
         Guarda la unidad de Studio en unidad_json.
         """
-        payload = data or {}
+        payload = self._extract_handler_payload(data)
         unit = payload.get("unit")
 
         if unit is None and "unidad_json" in payload:
             try:
                 unit = json.loads(payload.get("unidad_json") or "{}")
             except (TypeError, ValueError):
-                unit = None
+                return {
+                    "ok": False,
+                    "success": False,
+                    "error": "No se pudo interpretar unidad_json.",
+                    "errors": [
+                        {
+                            "code": "invalid_unit_json",
+                            "message": (
+                                "No se pudo interpretar unidad_json como JSON válido."
+                            ),
+                            "field": "unidad_json",
+                        }
+                    ],
+                    "warnings": [],
+                }
 
-        if not self._is_valid_unit(unit):
+        validation_payload = validate_and_normalize_studio_unit(unit)
+
+        if not validation_payload.get("ok"):
             return {
                 "ok": False,
                 "success": False,
-                "error": "La unidad no tiene un formato valido.",
+                "error": validation_payload.get(
+                    "error", "La unidad no tiene un formato valido."
+                ),
+                "errors": validation_payload.get("errors", []),
+                "warnings": validation_payload.get("warnings", []),
             }
+
+        normalized_unit = validation_payload["unit"]
 
         if "prompt_docente" in payload:
             self.prompt_docente = payload.get("prompt_docente") or ""
 
-        self.unidad_json = json.dumps(unit, ensure_ascii=False)
+        self.unidad_json = json.dumps(normalized_unit, ensure_ascii=False)
 
-        return {
+        response = {
             "ok": True,
             "success": True,
             "message": "Unidad guardada correctamente.",
-            "unit": unit,
+            "unit": normalized_unit,
         }
+
+        if validation_payload.get("warnings"):
+            response["warnings"] = validation_payload["warnings"]
+
+        return response
 
     @XBlock.json_handler
     def save_student_answers(self, data, suffix=""):
@@ -577,10 +714,30 @@ class IAAssistantXBlock(XBlock):
 
         review = result.get("review") or {}
 
+        if isinstance(review, dict):
+            review = dict(review)
+            review_meta = review.get("_ia_assistant")
+            if not isinstance(review_meta, dict):
+                review_meta = {}
+            review_meta["frontend_answers_signature"] = (
+                self._build_answers_signature_payload(answers)
+            )
+            review_meta["answers_signature"] = self._build_answers_signature(
+                answers
+            )
+            review["_ia_assistant"] = review_meta
+
         # Guardar resultado en user_state
         self.student_review_result = review
 
-        return {"ok": True, "success": True, "review": review}
+        grade_warning = self._publish_grade_from_review(review)
+        self.student_review_result = review
+
+        response = {"ok": True, "success": True, "review": review}
+        if grade_warning:
+            response["warnings"] = [{"message": grade_warning}]
+
+        return response
 
     @XBlock.json_handler
     def generate_teacher_unit(self, data, suffix=""):

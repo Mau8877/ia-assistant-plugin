@@ -59,6 +59,16 @@
             return currentRoot.querySelector("[data-ia-assistant-unit-title]");
         },
 
+        getUnitScoreSummary: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector("[data-ia-assistant-unit-score]");
+        },
+
         getJsonToggleButton: function (root) {
             var currentRoot = root || this.getRoot();
 
@@ -117,6 +127,158 @@
             }
 
             return currentRoot.querySelectorAll("[data-ia-assistant-student-preview-close]");
+        },
+
+        getChatbarProposalPreview: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector("[data-ia-assistant-chatbar-preview]");
+        },
+
+        getChatbarProposalPreviewCloseButtons: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return [];
+            }
+
+            return currentRoot.querySelectorAll(
+                "[data-ia-assistant-chatbar-preview-close]"
+            );
+        },
+
+        getChatbarProposalPreviewTitle: function (root) {
+            var preview = this.getChatbarProposalPreview(root);
+
+            if (!preview) {
+                return null;
+            }
+
+            return preview.querySelector(
+                "[data-ia-assistant-chatbar-preview-title]"
+            );
+        },
+
+        getChatbarProposalPreviewSubtitle: function (root) {
+            var preview = this.getChatbarProposalPreview(root);
+
+            if (!preview) {
+                return null;
+            }
+
+            return preview.querySelector(
+                "[data-ia-assistant-chatbar-preview-subtitle]"
+            );
+        },
+
+        getChatbarProposalPreviewBody: function (root) {
+            var preview = this.getChatbarProposalPreview(root);
+
+            if (!preview) {
+                return null;
+            }
+
+            return preview.querySelector(
+                "[data-ia-assistant-chatbar-preview-body]"
+            );
+        },
+
+        getChatbarProposalPreviewApplyButton: function (root) {
+            var preview = this.getChatbarProposalPreview(root);
+
+            if (!preview) {
+                return null;
+            }
+
+            return preview.querySelector(
+                "[data-ia-assistant-chatbar-preview-apply]"
+            );
+        },
+
+        getChatbarProposalPreviewDiscardButton: function (root) {
+            var preview = this.getChatbarProposalPreview(root);
+
+            if (!preview) {
+                return null;
+            }
+
+            return preview.querySelector(
+                "[data-ia-assistant-chatbar-preview-discard]"
+            );
+        },
+
+        getChatbarConfirm: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return null;
+            }
+
+            return currentRoot.querySelector("[data-ia-assistant-chatbar-confirm]");
+        },
+
+        getChatbarConfirmCloseButtons: function (root) {
+            var currentRoot = root || this.getRoot();
+
+            if (!currentRoot) {
+                return [];
+            }
+
+            return currentRoot.querySelectorAll(
+                "[data-ia-assistant-chatbar-confirm-close]"
+            );
+        },
+
+        getChatbarConfirmTitle: function (root) {
+            var confirmDialog = this.getChatbarConfirm(root);
+
+            if (!confirmDialog) {
+                return null;
+            }
+
+            return confirmDialog.querySelector(
+                "[data-ia-assistant-chatbar-confirm-title]"
+            );
+        },
+
+        getChatbarConfirmBody: function (root) {
+            var confirmDialog = this.getChatbarConfirm(root);
+
+            if (!confirmDialog) {
+                return null;
+            }
+
+            return confirmDialog.querySelector(
+                "[data-ia-assistant-chatbar-confirm-body]"
+            );
+        },
+
+        getChatbarConfirmCancelButton: function (root) {
+            var confirmDialog = this.getChatbarConfirm(root);
+
+            if (!confirmDialog) {
+                return null;
+            }
+
+            return confirmDialog.querySelector(
+                "[data-ia-assistant-chatbar-confirm-cancel]"
+            );
+        },
+
+        getChatbarConfirmApplyButton: function (root) {
+            var confirmDialog = this.getChatbarConfirm(root);
+
+            if (!confirmDialog) {
+                return null;
+            }
+
+            return confirmDialog.querySelector(
+                "[data-ia-assistant-chatbar-confirm-apply]"
+            );
         },
 
         getJsonPanel: function (root) {

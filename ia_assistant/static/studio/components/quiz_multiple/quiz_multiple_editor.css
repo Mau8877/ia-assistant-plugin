@@ -108,6 +108,7 @@
 }
 
 .ia-assistant-quiz-multiple-editor__question-textarea:focus,
+.ia-assistant-quiz-multiple-editor .ia-assistant-score-field__input:focus,
 .ia-assistant-quiz-multiple-editor__option-input:focus,
 .ia-assistant-quiz-multiple-editor__option-feedback:focus {
     border-color: var(--ia-assistant-component-quiz-accent);

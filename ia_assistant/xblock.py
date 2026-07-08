@@ -8,9 +8,11 @@ from web_fragments.fragment import Fragment
 
 from .services.ai_errors import AIError, ai_error_to_payload
 from .resources_manifest import (
+    STUDIO_CSS_URL_PATHS,
     STUDIO_CSS_PATHS,
     STUDIO_HTML_PATH,
     STUDIO_JS_PATHS,
+    STUDIO_JS_URL_PATHS,
     STUDENT_CSS_PATHS,
     STUDENT_HTML_PATH,
     STUDENT_JS_PATHS,
@@ -116,7 +118,9 @@ class IAAssistantXBlock(XBlock):
             "load_warning": load_warning,
         }
         fragment = Fragment(read_static_text(STUDIO_HTML_PATH))
+        self._add_css_url_resources(fragment, STUDIO_CSS_URL_PATHS)
         self._add_css_resources(fragment, STUDIO_CSS_PATHS)
+        self._add_js_url_resources(fragment, STUDIO_JS_URL_PATHS)
         self._add_js_resources(fragment, STUDIO_JS_PATHS)
         initialize_data["generate_teacher_unit_url"] = self._handler_url(
             "generate_teacher_unit"
@@ -232,6 +236,28 @@ class IAAssistantXBlock(XBlock):
         for resource_path in resource_paths:
             fragment.add_css(read_static_text(resource_path))
 
+    def _add_css_url_resources(self, fragment, resource_pairs):
+        """
+        Agrega recursos CSS servidos por URL local del runtime.
+        """
+        for resource_uri, fallback_resource_path in resource_pairs:
+            resource_url = ""
+
+            if hasattr(self.runtime, "local_resource_url"):
+                try:
+                    resource_url = self.runtime.local_resource_url(
+                        self,
+                        resource_uri,
+                    ) or ""
+                except NotImplementedError:
+                    resource_url = ""
+
+            if resource_url:
+                fragment.add_css_url(resource_url)
+                continue
+
+            fragment.add_css(read_static_text(fallback_resource_path))
+
     @staticmethod
     def _add_js_resources(fragment, resource_paths):
         """
@@ -239,6 +265,28 @@ class IAAssistantXBlock(XBlock):
         """
         for resource_path in resource_paths:
             fragment.add_javascript(read_static_text(resource_path))
+
+    def _add_js_url_resources(self, fragment, resource_pairs):
+        """
+        Agrega recursos JavaScript servidos por URL local del runtime.
+        """
+        for resource_uri, fallback_resource_path in resource_pairs:
+            resource_url = ""
+
+            if hasattr(self.runtime, "local_resource_url"):
+                try:
+                    resource_url = self.runtime.local_resource_url(
+                        self,
+                        resource_uri,
+                    ) or ""
+                except NotImplementedError:
+                    resource_url = ""
+
+            if resource_url:
+                fragment.add_javascript_url(resource_url)
+                continue
+
+            fragment.add_javascript(read_static_text(fallback_resource_path))
 
     @staticmethod
     def _extract_handler_payload(data):

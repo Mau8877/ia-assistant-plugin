@@ -123,17 +123,53 @@
 }
 
 .ia-assistant-teoria-editor__toastui {
+    min-height: 320px;
     width: 100%;
 }
 
 .ia-assistant-teoria-editor__toastui .toastui-editor-defaultUI {
     border-color: var(--ia-assistant-color-border);
     border-radius: var(--ia-assistant-radius-sm);
+    min-height: 500px;
+}
+
+.ia-assistant-teoria-editor__toastui .toastui-editor-main {
+    min-height: 454px;
 }
 
 .ia-assistant-teoria-editor__fallback {
     min-height: 260px;
     resize: vertical;
+}
+
+.ia-assistant-teoria-toastui-fallback {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ia-assistant-space-sm);
+    width: 100%;
+}
+
+.ia-assistant-teoria-toastui-fallback-message {
+    color: var(--ia-assistant-color-muted);
+    font-size: var(--ia-assistant-font-size-sm);
+    line-height: 1.45;
+    margin: 0;
+}
+
+.ia-assistant-teoria-toastui-fallback-textarea {
+    background: var(--ia-assistant-color-surface);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    box-sizing: border-box;
+    color: var(--ia-assistant-color-text);
+    font: inherit;
+    line-height: 1.5;
+    min-height: 320px;
+    padding: var(--ia-assistant-space-sm);
+    resize: vertical;
+    transition: border-color var(--ia-assistant-transition-fast),
+        box-shadow var(--ia-assistant-transition-fast);
+    width: 100%;
 }
 
 .ia-assistant-teoria-editor__label {
@@ -148,6 +184,13 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--ia-assistant-space-xs);
+}
+
+.ia-markdown-toolbar {
+    background: var(--ia-assistant-color-background-soft);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    padding: var(--ia-assistant-space-sm);
 }
 
 .ia-assistant-teoria-editor__toolbar-group {
@@ -190,6 +233,10 @@
     color: var(--ia-assistant-component-teoria-accent);
 }
 
+.ia-markdown-toolbar__button {
+    min-height: 36px;
+}
+
 .ia-assistant-teoria-editor__input,
 .ia-assistant-teoria-editor__textarea,
 .ia-assistant-teoria-editor__visual-editor {
@@ -211,8 +258,105 @@
     min-height: 260px;
 }
 
+.ia-assistant-teoria-editor__markdown-editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ia-assistant-space-sm);
+    width: 100%;
+}
+
+.ia-assistant-teoria-editor__markdown-header {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ia-assistant-space-sm);
+}
+
+.ia-assistant-teoria-editor__markdown-label {
+    color: var(--ia-assistant-color-text);
+    font-size: var(--ia-assistant-font-size-sm);
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.ia-assistant-teoria-editor__markdown-help {
+    color: var(--ia-assistant-color-muted);
+    font-size: var(--ia-assistant-font-size-sm);
+    line-height: 1.45;
+}
+
 .ia-assistant-teoria-editor__textarea {
     resize: vertical;
+}
+
+.ia-teoria-markdown-textarea {
+    min-height: 320px;
+    width: 100%;
+}
+
+.ia-assistant-teoria-editor__preview {
+    background: var(--ia-assistant-color-background-soft);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    color: var(--ia-assistant-color-text);
+    min-height: 140px;
+    padding: var(--ia-assistant-space-base);
+}
+
+.ia-assistant-teoria-editor__preview[hidden] {
+    display: none;
+}
+
+.ia-assistant-teoria-editor__preview-empty {
+    color: var(--ia-assistant-color-muted);
+    margin: 0;
+}
+
+.ia-assistant-teoria-editor__preview h1,
+.ia-assistant-teoria-editor__preview h2,
+.ia-assistant-teoria-editor__preview h3,
+.ia-assistant-teoria-editor__preview p,
+.ia-assistant-teoria-editor__preview blockquote,
+.ia-assistant-teoria-editor__preview pre,
+.ia-assistant-teoria-editor__preview ul,
+.ia-assistant-teoria-editor__preview ol {
+    margin: 0 0 var(--ia-assistant-space-sm);
+}
+
+.ia-assistant-teoria-editor__preview blockquote {
+    border-left: var(--ia-assistant-space-xs) solid var(--ia-assistant-component-teoria-accent);
+    color: var(--ia-assistant-color-muted);
+    padding-left: var(--ia-assistant-space-sm);
+}
+
+.ia-assistant-teoria-editor__preview code {
+    background: var(--ia-assistant-color-surface);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    font-family: var(--ia-assistant-font-monospace);
+    font-size: var(--ia-assistant-font-size-sm);
+    padding: 0 var(--ia-assistant-space-xs);
+}
+
+.ia-assistant-teoria-editor__preview pre {
+    background: var(--ia-assistant-color-surface);
+    border: 1px solid var(--ia-assistant-color-border);
+    border-radius: var(--ia-assistant-radius-sm);
+    overflow-x: auto;
+    padding: var(--ia-assistant-space-sm);
+    white-space: pre-wrap;
+}
+
+.ia-assistant-teoria-editor__preview pre code {
+    background: transparent;
+    border: 0;
+    padding: 0;
+}
+
+.ia-assistant-teoria-editor__preview hr {
+    border: 0;
+    border-top: 1px solid var(--ia-assistant-color-border);
+    margin: var(--ia-assistant-space-base) 0;
 }
 
 .ia-assistant-teoria-editor__visual-editor {
@@ -284,7 +428,8 @@
 .ia-assistant-teoria-editor__input:focus,
 .ia-assistant-teoria-editor__toolbar-button:focus,
 .ia-assistant-teoria-editor__textarea:focus,
-.ia-assistant-teoria-editor__visual-editor:focus {
+.ia-assistant-teoria-editor__visual-editor:focus,
+.ia-assistant-teoria-toastui-fallback-textarea:focus {
     border-color: var(--ia-assistant-component-teoria-accent);
     box-shadow: 0 0 0 3px var(--ia-assistant-component-teoria-soft);
     outline: 1px solid transparent;

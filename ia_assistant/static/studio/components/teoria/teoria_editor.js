@@ -235,7 +235,7 @@
         labelText.className = "ia-assistant-teoria-editor__label";
         labelText.textContent = "Contenido Markdown";
         help.className = "ia-assistant-teoria-editor__help";
-        help.textContent = "Redacta el contenido usando Markdown simple.";
+        help.textContent = "Redacta y previsualiza la teoria en Markdown con editor visual.";
         editorContainer.className = "ia-assistant-teoria-editor__toastui";
 
         field.appendChild(labelText);

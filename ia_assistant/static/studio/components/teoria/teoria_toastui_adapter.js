@@ -71,21 +71,27 @@
     }
 
     function createFallbackEditor(container, initialMarkdown, onChange) {
+        var fallbackRoot = document.createElement("div");
         var message = document.createElement("p");
         var textarea = document.createElement("textarea");
         var handleInput = function () {
             onChange(normalizeTheoryMarkdown(textarea.value));
         };
 
+        fallbackRoot.className = "ia-assistant-teoria-toastui-fallback";
         message.className = "ia-assistant-teoria-toastui-fallback-message";
-        message.textContent = "El editor visual no cargo. Se usa Markdown simple.";
+        message.textContent = "Editor Markdown de respaldo";
 
         textarea.className = "ia-assistant-teoria-toastui-fallback-textarea";
         textarea.value = normalizeMarkdown(initialMarkdown);
+        textarea.rows = 16;
+        textarea.spellcheck = true;
+        textarea.setAttribute("aria-label", "Contenido Markdown de respaldo");
         textarea.addEventListener("input", handleInput);
 
-        container.appendChild(message);
-        container.appendChild(textarea);
+        fallbackRoot.appendChild(message);
+        fallbackRoot.appendChild(textarea);
+        container.appendChild(fallbackRoot);
 
         return {
             destroy: function () {
@@ -176,6 +182,15 @@
             try {
                 return createToastEditor(container, initialMarkdown, onChange);
             } catch (error) {
+                if (window.console && typeof window.console.error === "function") {
+                    window.console.error(
+                        "IA Assistant teoria: ToastUI fallo al inicializar.",
+                        {
+                            name: error && error.name ? error.name : "Error",
+                            message: error && error.message ? error.message : String(error)
+                        }
+                    );
+                }
                 clearContainer(container);
                 return createFallbackEditor(container, initialMarkdown, onChange);
             }

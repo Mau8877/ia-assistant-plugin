@@ -19,6 +19,7 @@ setup(
     package_data={
         "ia_assistant": [
             "static/**/*",
+            "public/**/*",
         ],
     },
     zip_safe=False,

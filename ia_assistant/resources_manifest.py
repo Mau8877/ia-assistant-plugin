@@ -11,12 +11,18 @@ STUDIO_CSS_PATHS = [
     "studio/widgets/chatbar_ia/chatbar_ia.css",
     "studio/widgets/component_picker/component_picker.css",
     "studio/widgets/component_tabs/component_tabs.css",
-    "vendor/toastui/toastui-editor.min.css",
     "studio/components/teoria/teoria_editor.css",
     "studio/components/quiz_multiple/quiz_multiple_editor.css",
     "studio/components/pregunta_abierta/pregunta_abierta_editor.css",
     "studio/components/codigo/codigo_editor.css",
     "student/css/student.css",
+]
+
+STUDIO_CSS_URL_PATHS = [
+    (
+        "public/vendor/toastui/toastui-editor.min.css",
+        "vendor/toastui/toastui-editor.min.css",
+    ),
 ]
 
 STUDIO_JS_PATHS = [
@@ -51,9 +57,8 @@ STUDIO_JS_PATHS = [
     "studio/widgets/component_picker/component_picker.js",
     "studio/widgets/confirm_modal/confirm_modal.js",
     "studio/widgets/component_tabs/component_tabs.js",
-    "studio/components/teoria/teoria_markdown_editor.js",
-    "vendor/toastui/toastui-editor-all.min.js",
     "studio/components/teoria/teoria_toastui_adapter.js",
+    "studio/components/teoria/teoria_markdown_editor.js",
     "studio/components/teoria/teoria_editor.js",
     "studio/components/quiz_multiple/quiz_multiple_editor.js",
     "studio/components/pregunta_abierta/pregunta_abierta_editor.js",
@@ -61,6 +66,13 @@ STUDIO_JS_PATHS = [
     "studio/components/codigo/codigo_editor.js",
     "studio/components/revision/revision_editor.js",
     "studio/js/studio.js",
+]
+
+STUDIO_JS_URL_PATHS = [
+    (
+        "public/vendor/toastui/toastui-editor-all.min.js",
+        "vendor/toastui/toastui-editor-all.min.js",
+    ),
 ]
 
 STUDENT_CSS_PATHS = [
